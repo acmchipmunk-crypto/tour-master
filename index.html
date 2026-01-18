@@ -344,7 +344,6 @@ let selectedSeat = { busNum: 0, idx: -1 };
 let msgListGroups = []; 
 let priorityQueue = [];
 let audioCtx = null;
-
 // =========================================
 // [1] 유틸리티 및 헬퍼 함수
 // =========================================
@@ -839,7 +838,6 @@ function refreshDisplay() {
     saveSeatMap(); redrawAll(busSize); renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2);
     window.scrollTo(0, scrollY);
 }
-
 // =========================================
 // [6] 메시지 생성 로직
 // =========================================
@@ -873,69 +871,55 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
 
         let gid = g.repNum; let msgText = ""; let langTag = "";
         
-        let txtLift = g.options.lift ? "Included ✅" : "Lift 7hr: 75,000 / 60,000";
-        let txtClothes = g.options.clothes ? "Included ✅" : "Clothes: 20,000";
-        let txtGear = g.options.gear ? "Included ✅" : "Gear: 15,000 / 20,000";
-        
+        // [복귀자용 가격표 - Day2/3 안내를 위해 유지]
         const priceList_CN = `[Price List]\n\nS. 积极心态（包含）\n\nA. 缆车 + 装备\n   周末 70,000 / 平日 60,000\nB. 头盔 20,000\nC. 护具 15,000\nD. 滑雪服 20,000\nE. 雪橇 30,000\nF. 观光缆车 20,000\n\n*(刷卡 Card +10%)`;
         const priceList_EN = `[Price List]\n\nS. Positive mindset (Included)\n\nA. Lift + Gear\n   Weekend 70,000 / Weekday 60,000\nB. Helmet 20,000\nC. Guard 15,000\nD. Ski Clothes 20,000\nE. Sled 30,000\nF. Sightseeing Lift 20,000\n\n*(Card payment +10%)`;
 
-        if (g.paxType === 'D2' || g.paxType === 'D3' || (!g.isSancheoneo && g.paxType === 'General')) {
+        // 1. [복귀/숙박 손님 (Day 2, Day 3)] - 기존 로직 그대로 유지
+        if (g.paxType === 'D2' || g.paxType === 'D3') {
             let isReturnGuest = (g.paxType === 'D2' || g.paxType === 'D3');
             let dayLabel = isReturnGuest ? (g.paxType === 'D3' ? "Day 3" : "Day 2") : "Day 1";
             
-            if (isReturnGuest) {
-                let step3_EN = "3. Gathering (15:40)\n📍 Lobby (With luggage)";
-                let step3_CN = "3. 集合 Gathering (15:40)\n📍 酒店大厅 (带上所有行李)";
-                
-                if (g.isStay) { 
-                    step3_EN = "3. Stay Guest\n📍 No Bus (Enjoy Skiing!)"; 
-                    step3_CN = "3. 续住 (Stay)\n📍 No Bus (Enjoy Skiing!)"; 
-                }
+            let step3_EN = "3. Gathering (15:40)\n📍 Lobby (With luggage)";
+            let step3_CN = "3. 集合 Gathering (15:40)\n📍 酒店大厅 (带上所有行李)";
+            
+            if (g.isStay) { 
+                step3_EN = "3. Stay Guest\n📍 No Bus (Enjoy Skiing!)"; 
+                step3_CN = "3. 续住 (Stay)\n📍 No Bus (Enjoy Skiing!)"; 
+            }
 
-                if(g.langContext === 'CN') {
-                    langTag = `<span class="lang-tag lang-CN">中文(${dayLabel})</span>`;
-                    msgText = `[${dayLabel}/Return Guide - ${guideName}]\nGroup: ${g.msgNum}\nSeat: ${seatStr}\n\n1. 退房 Check-out (11:00 前)\n*行李寄放一楼大厅 (Lobby)\n⚠️ 迟交罚款 (Late): 10,000 / 30分\n\n2. Klook 休息室 (10:00)\n👉 付款 & 领取缆车票 (Payment/Ticket)\n\n${step3_CN}\n\n${priceList_CN}`;
-                } else {
-                    langTag = `<span class="lang-tag lang-EN">ENG(${dayLabel})</span>`;
-                    msgText = `[${dayLabel}/Return Guide - ${guideName}]\nGroup: ${g.msgNum}\nSeat: ${seatStr}\n\n1. Check-out (Until 11:00)\n*Leave bags at Lobby\n⚠️ Late Penalty: 10,000 KRW / 30min\n\n2. Klook Lounge (10:00)\n👉 Payment & Get Lift Card\n\n${step3_EN}\n\n${priceList_EN}`;
-                }
-            } 
-            else {
-                 let pickupInfo = ""; let loc = g.location ? g.location.trim() : "";
-                 if(g.langContext === 'CN') {
-                    langTag = `<span class="lang-tag lang-CN">SKI(CN)</span>`;
-                    if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
-                    else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口 (Myeongdong Exit 3)`; } 
-                    else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口 (DDP Exit 11)`; } 
-                    else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
-                    msgText = `[Ski Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*遲到恕不退款。\n*車內只允許飲用白水。\n\n[Option Check]\nLift: ${txtLift}\nClothes: ${txtClothes}\nGear: ${txtGear}\n\n👉 請回覆 "您的出發時間" 以確認收到。\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
-                } else {
-                    langTag = `<span class="lang-tag lang-EN">SKI(EN)</span>`;
-                    if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ. Exit 8`; } 
-                    else if (loc.includes('명동') || loc.includes('Myeongdong')) { pickupInfo = `❗️${tM} Myeongdong Exit 3`; } 
-                    else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
-                    else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
-                    msgText = `[Ski Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*No refund if late.\n*Only water is allowed on bus.\n\n[Option Check]\nLift: ${txtLift}\nClothes: ${txtClothes}\nGear: ${txtGear}\n\n👉 Reply "Your departure time" to confirm\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
-                }
+            if(g.langContext === 'CN') {
+                langTag = `<span class="lang-tag lang-CN">中文(${dayLabel})</span>`;
+                msgText = `[${dayLabel}/Return Guide - ${guideName}]\nGroup: ${g.msgNum}\nSeat: ${seatStr}\n\n1. 退房 Check-out (11:00 前)\n*行李寄放一楼大厅 (Lobby)\n⚠️ 迟交罚款 (Late): 10,000 / 30分\n\n2. Klook 休息室 (10:00)\n👉 付款 & 领取缆车票 (Payment/Ticket)\n\n${step3_CN}\n\n${priceList_CN}`;
+            } else {
+                langTag = `<span class="lang-tag lang-EN">ENG(${dayLabel})</span>`;
+                msgText = `[${dayLabel}/Return Guide - ${guideName}]\nGroup: ${g.msgNum}\nSeat: ${seatStr}\n\n1. Check-out (Until 11:00)\n*Leave bags at Lobby\n⚠️ Late Penalty: 10,000 KRW / 30min\n\n2. Klook Lounge (10:00)\n👉 Payment & Get Lift Card\n\n${step3_EN}\n\n${priceList_EN}`;
             }
         } 
+        // 2. [출발 손님 (일반, 스키, 산천어 등 모든 출발자)] - 통합된 새 양식 적용
         else {
              let pickupInfo = ""; let loc = g.location ? g.location.trim() : "";
-            if(g.langContext === 'CN') {
+             
+             if(g.langContext === 'CN') {
                 langTag = `<span class="lang-tag lang-CN">TOUR(CN)</span>`;
+                // [절대 수정 금지] 출발지 로직 유지
                 if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
                 else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口 (Myeongdong Exit 3)`; } 
                 else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口 (DDP Exit 11)`; } 
                 else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
+                
+                // 중국어: 옵션 제거된 깔끔한 버전 (기존 일반투어 메시지와 동일)
                 msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
             } else {
                 langTag = `<span class="lang-tag lang-EN">TOUR(EN)</span>`;
+                // [절대 수정 금지] 출발지 로직 유지
                 if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ. Exit 8`; } 
                 else if (loc.includes('명동') || loc.includes('Myeongdong')) { pickupInfo = `❗️${tM} Myeongdong Exit 3`; } 
                 else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
                 else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
-                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
+                
+                // [오빠 요청 양식] 모든 출발 손님에게 이 메시지 전송 (옵션 X)
+                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
             }
         }
 

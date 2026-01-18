@@ -442,10 +442,27 @@ function getMessengerApp(text) {
 }
 
 function copyToClipboard(text, el) {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+            feedback(el);
+        }).catch(() => {
+            fallbackCopy(text, el);
+        });
+    } else {
+        fallbackCopy(text, el);
+    }
+}
+
+function fallbackCopy(text, el) {
+    const scrollY = window.scrollY;
     const helper = document.getElementById('clipboardHelper');
-    helper.value = text; helper.style.opacity = '1'; helper.select(); helper.setSelectionRange(0, 99999); 
-    try { if(document.execCommand('copy')) feedback(el); else alert('복사 실패'); } catch (err) { alert('에러: ' + err); }
-    helper.style.opacity = '0';
+    helper.value = text;
+    helper.focus({ preventScroll: true });
+    helper.select();
+    document.execCommand('copy');
+    helper.blur();
+    window.scrollTo(0, scrollY);
+    feedback(el);
 }
 
 /* [수정 3] 앱 열기 실패 시 오류 팝업 없이 복사만 유지하는 로직 */

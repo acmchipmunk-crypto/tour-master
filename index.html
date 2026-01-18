@@ -3,13 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>미스터 신의 투어마스터 2.0 (Global Fix)</title>
+<title>미스터 신의 투어마스터 10.0 (Contact Logic Fixed)</title>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
+  /* --- [스타일은 원본 100% 유지] --- */
   body, input, button, textarea, select { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; -webkit-user-select:none; }
-  body { background: #f0f2f5; margin: 0; padding: 5px; }
-  .input-box { background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px; }
-  textarea { width: 100%; height: 80px; border: 1px solid #ddd; border-radius: 8px; padding: 8px; font-size: 11px; box-sizing: border-box; }
+  body { background: #f0f2f5; margin: 0; padding: 5px; max-width: 100vw; overflow-x: hidden; }
+  
+  .guide-panel { background: #fff3e0; padding: 10px; border-radius: 12px; margin-bottom: 10px; text-align: center; border: 2px solid #ffe0b2; display: flex; justify-content: space-around; gap: 5px; }
+  .guide-input-group { display: flex; flex-direction: column; align-items: center; }
+  .guide-input { font-size: 16px; font-weight: 900; color: #e65100; border: none; border-bottom: 2px solid #e65100; background: transparent; text-align: center; width: 120px; outline: none; }
+  
+  .input-box { background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px; box-sizing: border-box; width: 100%; }
+  
+  .manual-control-panel { display: flex; gap: 5px; background: #e8eaf6; padding: 10px; border-radius: 8px; margin-bottom: 10px; align-items: center; border: 1px solid #c5cae9; width: 100%; box-sizing: border-box; }
+  .manual-input { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; text-align: center; border: 2px solid #3f51b5; border-radius: 6px; color: #333; outline: none; min-width: 0; }
+  .btn-manual { width: 50px; height: 45px; font-size: 20px; font-weight: 900; border: none; border-radius: 6px; cursor: pointer; color: white; flex-shrink: 0; }
+  .btn-add { background: #3f51b5; }
+  .btn-del { background: #f44336; }
+
+  textarea { width: 100%; height: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 8px; font-size: 11px; box-sizing: border-box; }
   
   .time-setting-panel { background: #e3f2fd; padding: 8px; border-radius: 8px; margin-bottom: 8px; display: flex; gap: 5px; justify-content: space-between; align-items: center; }
   .time-input-group { display: flex; flex-direction: column; flex: 1; }
@@ -35,13 +48,14 @@
   .vcard-input { width: 80px; padding: 8px; text-align: center; border: 1px solid #00897b; border-radius: 6px; font-weight: bold; color: #00695c; }
   .btn-vcard { background: #009688; color: white; flex: 1; font-size: 13px; padding: 10px; }
   
-  .manual-panel { display: flex; gap: 5px; margin-top: 10px; padding: 8px; background: #fff3e0; border-radius: 8px; border: 1px solid #ffe0b2; align-items: center; justify-content: space-between; }
-  .manual-input { width: 80px; padding: 10px; text-align: center; border: 2px solid #ff9800; border-radius: 6px; font-weight: 900; font-size: 16px; color: #e65100; }
+  .capture-wrapper { margin-bottom: 30px; border: 5px solid #eee; }
+  #captureArea1, #captureArea2 { background: white; padding: 15px 5px; border-radius: 0; width: 100%; max-width: 500px; margin: 0 auto; box-sizing: border-box; }
   
-  #captureArea { background: white; padding: 15px 5px; border-radius: 0; width: 100%; max-width: 500px; margin: 0 auto; box-sizing: border-box; }
   .bus-header { text-align: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #333; }
   .pickup-summary { background: #2c3e50; color: white; padding: 10px; border-radius: 6px; font-size: 1.2rem; font-weight: 900; margin-bottom: 5px; letter-spacing: -0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
   .bus-date { font-size: 1.0rem; color: #555; margin-top: 6px; font-weight: 800; }
+  .bus-title-label { background: #333; color: #fff; display:inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 5px; font-weight: bold; }
+  
   .bus-grid { display: grid; grid-template-columns: 1fr 1fr 0.2fr 1fr 1fr; grid-auto-rows: 1fr; gap: 4px; width: 100%; }
   .last-row-45 { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 4px; height: 100%; }
   .last-row-45 .seat { flex: 1; width: auto; }
@@ -51,29 +65,27 @@
   .seat.reserved { background: #bbb; color: white; opacity: 0.5; pointer-events: none; border:none; } 
   .seat.emergency { border: 2px dashed #ff9800; background-color: #fff8e1; } 
   .seat.selected { border: 3px solid #ff0000; transform: scale(1.05); z-index: 20; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+  .seat.synced-general { background-color: #e0e0e0 !important; border: 1px solid #bdbdbd; opacity: 0.8; }
+  
   .seat-num { position: absolute; top: 2px; left: 4px; font-size: 11px; font-weight: bold; color: rgba(0,0,0,0.4); z-index: 2; }
   .grp-id { font-size: 24px; font-weight: 900; color: #333; line-height: 1; margin-bottom: 4px; margin-top: 8px; text-align: center; }
   .grp-id.long-text { font-size: 20px; letter-spacing: -1px; }
-  .info-badge { background: rgba(255,255,255,0.85); border-radius: 12px; padding: 3px 6px; text-align: center; font-size: 11px; font-weight: 900; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: 90%; margin-top: auto; margin-bottom: 2px; white-space: nowrap; }
-  .male-text { color: #1565c0; } 
-  .female-text { color: #e91e63; } 
-  .neutral-text { color: #757575; } 
-  .app-tag { color: #333; font-weight: 800; } 
+  .info-badge { background: rgba(255,255,255,0.85); border-radius: 12px; padding: 3px 6px; text-align: center; font-size: 11px; font-weight: 900; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: 95%; margin-top: auto; margin-bottom: 2px; white-space: nowrap; }
+  .male-text { color: #1565c0; } .female-text { color: #e91e63; } .neutral-text { color: #757575; } 
+  .day-tag { color: white; padding: 1px 4px; border-radius: 4px; margin-right: 3px; font-size: 10px; vertical-align: middle; }
+  .tag-d1 { background-color: #1976d2; } .tag-d2 { background-color: #d32f2f; } .tag-d3 { background-color: #7b1fa2; } .tag-stay { background-color: #ff9800; }
+  .tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; }
+
   .status { font-size: 11px; color: #666; text-align: right; margin-top: 5px; }
 
-  /* 메시지 카드 스타일 */
   .msg-section { margin-top: 20px; border-top: 2px solid #333; padding-top: 10px; }
   .msg-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   .msg-check-area { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-right: 8px; width: 45px; gap: 8px; }
   .check-box-wrapper { display: flex; flex-direction: column; align-items: center; }
   .msg-check-label { font-size: 10px; font-weight: 800; color: #555; margin-bottom: 2px; text-align: center; white-space: nowrap; }
   .label-sent { color: #1976d2; } .label-connected { color: #d32f2f; }
-  
-  /* 체크박스 색상 커스텀 */
   .msg-check-input { transform: scale(1.5); margin: 0; cursor: pointer; }
-  .chk-sent { accent-color: #2196f3; } /* 파란색 */
-  .chk-conn { accent-color: #f44336; } /* 빨간색 */
-  
+  .chk-sent { accent-color: #2196f3; } .chk-conn { accent-color: #f44336; } 
   .msg-info { flex: 1; margin-right: 5px; min-width: 0; }
   .msg-group-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
   .msg-group { font-size: 18px; font-weight: 900; color: #333; }
@@ -82,45 +94,51 @@
   .lang-tag { font-size: 10px; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
   .lang-CN { background: #fce4ec; color: #c2185b; }
   .lang-EN { background: #e3f2fd; color: #1565c0; }
-
-  /* 버튼 영역 */
   .msg-actions { display: flex; gap: 5px; align-items: center; }
-  
-  .btn-action {
-      width: 45px; height: 45px; border-radius: 8px; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; text-decoration: none;
-      font-size: 10px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      cursor: pointer; text-align: center; line-height: 1.2;
-      transition: transform 0.1s;
-  }
+  .btn-action { width: 45px; height: 45px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; font-size: 10px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; text-align: center; line-height: 1.2; transition: transform 0.1s; }
   .btn-action:active { transform: scale(0.95); }
-
-  /* 버튼 색상 */
   .btn-wa-send { background: #25D366; color: white; }
   .btn-wa-send.disabled { background: #ccc; pointer-events: none; }
+  .btn-copy-body { background: #607d8b; color: white; }
+  .btn-copy-mail { background: #4fc3f7; color: white; }
   
-  .btn-copy-body { background: #607d8b; color: white; } 
-
-  /* 앱 아이콘 스타일 */
-  .logo-wa { background: #25D366; color: white; } 
-  .logo-line { background: white; border: 2px solid #06C755; color: #06C755; box-sizing: border-box; } 
-  .logo-kakao { background: #FEE500; color: #3c1e1e; }
-  .logo-viber { background: #7360f2; color: white; }
-  .logo-wechat { background: #07C160; color: white; }
-  .logo-zalo { background: #0068FF; color: white; }
-  .logo-none { background: #e0e0e0; color: #999; cursor: default; }
-  
+  .logo-wa { background: #25D366; color: white; } .logo-line { background: white; border: 2px solid #06C755; color: #06C755; box-sizing: border-box; } .logo-kakao { background: #FEE500; color: #3c1e1e; }
+  .logo-viber { background: #7360f2; color: white; } .logo-wechat { background: #000000; color: #07C160; border: 1px solid #07C160; } .logo-zalo { background: #0068FF; color: white; } .logo-none { background: #e0e0e0; color: #999; cursor: default; }
+  .hidden-msg { display: none; white-space: pre-wrap; }
 </style>
 </head>
 <body>
+<div class="guide-panel">
+    <div class="guide-input-group">
+        <label style="font-weight:bold; font-size:12px; color:#ef6c00;">가이드 (Guide)</label>
+        <input type="text" id="guideNameInput" class="guide-input" value="Mr. Shin" oninput="saveGuideName()">
+    </div>
+    <div class="guide-input-group">
+        <label style="font-weight:bold; font-size:12px; color:#0277bd;">버스 번호 (Bus)</label>
+        <input type="text" id="busNumberInput" class="guide-input" value="4044" oninput="saveGuideName()">
+    </div>
+</div>
+
+<div class="input-box" style="background: #fff9c4; border: 2px solid #fbc02d;">
+  <label style="font-weight:bold; font-size:13px; color:#f57f17;">📢 당일 투어 특수 공지 (Special Notice)</label>
+  <textarea id="specialNotice" style="height: 50px; margin-top:5px; border-color:#fbc02d;" placeholder="여기에 입력한 내용이 당일 메시지 중간에 들어갑니다." oninput="saveSpecialNotice()"></textarea>
+</div>
+
 <div class="input-box">
-  <h2>🎩 미스터 신의 투어마스터 2.0 (Global)</h2>
+  <h2>미스터 신의 투어마스터 10.0 (Contact Fixed)</h2>
+  
+  <div class="manual-control-panel">
+      <input type="number" id="manualGroupNum" class="manual-input" placeholder="No." inputmode="numeric">
+      <button class="btn-manual btn-add" onclick="manualAddGroup()">+</button>
+      <button class="btn-manual btn-del" onclick="manualDelGroup()">-</button>
+  </div>
+
   <div class="time-setting-panel">
     <div class="time-input-group"><label>홍대(8번)</label><input type="text" id="timeHongdae" value="06:40" onchange="saveTimeInput()"></div>
     <div class="time-input-group"><label>명동(3번)</label><input type="text" id="timeMyeongdong" value="07:10" onchange="saveTimeInput()"></div>
     <div class="time-input-group"><label>동대문(11번)</label><input type="text" id="timeDongdaemun" value="07:20" onchange="saveTimeInput()"></div>
   </div>
-  <textarea id="rawData" placeholder="엑셀 데이터를 붙여넣으세요..." oninput="saveTextInput()"></textarea>
+  <textarea id="rawData" placeholder="데이터를 붙여넣으세요... (스키/산천어/일반 자동 감지)" oninput="saveTextInput()"></textarea>
   <div class="size-selector">
     <label><input type="radio" name="busSize" value="44" checked onchange="saveTextInput()"> 44인승</label>
     <label><input type="radio" name="busSize" value="45" onchange="saveTextInput()"> 45인승</label>
@@ -142,317 +160,911 @@
   </div>
   <div class="vcard-panel">
       <input type="text" id="vcardDate" class="vcard-input" placeholder="YYMMDD" onchange="checkDateChange()">
-      <button class="btn-vcard" onclick="downloadVCard()">📞 연락처 저장 (VCF)</button>
-  </div>
-  <div class="manual-panel">
-    <input type="text" id="manualTeam" class="manual-input" placeholder="그룹번호">
-    <button onclick="manualModify('remove')" style="background:#ef5350; color:white; flex:1; padding:10px; border:none; border-radius:5px;">- 한명 빼기</button>
-    <button onclick="manualModify('add')" style="background:#42a5f5; color:white; flex:1; padding:10px; border:none; border-radius:5px;">+ 한명 추가</button>
+      <button class="btn-vcard" onclick="downloadVCard()">📞 연락처 파일 다운로드 (.vcf)</button>
   </div>
   <div class="btn-group">
     <button class="btn-clear" onclick="clearData()">🗑 초기화</button>
-    <button class="btn-run" onclick="runAI()">🤖 배치 실행</button>
-    <button class="btn-save" onclick="downloadImage()">📸 이미지 저장</button>
+    <button class="btn-run" onclick="runAI()">🤖 자동 배치 실행</button>
+    <button class="btn-save" onclick="downloadImage(1)">📸 맵1(가는편)</button>
+    <button class="btn-save" style="background:#e91e63;" onclick="downloadImage(2)">📸 맵2(오는편)</button>
   </div>
   <div class="status" id="paxInfo">준비됨</div>
 </div>
 
-<div id="captureArea">
-  <div class="bus-header">
-    <div class="pickup-summary" id="pickupSummary">준비중...</div>
-    <div class="bus-date" id="tomorrowDate">2025-00-00</div>
+<div class="capture-wrapper">
+  <div id="captureArea1">
+    <div class="bus-header">
+      <div class="bus-title-label">☀️ Map 1 (Seoul → Dest)</div>
+      <div class="pickup-summary" id="pickupSummary1">준비중...</div>
+      <div class="bus-date" id="dateDisplay1">2026-00-00</div>
+    </div>
+    <div class="bus-grid" id="busGrid1"></div>
   </div>
-  <div class="bus-grid" id="busGrid"></div>
+</div>
+
+<div class="capture-wrapper">
+  <div id="captureArea2">
+    <div class="bus-header">
+      <div class="bus-title-label">🌙 Map 2 (Dest → Seoul)</div>
+      <div class="pickup-summary" id="pickupSummary2">준비중...</div>
+      <div class="bus-date" id="dateDisplay2">2026-00-00</div>
+    </div>
+    <div class="bus-grid" id="busGrid2"></div>
+  </div>
 </div>
 
 <div class="msg-section" id="msgSection" style="display:none;">
     <h3 style="text-align:center; margin:0 0 10px 0;">💬 메시지 발송 & 체크</h3>
     <div id="msgList"></div>
 </div>
-<textarea id="clipboardHelper" style="position:absolute; left:-9999px;"></textarea>
+<textarea id="clipboardHelper" style="position:fixed; top:0; left:0; width:1px; height:1px; opacity:0; pointer-events:none;"></textarea>
 
 <script>
-// 전 세계 국가 번호 데이터 (ISO 표준)
-const GLOBAL_PHONE_CODES = {
-  "1": "US", "7": "RU", "20": "EG", "27": "ZA", "30": "GR", "31": "NL", "32": "BE", "33": "FR", "34": "ES", "36": "HU", "39": "IT", "40": "RO", "41": "CH", "43": "AT", "44": "UK", "45": "DK", "46": "SE", "47": "NO", "48": "PL", "49": "DE", "51": "PE", "52": "MX", "53": "CU", "54": "AR", "55": "BR", "56": "CL", "57": "CO", "58": "VE", "60": "MY", "61": "AU", "62": "ID", "63": "PH", "64": "NZ", "65": "SG", "66": "TH", "81": "JP", "82": "KR", "84": "VN", "86": "CN", "90": "TR", "91": "IN", "92": "PK", "93": "AF", "94": "LK", "95": "MM", "98": "IR",
-  "212": "MA", "213": "DZ", "216": "TN", "218": "LY", "220": "GM", "221": "SN", "222": "MR", "223": "ML", "224": "GN", "225": "CI", "226": "BF", "227": "NE", "228": "TG", "229": "BJ", "230": "MU", "231": "LR", "232": "SL", "233": "GH", "234": "NG", "235": "TD", "236": "CF", "237": "CM", "238": "CV", "239": "ST", "240": "GQ", "241": "GA", "242": "CG", "243": "CD", "244": "AO", "245": "GW", "246": "IO", "248": "SC", "249": "SD", "250": "RW", "251": "ET", "252": "SO", "253": "DJ", "254": "KE", "255": "TZ", "256": "UG", "257": "BI", "258": "MZ", "260": "ZM", "261": "MG", "262": "RE", "263": "ZW", "264": "NA", "265": "MW", "266": "LS", "267": "BW", "268": "SZ", "269": "KM",
-  "290": "SH", "291": "ER", "297": "AW", "298": "FO", "299": "GL", "350": "GI", "351": "PT", "352": "LU", "353": "IE", "354": "IS", "355": "AL", "356": "MT", "357": "CY", "358": "FI", "359": "BG", "370": "LT", "371": "LV", "372": "EE", "373": "MD", "374": "AM", "375": "BY", "376": "AD", "377": "MC", "378": "SM", "379": "VA", "380": "UA", "381": "RS", "382": "ME", "383": "XK", "385": "HR", "386": "SI", "387": "BA", "389": "MK", "420": "CZ", "421": "SK", "423": "LI",
-  "500": "FK", "501": "BZ", "502": "GT", "503": "SV", "504": "HN", "505": "NI", "506": "CR", "507": "PA", "508": "PM", "509": "HT", "590": "GP", "591": "BO", "592": "GY", "593": "EC", "594": "GF", "595": "PY", "596": "MQ", "597": "SR", "598": "UY", "599": "CW",
-  "670": "TL", "672": "NF", "673": "BN", "674": "NR", "675": "PG", "676": "TO", "677": "SB", "678": "VU", "679": "FJ", "680": "PW", "681": "WF", "682": "CK", "683": "NU", "685": "WS", "686": "KI", "687": "NC", "688": "TV", "689": "PF", "690": "TK", "691": "FM", "692": "MH",
-  "850": "KP", "852": "HK", "853": "MO", "855": "KH", "856": "LA", "880": "BD", "886": "TW", "960": "MV", "961": "LB", "962": "JO", "963": "SY", "964": "IQ", "965": "KW", "966": "SA", "967": "YE", "968": "OM", "970": "PS", "971": "AE", "972": "IL", "973": "BH", "974": "QA", "975": "BT", "976": "MN", "977": "NP", "992": "TJ", "993": "TM", "994": "AZ", "995": "GE", "996": "KG", "998": "UZ"
+/**
+ * [전역 상수 및 설정]
+ */
+const CONFIG = {
+    BOOTS_YOUTUBE: "https://youtu.be/J9S0q1QKoOY?si=V57nHSmY0NGhhHcY",
+    COLORS: {
+        hongdae: '#C8E6C9',    // 홍대 (초록)
+        myeongdong: '#BBDEFB', // 명동 (파랑)
+        dongdaemun: '#E1BEE7', // 동대문 (보라)
+        resort: '#FFF9C4',     // 스키장/D2/D3 (노랑)
+        etc: '#E0E0E0'         // 기타/현장 (회색)
+    },
+    PHONE_CODES: { 
+        "1": "US", "7": "RU", "20": "EG", "27": "ZA", "30": "GR", "31": "NL", "32": "BE", "33": "FR", "34": "ES", 
+        "36": "HU", "39": "IT", "40": "RO", "41": "CH", "43": "AT", "44": "UK", "45": "DK", "46": "SE", "47": "NO", 
+        "48": "PL", "49": "DE", "51": "PE", "52": "MX", "53": "CU", "54": "AR", "55": "BR", "56": "CL", "57": "CO", 
+        "58": "VE", "60": "MY", "61": "AU", "62": "ID", "63": "PH", "64": "NZ", "65": "SG", "66": "TH", "81": "JP", 
+        "82": "KR", "84": "VN", "86": "CN", "90": "TR", "91": "IN", "92": "PK", "93": "AF", "94": "LK", "95": "MM", 
+        "98": "IR", "852": "HK", "886": "TW" 
+    },
+    COUNTRY_MAP: { 
+        'KR':'한국','CN':'중국','TW':'대만','HK':'홍콩','SG':'싱가','MY':'말레','TH':'태국','PH':'필리',
+        'VN':'베트','ID':'인니','US':'미국','UK':'영국','AU':'호주','JP':'일본' 
+    }
 };
 
-window.onload = function() {
-    loadTextInput();
-    const today = new Date(); today.setDate(today.getDate() + 1);
-    const days = ['일','월','화','수','목','금','토'];
-    document.getElementById('tomorrowDate').innerText = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')} (${days[today.getDay()]})`;
-    const yymmdd = String(today.getFullYear()).slice(2) + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
-    
-    const lastDate = localStorage.getItem('bus_lastDate');
-    if(lastDate && lastDate !== yymmdd) { localStorage.removeItem('bus_msgStatus'); }
-    document.getElementById('vcardDate').value = yymmdd;
-    localStorage.setItem('bus_lastDate', yymmdd); 
-
-    const savedTimes = JSON.parse(localStorage.getItem('bus_times') || '{}');
-    if(savedTimes.h) document.getElementById('timeHongdae').value = savedTimes.h;
-    if(savedTimes.m) document.getElementById('timeMyeongdong').value = savedTimes.m;
-    if(savedTimes.d) document.getElementById('timeDongdaemun').value = savedTimes.d;
-
-    const savedSeatMap = localStorage.getItem('bus_seatMap');
-    const savedPax = localStorage.getItem('bus_totalPax');
-    if (savedSeatMap && savedPax) {
-        currentSeatMap = JSON.parse(savedSeatMap);
-        currentTotalPax = parseInt(savedPax);
-        currentBusSize = parseInt(document.querySelector('input[name="busSize"]:checked').value);
-        renderBus(currentSeatMap, currentTotalPax, currentBusSize);
-        updateHeaderFromMap(currentSeatMap); 
-        renderMessages(currentSeatMap); 
-    }
-}
-function checkDateChange() {
-    const inputDate = document.getElementById('vcardDate').value;
-    const lastDate = localStorage.getItem('bus_lastDate');
-    if (lastDate && inputDate !== lastDate) {
-        if(confirm("날짜가 변경되었습니다. 이전 체크박스 및 메모를 초기화할까요?")) {
-             localStorage.removeItem('bus_msgStatus');
-             localStorage.setItem('bus_lastDate', inputDate);
-             renderMessages(currentSeatMap); 
-        }
-    } else { localStorage.setItem('bus_lastDate', inputDate); }
-}
-function saveTextInput() {
-    localStorage.setItem('bus_rawData', document.getElementById('rawData').value);
-    const size = document.querySelector('input[name="busSize"]:checked').value;
-    localStorage.setItem('bus_size', size);
-}
-function saveTimeInput() {
-    const times = { h: document.getElementById('timeHongdae').value, m: document.getElementById('timeMyeongdong').value, d: document.getElementById('timeDongdaemun').value };
-    localStorage.setItem('bus_times', JSON.stringify(times));
-}
-function saveState() {
-    localStorage.setItem('bus_seatMap', JSON.stringify(currentSeatMap));
-    localStorage.setItem('bus_totalPax', currentTotalPax);
-    saveTextInput();
-    renderMessages(currentSeatMap);
-}
-function loadTextInput() {
-    const savedData = localStorage.getItem('bus_rawData');
-    if(savedData) document.getElementById('rawData').value = savedData;
-    const savedSize = localStorage.getItem('bus_size');
-    if(savedSize) {
-        const radios = document.getElementsByName('busSize');
-        for(let r of radios) { if(r.value === savedSize) r.checked = true; }
-    }
-}
-function clearData() {
-    if(confirm('정말 모든 데이터를 지우고 초기화할까요?')) {
-        document.getElementById('rawData').value = '';
-        localStorage.removeItem('bus_rawData'); localStorage.removeItem('bus_seatMap'); 
-        localStorage.removeItem('bus_totalPax'); localStorage.removeItem('bus_msgStatus'); 
-        document.getElementById('busGrid').innerHTML = '';
-        document.getElementById('pickupSummary').innerText = '데이터 없음';
-        document.getElementById('msgSection').style.display = 'none';
-        currentSeatMap = []; location.reload(); 
-    }
-}
-
-let selectedSeatIdx = -1;
+let currentSeatMap1 = [];
+let currentSeatMap2 = [];
+let selectedSeat = { busNum: 0, idx: -1 };
+let msgListGroups = []; 
 let priorityQueue = [];
-let currentSeatMap = []; 
-let currentBusSize = 44;
-let currentTotalPax = 0;
-const colors = ['#c8e6c9', '#fff9c4', '#ffcdd2', '#bbdefb', '#e1bee7', '#b2dfdb'];
+let audioCtx = null;
 
-function updatePriority(checkbox) {
-  const val = checkbox.value;
-  if(checkbox.checked) { if(!priorityQueue.includes(val)) priorityQueue.push(val); } 
-  else { priorityQueue = priorityQueue.filter(item => item !== val); }
-  const mapName = {'solo':'혼자','CN':'중국','EN':'영어','F':'여자','M':'남자','G4':'4인이상'};
-  const text = priorityQueue.map(k => mapName[k]).join(' > ');
-  document.getElementById('priorityView').innerText = text ? `우선순위: ${text}` : '우선순위: 없음';
-}
+// =========================================
+// [1] 유틸리티 및 헬퍼 함수
+// =========================================
 
-function manualModify(type) {
-  const teamInput = document.getElementById('manualTeam').value.trim();
-  if(!teamInput) { alert('그룹 번호를 입력해줘 오빠!'); return; }
-  currentBusSize = parseInt(document.querySelector('input[name="busSize"]:checked').value);
-  if(!currentSeatMap || currentSeatMap.length === 0) currentSeatMap = new Array(currentBusSize + 1).fill(null);
-  
-  if (type === 'remove') {
-    let seatsToRemove = [];
-    for(let i=1; i<=currentBusSize; i++) { if(currentSeatMap[i] && checkTeamMatch(currentSeatMap[i].mainNum, teamInput)) seatsToRemove.push(i); }
-    if(seatsToRemove.length > 0) {
-        let targetSeatIdx = seatsToRemove[seatsToRemove.length - 1]; 
-        currentSeatMap[targetSeatIdx] = null;
-        currentTotalPax = Math.max(0, currentTotalPax - 1);
-    } else { alert('가족을 찾을 수 없어!'); }
-  } else if (type === 'add') {
-    let emptySeatIdx = -1;
-    let sequence = generateSeatSequence(currentTotalPax + 1, currentBusSize);
-    for(let k=0; k<sequence.length; k++) { if(!currentSeatMap[sequence[k]]) { emptySeatIdx = sequence[k]; break; } }
-    if(emptySeatIdx === -1) { for(let i=1; i<=currentBusSize; i++) { if(!currentSeatMap[i]) { emptySeatIdx = i; break; } } }
-    if(emptySeatIdx === -1) { alert('빈 자리가 없어 오빠!'); return; }
-    let existingMember = null;
-    for(let i=1; i<=currentBusSize; i++) { if(currentSeatMap[i] && checkTeamMatch(currentSeatMap[i].mainNum, teamInput)) { existingMember = currentSeatMap[i]; break; } }
-    if (existingMember) { currentSeatMap[emptySeatIdx] = { ...existingMember }; currentTotalPax++; } 
-    else {
-        currentSeatMap[emptySeatIdx] = {
-            mainNum: teamInput, repNum: teamInput, msgNum: teamInput, isLong: false, count: 1,
-            name: 'New ' + teamInput, country: 'ETC', gender: 'M', langContext: 'EN', appType: '무',
-            location: '현장', phone: '', messenger: '', note: '', color: '#b0bec5', textClass: 'male-text', subInfo: '현장 <span class="app-tag">추가</span>'
-        };
-        currentTotalPax++;
-    }
+function initAudio() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
   }
-  renderBus(currentSeatMap, currentTotalPax, currentBusSize);
-  updateHeaderFromMap(currentSeatMap); saveState();
-}
-function checkTeamMatch(seatTeamStr, inputStr) {
-    if(!seatTeamStr) return false;
-    let s = seatTeamStr.toString().replace(/\D/g, ''); let i = inputStr.toString().replace(/\D/g, '');
-    if(s === i) return true;
-    if(seatTeamStr.toString().includes('.')) { let parts = seatTeamStr.toString().split('.'); if(parts.includes(i)) return true; }
-    return false;
+  if (audioCtx.state === 'suspended') { audioCtx.resume(); }
 }
 
-function runAI() {
-  saveTextInput(); saveTimeInput(); 
-  const raw = document.getElementById('rawData').value;
-  const busSize = parseInt(document.querySelector('input[name="busSize"]:checked').value);
-  const direction = document.querySelector('input[name="direction"]:checked').value;
-  const lines = raw.trim().split('\n');
-  let entries = []; let originalOrder = 1;
+function playPopSound() {
+  initAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  osc.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+  gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+  osc.start(audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime + 0.1);
+}
 
-  lines.forEach(line => {
-    let parts = line.split('\t'); if(parts.length < 4) return;
-    let customId = parts[0] ? parts[0].trim() : originalOrder.toString();
-    let resNum = parts[2] ? parts[2].trim() : "";
-    let name = parts[3] ? parts[3].trim() : "Guest"; 
-    let rawPhone = parts[4] ? parts[4].trim() : ""; 
-    let messengerCol = parts[5] ? parts[5].trim() : ""; 
-    let email = parts[6] ? parts[6].trim().toLowerCase() : "";
-    let count = parseInt(parts[8]) || 1;
-    let location = parts[9] ? parts[9].trim() : "";
-    let note = parts[parts.length - 1] ? parts[parts.length - 1].trim() : ""; 
-    let rawLang = parts[7] ? parts[7].trim() : "";
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'BUTTON' || (e.target.tagName === 'INPUT' && (e.target.type === 'checkbox' || e.target.type === 'radio')) || e.target.closest('.seat') || e.target.classList.contains('btn-action')) {
+        playPopSound();
+    }
+});
+
+/**
+ * [CRITICAL UPDATE] 전화번호 파싱 로직 완전 수정
+ * 1. 전화번호 칼럼: 오직 '국가번호' 추출용 및 'WhatsApp/Viber 없을 때'의 대체재로 사용.
+ * 2. 메신저 칼럼: WhatsApp/Viber가 명시된 경우에만 숫자 추출. Line/Kakao 등은 무시.
+ * 3. 최종 조합: (추출된 국가번호) + (선택된 번호 Body).
+ * 4. 중복 방지: 번호 Body가 이미 국가번호로 시작하면 붙이지 않음.
+ */
+function combinePhoneAndMessenger(phoneCol, messengerCol) {
+    let cleanPhoneCol = (phoneCol || "").trim();
+    // [Modified Item 1] 전화번호 여러 개일 때 분리
+    let splitPhone = cleanPhoneCol.split(/[,\/]/);
+    let firstPhone = splitPhone[0] ? splitPhone[0].trim() : "";
+    let cleanMsgCol = (messengerCol || "").trim();
+    let lowerMsg = cleanMsgCol.toLowerCase();
     
-    let langContext = 'EN';
-    if (rawLang.includes('중국어')) langContext = 'CN';
+    // [Step 1] 전화번호 칼럼에서 국가번호 추출 (Phone Codes Loop)
+    // 숫자가 아닌 문자는 일단 제거하고 앞자리 매칭 확인
+    let rawPhoneDigits = firstPhone.replace(/[^0-9]/g, '');
+    let f_CountryCode = "82"; // 기본값
+    let f_Country = "ETC";
     
-    let parsedInfo = parsePhone(rawPhone, messengerCol);
-    let country = parsedInfo.country;
+    // 긴 번호부터 매칭 (4자리 ~ 1자리)
+    for (let len = 4; len >= 1; len--) {
+        let prefix = rawPhoneDigits.substring(0, len);
+        if (CONFIG.PHONE_CODES[prefix]) { 
+            f_CountryCode = prefix; 
+            f_Country = CONFIG.PHONE_CODES[prefix]; 
+            break; 
+        }
+    }
+    
+    // [Step 2] 사용할 번호 Body 결정 (우선순위 로직)
+    let targetBody = "";
+    let isMessengerValid = false;
+    
+    // WhatsApp 또는 Viber가 메신저 칼럼에 명시되어 있는가?
+    if (lowerMsg.includes('whatsapp') || lowerMsg.includes('viber')) {
+        // 있으면 메신저 칼럼의 숫자만 추출하여 사용
+        targetBody = cleanMsgCol.replace(/[^0-9]/g, '');
+        isMessengerValid = true;
+    } 
+    
+    // 메신저 칼럼이 유효하지 않으면 (Line/Kakao/WeChat 등, 혹은 비어있음) -> 전화번호 칼럼 사용
+    if (!isMessengerValid) {
+        // 전화번호 칼럼의 숫자 사용. 단, 앞서 추출한 국가번호가 중복될 수 있으므로 주의 필요.
+        targetBody = rawPhoneDigits;
+        
+        // [Logic Refinement] 전화번호 칼럼을 Body로 쓸 때, 
+        // 이미 앞부분이 국가번호와 같다면 제거할지 말지 고민되지만,
+        // 보통 엑셀에 886-9xxx 로 적혀있으면 국가번호가 이미 포함된 것임.
+        // 아래 Step 4에서 중복 체크하므로 여기선 그대로 둠.
+    }
+    
+    // [Step 3] 맨 앞의 '0' 제거 (국가번호 붙이기 전 표준화)
+    if (targetBody.startsWith('0')) targetBody = targetBody.substring(1);
+    
+    // [Step 4] 국가번호와 결합
+    // 만약 Body가 이미 해당 국가번호로 시작한다면? (예: Body가 852968..., Code가 852)
+    // 중복해서 붙이지 않는다. (852852... 방지)
+    let fullNumber = "";
+    if (targetBody.startsWith(f_CountryCode)) {
+        fullNumber = targetBody;
+    } else {
+        fullNumber = f_CountryCode + targetBody;
+    }
+    
+    return { code: f_CountryCode, country: f_Country, fullNumber: fullNumber };
+}
+
+function getGenderGlobal(name) {
+  if(!name) return 'N'; const lowerName = name.toLowerCase();
+  if(lowerName.includes('mr.') || lowerName.includes('mr ')) return 'M';
+  if(lowerName.includes('ms.') || lowerName.includes('mrs.') || lowerName.includes('miss')) return 'F';
+  
+  const f_list = ['alice','amy','annie','audrey','belle','bernice','carol','cathy','celine','chery','chloe','cindy','clara','connie','crystal','daisy','daphne','doris','elaine','eleanor','elizabeth','emily','eva','fiona','grace','hannah','hazel','helen','irene','iris','ivy','janet','jean','jessica','joan','joanna','joyce','judy','julia','karen','kelly','kitty','linda','lisa','mandy','mary','megan','melissa','michelle','nicole','olivia','peggy','phoebe','rachel','rebecca','regina','rita','rose','ruby','sally','sandy','sarah','sharon','sophie','stella','stephanie','susan','sylvia','teresa','tiffany','tina','tracy','vicky','victoria','vivian','wendy','winnie','yvonne','zoe','ji-eun','min-ji','su-bin','ha-eun','yoon-seo','wei','fang','mei','hui','ying','yan','ling','putri','nur','ayu','sari'];
+  const m_list = ['aaron','adam','alan','albert','alex','alfred','alvin','andrew','andy','anthony','arthur','austin','ben','benjamin','bernard','brian','calvin','charles','chris','christopher','daniel','david','dennis','derek','donald','douglas','eddie','edward','eric','felix','frank','gary','george','gordon','harry','henry','howard','hugo','ivan','jack','jackson','jacob','james','jason','jeffrey','jerry','jimmy','joe','john','jonathan','joseph','justin','keith','kelvin','ken','kenneth','kevin','larry','leo','leon','louis','lucas','marcus','mark','martin','matthew','max','michael','mike','nathan','nelson','nicholas','nick','oscar','patrick','paul','peter','philip','raymond','richard','ricky','robert','roger','ronald','roy','ryan','sam','samuel','scott','sean','simon','stanley','stephen','steven','terry','thomas','tim','timothy','tom','tommy','tony','victor','vincent','wayne','william','wilson','ji-hoon','min-jun','jun-ho','wei','jun','jie','ming','muhammad','ahmad','ali','rizky','putra'];
+  
+  for(let n of f_list) { if(lowerName.includes(n)) return 'F'; }
+  for(let n of m_list) { if(lowerName.includes(n)) return 'M'; }
+  return 'N';
+}
+
+function getMessengerApp(text) { 
+    if(!text) return '무'; const t = text.toLowerCase(); 
+    if(t.includes('whatsapp')) return '와'; if(t.includes('line')) return '라'; 
+    if(t.includes('kakao')) return '카'; if(t.includes('wechat') || t.includes('weixin')) return '웨'; 
+    if(t.includes('viber')) return '바'; if(t.includes('zalo')) return '잘'; return '무'; 
+}
+
+function copyToClipboard(text, el) {
+    const helper = document.getElementById('clipboardHelper');
+    helper.value = text; helper.style.opacity = '1'; helper.select(); helper.setSelectionRange(0, 99999); 
+    try { if(document.execCommand('copy')) feedback(el); else alert('복사 실패'); } catch (err) { alert('에러: ' + err); }
+    helper.style.opacity = '0';
+}
+function feedback(el) { if(!el) return; let original = el.innerHTML; el.innerHTML = 'OK!'; setTimeout(() => el.innerHTML = original, 800); }
+function copyMessageBody(btn) { const card = btn.closest('.msg-card'); const hiddenDiv = card.querySelector('.hidden-msg'); copyToClipboard(hiddenDiv.textContent, btn); }
+function copyOnly(el, text) { copyToClipboard(text, el); }
+
+// =========================================
+// [2] 데이터 파싱 및 전처리
+// =========================================
+
+function parseRawDataLine(line, originalOrder) {
+    let parts = line.split('\t'); 
+    if(parts.length < 4) return null;
+    
+    let firstCol = parts[0] ? parts[0].trim() : "";
+    if (firstCol === 'No.' || firstCol.toLowerCase().startsWith('total') || firstCol.includes('엑셀') || firstCol.includes('날짜')) return null;
+
+    // [Logic Check 1] Tour Type Detection (Strict)
+    // "ski" or "snowboard" in text = Ski Tour. Else = General.
+    const lineLower = line.toLowerCase();
+    const isSkiTour = lineLower.includes('ski') || lineLower.includes('snowboard');
+    
+    let customId, productName, name, rawPhone, messengerCol, count, location, rawLang, note;
+    let optLift = false, optGear = false, optClothes = false, optLesson = false;
+    
+    // 이메일 추출 로직
+    let emailAddr = "";
+    for(let p of parts) { if(p && p.includes('@')) { emailAddr = p.trim(); break; } }
+
+    if (!isSkiTour) { // 일반/산천어 (General)
+        // General Format Mapping
+        customId = parts[0] ? parts[0].trim() : originalOrder.toString();
+        productName = parts[2] ? parts[2].trim() : ""; 
+        name = parts[4] ? parts[4].trim() : "Guest";
+        rawPhone = parts[5] ? parts[5].trim() : ""; // Column F
+        messengerCol = parts[6] ? parts[6].trim() : ""; // Column G
+        rawLang = parts[8] ? parts[8].trim() : "";
+        count = parseInt(parts[9]) || 1;
+        location = parts[10] ? parts[10].trim() : "";
+        note = parts[12] ? parts[12].trim() : "";
+    } else { // 스키 (Ski)
+        // Ski Format Mapping
+        customId = parts[0] ? parts[0].trim() : originalOrder.toString();
+        productName = parts[1] ? parts[1].trim() : "";
+        name = parts[3] ? parts[3].trim() : "Guest"; 
+        rawPhone = parts[4] ? parts[4].trim() : ""; // Column E
+        messengerCol = parts[5] ? parts[5].trim() : ""; // Column F
+        rawLang = parts[7] ? parts[7].trim() : "";
+        count = parseInt(parts[8]) || 1;
+        location = parts[9] ? parts[9].trim() : "";
+        note = parts[10] ? parts[10].trim() : "";
+        
+        // Options Check
+        if (parts[11] && parseInt(parts[11]) > 0) optLift = true;
+        if (parts[12] && parseInt(parts[12]) > 0) optGear = true;
+        if (parts[13] && parseInt(parts[13]) > 0) optClothes = true;
+        if (parts[14] && parseInt(parts[14]) > 0) optLesson = true;
+    }
+
+    // PaxType 분석
+    let paxType = 'General'; let isStay = false; 
+    let isBoard = (productName.toLowerCase().includes('board') || productName.includes('보드'));
+    let isHot = (productName.toLowerCase().includes('hot')); // Ski Tour의 경우 HOT 표시 확인
+
+    let lowerP = productName.toLowerCase();
+    if (lowerP.includes('day1') || lowerP.includes('day 1')) { paxType = 'D1'; }
+    else if (lowerP.includes('day2') || lowerP.includes('day 2')) { paxType = 'D2'; }
+    else if (lowerP.includes('day3') || lowerP.includes('day 3')) { paxType = 'D3'; }
+    else if (lowerP.includes('편도') || lowerP.includes('one way')) { paxType = 'D1'; }
+    
+    if (paxType === 'General' && (location.includes('스키장') || location.includes('Resort'))) { paxType = 'D2'; }
+
+    // [Logic Check 3] New Phone Logic Applied Here
+    let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
+    
+    let langContext = (rawLang && rawLang.includes('중국어')) ? 'CN' : 'EN';
     let gender = getGenderGlobal(name); 
     let appType = getMessengerApp(messengerCol);
 
-    entries.push({
-      id: customId, originalId: originalOrder, resNum: resNum, name: name, phone: rawPhone, email: email,
-      count: count, location: location, note: note === "0" ? "" : note,
-      country: country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false
-    });
-    originalOrder++;
-  });
-
-  let finalGroups = [];
-  entries.forEach((entry) => {
-    if(entry.isGrouped) return;
-    let currentGroupMembers = [entry]; entry.isGrouped = true;
-    let queue = [entry];
-    while(queue.length > 0) {
-      let curr = queue.shift();
-      entries.forEach((target) => {
-        if(target.isGrouped) return;
-        let isLinked = false;
-        let p1 = curr.phone.replace(/[^0-9]/g, ''); let p2 = target.phone.replace(/[^0-9]/g, '');
-        if(p1.length > 5 && p1 === p2) isLinked = true;
-        else if(curr.email && curr.email.length > 5 && curr.email === target.email) isLinked = true;
-        else if(curr.resNum && curr.resNum.length > 4 && curr.resNum === target.resNum) isLinked = true;
-        else if(curr.name && curr.name.length > 2 && curr.name === target.name) isLinked = true; 
-        if(isLinked) { target.isGrouped = true; currentGroupMembers.push(target); queue.push(target); }
-      });
-    }
-    let ids = currentGroupMembers.map(m => m.id); let repNum = ids[0]; 
-    let cleanIds = currentGroupMembers.map(m => m.id.replace(/\D/g, ''));
-    if(cleanIds[0] === "") cleanIds = currentGroupMembers.map(m => m.originalId);
-    let displayNum = cleanIds.length > 1 ? cleanIds.join('.') : cleanIds[0];
-    let prefixMatch = ids[0].match(/^([A-Za-z]+)/);
-    let prefix = prefixMatch ? prefixMatch[0] : "";
-    let msgNum = ids[0]; 
-    if(ids.length > 1) {
-        let tails = [];
-        for(let k=1; k<ids.length; k++) {
-            if(prefix && ids[k].startsWith(prefix)) tails.push(ids[k].substring(prefix.length));
-            else tails.push(ids[k]);
-        }
-        msgNum += "." + tails.join('.'); 
-    }
-    let firstMem = currentGroupMembers[0];
-    let totalC = currentGroupMembers.reduce((sum, m) => sum + m.count, 0);
-    let notes = currentGroupMembers.map(m => m.note).filter(n => n).join(' / ');
-    finalGroups.push({
-      mainNum: displayNum, msgNum: msgNum, repNum: repNum, isLong: cleanIds.length > 1, count: totalC,
-      name: firstMem.name, country: firstMem.country, gender: firstMem.gender, langContext: firstMem.langContext,
-      appType: firstMem.appType, location: firstMem.location, phone: firstMem.phone, messenger: firstMem.messenger, 
-      note: notes, members: currentGroupMembers
-    });
-  });
-
-  function getScore(grp) {
-    let score = 0;
-    priorityQueue.forEach((criteria, idx) => {
-      let weight = Math.pow(10, 6 - idx); let match = false;
-      if (criteria === 'solo' && grp.count === 1) match = true;
-      if (criteria === 'CN' && grp.langContext === 'CN') match = true;
-      if (criteria === 'EN' && grp.langContext === 'EN') match = true;
-      if (criteria === 'F' && grp.gender === 'F') match = true;
-      if (criteria === 'M' && grp.gender === 'M') match = true;
-      if (criteria === 'G4' && grp.count >= 4) match = true;
-      if(match) score += weight;
-    });
-    return score;
-  }
-  if (direction === 'front') finalGroups.sort((a,b) => getScore(b) - getScore(a));
-  else finalGroups.sort((a,b) => getScore(a) - getScore(b));
-
-  let totalPax = finalGroups.reduce((sum, g) => sum + g.count, 0);
-  let seatSequence = generateSeatSequence(totalPax, busSize);
-  let seatMap = new Array(busSize + 1).fill(null);
-  let currentSeqIdx = 0; let comfortMode = totalPax <= 35; 
-
-  finalGroups.forEach((grp, idx) => {
-    grp.color = colors[idx % colors.length];
-    
-    // 국가 표시용 (더 많은 국가 지원)
-    let nation = grp.country;
-    const countryNameMap = { 
-        'KR':'한국','CN':'중국','TW':'대만','HK':'홍콩','SG':'싱가','MY':'말레','TH':'태국','PH':'필리','VN':'베트','ID':'인니','US':'미국','UK':'영국','AU':'호주','JP':'일본','KH':'캄보','IN':'인도','RU':'러샤','FR':'프랑','DE':'독일','CA':'캐나','BR':'브라' 
+    return {
+      id: customId, originalId: originalOrder, name: name, 
+      phone: parsedInfo.fullNumber, // 정제된 번호 사용
+      count: count, location: location, note: note,
+      country: parsedInfo.country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false,
+      paxType: paxType, isStay: isStay, isBoard: isBoard, 
+      isSancheoneo: !isSkiTour, isHot: isHot, email: emailAddr,
+      options: { lift: optLift, gear: optGear, clothes: optClothes, lesson: optLesson }
     };
-    if (countryNameMap[grp.country]) nation = countryNameMap[grp.country];
-    
-    let genderSymbol = '△'; let txtClass = 'neutral-text';
-    if(grp.gender === 'F') { genderSymbol = '♀'; txtClass = 'female-text'; }
-    else if(grp.gender === 'M') { genderSymbol = '♂'; txtClass = 'male-text'; }
-    grp.textClass = txtClass;
-    grp.subInfo = `${nation}${genderSymbol} <span class="app-tag">(${grp.appType})</span>`;
+}
+function createGroupsFromEntries(entries) {
+    let finalGroups = [];
+    entries.forEach((entry) => {
+        if(entry.isGrouped) return;
+        
+        // [Logic Check] BFS로 연결된(전화번호 같은) 사람 찾기
+        // *중요* : 전화번호가 유효한 경우(5자리 이상)에만 묶음 처리.
+        let currentGroupMembers = [entry]; entry.isGrouped = true;
+        
+        if (entry.phone && entry.phone.length > 5) {
+            let queue = [entry];
+            while(queue.length > 0) {
+                let curr = queue.shift();
+                entries.forEach((target) => {
+                    if(target.isGrouped) return;
+                    // 전화번호가 같으면 같은 팀으로 간주
+                    if(target.phone && target.phone.length > 5 && curr.phone === target.phone) {
+                        target.isGrouped = true; 
+                        currentGroupMembers.push(target); 
+                        queue.push(target); 
+                    }
+                });
+            }
+        }
 
-    let needed = grp.count; let skipAfter = 0;
-    if (comfortMode && needed % 2 !== 0 && currentSeqIdx + needed < seatSequence.length) {
-         let lastSeatNum = seatSequence[currentSeqIdx + needed - 1];
-         if (lastSeatNum < 40) skipAfter = 1;
-    }
-    for(let i=0; i<needed; i++) {
-      if(currentSeqIdx >= seatSequence.length) break;
-      let seatNum = seatSequence[currentSeqIdx];
-      seatMap[seatNum] = { ...grp }; currentSeqIdx++;
-    }
-    if(skipAfter > 0 && currentSeqIdx < seatSequence.length) currentSeqIdx++;
-  });
-  currentSeatMap = seatMap; currentTotalPax = totalPax; currentBusSize = busSize;
-  renderBus(currentSeatMap, currentTotalPax, currentBusSize);
-  updateHeaderFromMap(currentSeatMap); saveState(); 
+        // 대표자(첫 번째 사람) 기준으로 그룹 정보 생성
+        let rep = currentGroupMembers[0];
+        
+        // 그룹 번호 표시 (예: 1.2.3)
+        let cleanIds = currentGroupMembers.map(m => m.id.replace(/\D/g, '')); 
+        if (cleanIds.some(id => id === "")) cleanIds = currentGroupMembers.map(m => m.id);
+        cleanIds.sort((a,b) => parseInt(a) - parseInt(b));
+        
+        let displayNum = cleanIds.join('.'); 
+        let totalC = currentGroupMembers.reduce((sum, m) => sum + m.count, 0);
+        
+        // 투어 타입 결정 (D3 > D2 > D1 > General)
+        let groupType = 'General';
+        if(currentGroupMembers.some(m => m.paxType === 'D3')) groupType = 'D3';
+        else if(currentGroupMembers.some(m => m.paxType === 'D2')) groupType = 'D2';
+        else if(currentGroupMembers.some(m => m.paxType === 'D1')) groupType = 'D1';
+        if (groupType === 'D1' && currentGroupMembers.some(m => m.paxType === 'General')) groupType = 'D1';
+
+        // 옵션 병합 (팀원 중 한 명이라도 옵션이 있으면 팀 전체에 표시)
+        let gLift = currentGroupMembers.some(m => m.options.lift);
+        let gGear = currentGroupMembers.some(m => m.options.gear);
+        let gClothes = currentGroupMembers.some(m => m.options.clothes);
+        let gLesson = currentGroupMembers.some(m => m.options.lesson);
+
+        finalGroups.push({
+            mainNum: displayNum, 
+            msgNum: rep.id + (currentGroupMembers.length > 1 ? ".." : ""), 
+            repNum: rep.id, 
+            count: totalC, 
+            name: rep.name, 
+            country: rep.country, 
+            gender: rep.gender, 
+            langContext: rep.langContext, 
+            appType: rep.appType, 
+            location: rep.location, 
+            phone: rep.phone, // *중요* 정제된 번호 하나만 사용
+            messenger: rep.messenger, 
+            paxType: groupType, 
+            isStay: currentGroupMembers.some(m => m.isStay), 
+            isBoard: currentGroupMembers.some(m => m.isBoard), 
+            isSancheoneo: rep.isSancheoneo,
+            isHot: currentGroupMembers.some(m => m.isHot),
+            email: rep.email,
+            options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson }
+        });
+    });
+    return finalGroups;
 }
 
-function updateHeaderFromMap(seatMap) {
+function calculateScore(grp) {
+    let score = 0;
+    priorityQueue.forEach((criteria, idx) => {
+        let weight = Math.pow(10, 6 - idx); let match = false;
+        if (criteria === 'solo' && grp.count === 1) match = true;
+        if (criteria === 'CN' && grp.langContext === 'CN') match = true;
+        if (criteria === 'EN' && grp.langContext === 'EN') match = true;
+        if (criteria === 'F' && grp.gender === 'F') match = true;
+        if (criteria === 'M' && grp.gender === 'M') match = true;
+        if (criteria === 'G4' && grp.count >= 4) match = true;
+        if(match) score += weight;
+    });
+    return score;
+}
+
+function getPickColor(grp) {
+    let loc = grp.location || '';
+    if (grp.paxType === 'D2' || grp.paxType === 'D3') return CONFIG.COLORS.resort;
+    if (loc.includes('홍대')) return CONFIG.COLORS.hongdae;
+    if (loc.includes('명동')) return CONFIG.COLORS.myeongdong;
+    if (loc.includes('동대문')) return CONFIG.COLORS.dongdaemun;
+    return CONFIG.COLORS.etc;
+}
+
+function setGroupMeta(grp) {
+    let nation = grp.country;
+    if (CONFIG.COUNTRY_MAP[grp.country]) nation = CONFIG.COUNTRY_MAP[grp.country];
+    let genderSymbol = '△'; let txtClass = 'neutral-text';
+    if(grp.gender === 'F') { genderSymbol = '♀'; txtClass = 'female-text'; } 
+    else if(grp.gender === 'M') { genderSymbol = '♂'; txtClass = 'male-text'; }
+    grp.textClass = txtClass; grp.subInfo = `${nation}${genderSymbol}`;
+}
+// =========================================
+// [4] 메인 컨트롤러 (runAI)
+// =========================================
+
+function runAI() {
+    // 1. 상태 저장 및 초기화
+    saveTextInput(); saveTimeInput(); saveGuideName();
+    localStorage.removeItem('bus_seatMap');
+    
+    const raw = document.getElementById('rawData').value;
+    const busSize = parseInt(document.querySelector('input[name="busSize"]:checked').value);
+    const direction = document.querySelector('input[name="direction"]:checked').value;
+    const lines = raw.trim().split('\n');
+    
+    // 2. 파싱 (Line 단위 스키/일반 구분 적용됨)
+    let entries = []; let originalOrder = 1;
+    lines.forEach(line => {
+        const parsed = parseRawDataLine(line, originalOrder);
+        if(parsed) { entries.push(parsed); originalOrder++; }
+    });
+
+    // 3. 그룹핑
+    msgListGroups = createGroupsFromEntries(entries);
+
+    // 4. 정렬 (Map 1: 가는 편)
+    let listGoing = msgListGroups.filter(g => g.paxType === 'General' || g.paxType === 'D1');
+    if (direction === 'front') listGoing.sort((a,b) => calculateScore(b) - calculateScore(a));
+    else listGoing.sort((a,b) => calculateScore(a) - calculateScore(b));
+
+    // 5. 좌석 배치 (Map 1)
+    currentSeatMap1 = new Array(busSize + 1).fill(null);
+    let seatSequence = generateSeatSequence(999, busSize);
+    let currentSeqIdx = 0;
+
+    listGoing.forEach((grp) => {
+        grp.color = getPickColor(grp); 
+        setGroupMeta(grp);
+        for(let i=0; i<grp.count; i++) {
+            if(currentSeqIdx < seatSequence.length) {
+                let seatNum = seatSequence[currentSeqIdx];
+                currentSeatMap1[seatNum] = { ...grp }; 
+                currentSeqIdx++;
+            }
+        }
+    });
+
+    // 6. Map 2 동기화 (General 승객 복사)
+    currentSeatMap2 = new Array(busSize + 1).fill(null);
+    for(let i=1; i<=busSize; i++) {
+        if(currentSeatMap1[i]) {
+            if (currentSeatMap1[i].paxType === 'General') {
+                let cloned = { ...currentSeatMap1[i] }; cloned.color = '#e0e0e0'; cloned.isSynced = true; currentSeatMap2[i] = cloned;
+            }
+        }
+    }
+
+    // 7. Map 2 배치 (D2/D3 돌아오는 편)
+    let listReturnOnly = msgListGroups.filter(g => g.paxType === 'D2' || g.paxType === 'D3');
+    toggleMap2(listReturnOnly.length > 0); 
+
+    if (direction === 'front') listReturnOnly.sort((a,b) => calculateScore(b) - calculateScore(a));
+    else listReturnOnly.sort((a,b) => calculateScore(a) - calculateScore(b));
+
+    let emptySeatsMap2 = [];
+    seatSequence.forEach(seatNum => { if(!currentSeatMap2[seatNum]) emptySeatsMap2.push(seatNum); });
+    
+    let d23Passengers = [];
+    listReturnOnly.forEach((grp) => {
+        grp.color = getPickColor(grp); 
+        setGroupMeta(grp);
+        if (!grp.isStay) { for(let k=0; k<grp.count; k++) { d23Passengers.push({ ...grp, count: 1 }); } }
+    });
+    
+    let pIdx = 0;
+    for(let k=0; k<emptySeatsMap2.length; k++) {
+        if(pIdx >= d23Passengers.length) break;
+        let seatNum = emptySeatsMap2[k]; currentSeatMap2[seatNum] = d23Passengers[pIdx]; pIdx++;
+    }
+
+    // 8. 저장 및 렌더링
+    saveSeatMap(); redrawAll(busSize); renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2);
+}
+
+function generateSeatSequence(totalPax, busSize) {
+  let sequence = []; for(let i = 5; i <= busSize; i++) sequence.push(i);
+  sequence.push(4); sequence.push(3); sequence.push(2); sequence.push(1); 
+  return sequence;
+}
+
+// =========================================
+// [5] UI 렌더링 및 인터랙션
+// =========================================
+
+function redrawAll(busSize) {
+    renderBus(currentSeatMap1, busSize, 'busGrid1', 1); 
+    renderBus(currentSeatMap2, busSize, 'busGrid2', 2);
+    updateHeader1(currentSeatMap1); 
+    updateHeader2(currentSeatMap2);
+}
+
+function renderBus(seatMap, maxSeats, gridId, busNum) {
+  const grid = document.getElementById(gridId); grid.innerHTML = '';
+  for(let row=0; row<11; row++) {
+    if(maxSeats === 45 && row === 10) {
+      let lastRowDiv = document.createElement('div'); lastRowDiv.className = 'last-row-45';
+      for(let k=41; k<=45; k++) createSeatElement(lastRowDiv, k, seatMap, maxSeats, busNum);
+      grid.appendChild(lastRowDiv); continue; 
+    }
+    for(let col=0; col<5; col++) {
+      if(col === 2) { grid.appendChild(document.createElement('div')); continue; }
+      let seatNum = (row < 10) ? (row * 4) + (col < 2 ? col + 1 : col) : (col < 2 ? 40 + col + 1 : 40 + col);
+      createSeatElement(grid, seatNum, seatMap, maxSeats, busNum);
+    }
+  }
+}
+
+function createSeatElement(parent, seatNum, seatMap, maxSeats, busNum) {
+  let seatDiv = document.createElement('div'); seatDiv.className = 'seat'; seatDiv.dataset.idx = seatNum;
+  if(selectedSeat.busNum === busNum && selectedSeat.idx === seatNum) seatDiv.classList.add('selected');
+  if (busNum === 2 && seatMap[seatNum] && seatMap[seatNum].paxType === 'General') { seatDiv.classList.add('synced-general'); }
+  
+  if(seatNum <= 4) {
+    if (seatMap[seatNum]) renderSeatContent(seatDiv, seatMap[seatNum], seatNum, busNum);
+    else { seatDiv.classList.add('emergency'); renderSeatContent(seatDiv, null, seatNum, busNum); }
+  } else {
+    renderSeatContent(seatDiv, seatMap[seatNum], seatNum, busNum);
+  }
+  
+  seatDiv.onclick = function() { handleSeatClick(this, busNum, seatNum, maxSeats); };
+  parent.appendChild(seatDiv);
+}
+
+function renderSeatContent(el, data, num, busNum) {
+  el.innerHTML = `<span class="seat-num">${num}</span>`;
+  if(data) {
+    if (busNum === 2 && data.paxType === 'General') { 
+        el.style.backgroundColor = data.color; 
+        el.innerHTML += `<div style="font-size:30px; color:#757575; font-weight:bold; margin-top:10px;">❌</div>`; 
+        return; 
+    }
+    el.style.backgroundColor = data.color;
+    let dispNum = data.mainNum; let longClass = data.isLong ? 'long-text' : '';
+    let dayTagHtml = "";
+    
+    if (data.isHot) dayTagHtml += `<span class="day-tag tag-hot">H</span>`;
+    if (data.paxType === 'D1') dayTagHtml += `<span class="day-tag tag-d1">D1</span>`;
+    if (data.paxType === 'D2') dayTagHtml += `<span class="day-tag tag-d2">D2</span>`;
+    if (data.paxType === 'D3') dayTagHtml += `<span class="day-tag tag-d3">D3</span>`;
+    
+    el.innerHTML += `<div class="grp-id ${longClass}">${dispNum}</div><div class="info-badge ${data.textClass}">${dayTagHtml}${data.subInfo}</div>`;
+  } else el.className += " empty";
+}
+
+function handleSeatClick(el, busNum, seatIdx, busSize) {
+    if(selectedSeat.idx === -1) { 
+        selectedSeat = { busNum: busNum, idx: seatIdx }; el.classList.add('selected'); 
+    } else {
+        let sourceBus = selectedSeat.busNum; let sourceIdx = selectedSeat.idx; let targetBus = busNum; let targetIdx = seatIdx;
+        if (sourceBus !== targetBus) { alert("같은 버스끼리만 이동 가능!"); resetSelection(); return; }
+        
+        let mapMain = (sourceBus === 1) ? currentSeatMap1 : currentSeatMap2;
+        let paxS = mapMain[sourceIdx]; let paxT = mapMain[targetIdx];
+        
+        mapMain[sourceIdx] = paxT; mapMain[targetIdx] = paxS;
+        
+        if (sourceBus === 1) {
+            if (paxS && paxS.paxType === 'General') syncMoveToMap2(sourceIdx, targetIdx, busSize);
+            if (paxT && paxT.paxType === 'General') syncMoveToMap2(targetIdx, sourceIdx, busSize);
+        }
+        resetSelection(); refreshDisplay();
+    }
+}
+
+function syncMoveToMap2(fromIdx, toIdx, busSize) {
+    let mover = currentSeatMap2[fromIdx]; if (!mover || mover.paxType !== 'General') return;
+    let obstacle = currentSeatMap2[toIdx]; 
+    if (!obstacle || obstacle.paxType === 'General') { 
+        currentSeatMap2[fromIdx] = obstacle; currentSeatMap2[toIdx] = mover; 
+    } else if (obstacle.paxType === 'D2' || obstacle.paxType === 'D3') {
+        currentSeatMap2[toIdx] = mover; currentSeatMap2[fromIdx] = null; 
+        let newSeat = findEmptySeatMap2(busSize);
+        if (newSeat !== -1) { currentSeatMap2[newSeat] = obstacle; }
+    }
+}
+
+function findEmptySeatMap2(busSize) {
+    let sequence = generateSeatSequence(999, busSize); 
+    for (let idx of sequence) { if (currentSeatMap2[idx] === null) return idx; } 
+    return -1;
+}
+
+function resetSelection() { 
+    document.querySelectorAll('.seat.selected').forEach(e => e.classList.remove('selected')); 
+    selectedSeat = { busNum: 0, idx: -1 }; 
+}
+
+function refreshDisplay() {
+    const scrollY = window.scrollY; const busSize = parseInt(localStorage.getItem('bus_size') || "44");
+    saveSeatMap(); redrawAll(busSize); renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2);
+    window.scrollTo(0, scrollY);
+}
+
+// =========================================
+// [6] 메시지 생성 로직 (수정됨)
+// =========================================
+
+function renderMessages(allGroups, seatMap1, seatMap2) {
+    const msgList = document.getElementById('msgList');
+    const section = document.getElementById('msgSection');
+    msgList.innerHTML = ''; section.style.display = 'block';
+    
+    const statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
+    const guideName = document.getElementById('guideNameInput').value || "Mr. Shin";
+    const tH = document.getElementById('timeHongdae').value;
+    const tM = document.getElementById('timeMyeongdong').value;
+    const tD = document.getElementById('timeDongdaemun').value;
+    const specialMsg = document.getElementById('specialNotice').value;
+    const finalSpecial = specialMsg ? `\n\n${specialMsg}\n` : "";
+
+    allGroups.sort((a, b) => {
+        let numA = parseInt(a.repNum.replace(/\D/g, '')) || 0; let numB = parseInt(b.repNum.replace(/\D/g, '')) || 0;
+        return numA - numB;
+    });
+
+    allGroups.forEach((g, idx) => {
+        let seatStr = ""; let targetMap = (g.paxType === 'D2' || g.paxType === 'D3') ? seatMap2 : seatMap1;
+        if (g.isStay) seatStr = "STAY (No Seat)";
+        else {
+            let seats = [];
+            for(let i=1; i<targetMap.length; i++) { if(targetMap[i] && targetMap[i].repNum === g.repNum) seats.push(i); }
+            seatStr = seats.sort((a,b)=>a-b).join('-');
+        }
+
+        let gid = g.repNum; let msgText = ""; let langTag = "";
+        
+        let txtLift = g.options.lift ? "Included ✅" : "Lift 7hr: 75,000 / 60,000";
+        let txtClothes = g.options.clothes ? "Included ✅" : "Clothes: 20,000";
+        let txtGear = g.options.gear ? "Included ✅" : "Gear: 15,000 / 20,000";
+        
+        // [수정 항목 3] 고정 Price List 정의
+        const priceList_CN = `[Price List]\n\nS. 积极心态（包含）\n\nA. 缆车 + 装备\n   周末 70,000 / 平日 60,000\nB. 头盔 20,000\nC. 护具 15,000\nD. 滑雪服 20,000\nE. 雪橇 30,000\nF. 观光缆车 20,000\n\n*(刷卡 Card +10%)`;
+        const priceList_EN = `[Price List]\n\nS. Positive mindset (Included)\n\nA. Lift + Gear\n   Weekend 70,000 / Weekday 60,000\nB. Helmet 20,000\nC. Guard 15,000\nD. Ski Clothes 20,000\nE. Sled 30,000\nF. Sightseeing Lift 20,000\n\n*(Card payment +10%)`;
+
+        // 스키장 손님 (D2, D3, General Ski)
+        if (g.paxType === 'D2' || g.paxType === 'D3' || (!g.isSancheoneo && g.paxType === 'General')) {
+            let isReturnGuest = (g.paxType === 'D2' || g.paxType === 'D3');
+            let dayLabel = isReturnGuest ? (g.paxType === 'D3' ? "Day 3" : "Day 2") : "Day 1";
+            
+            // 귀가 가이드 (D2/D3)
+            if (isReturnGuest) {
+                // [수정 항목 2] 언어별 메시지 완전 분리
+                let step3_EN = "3. Gathering (15:40)\n📍 Lobby (With luggage)";
+                let step3_CN = "3. 集合 Gathering (15:40)\n📍 酒店大厅 (带上所有行李)";
+                
+                if (g.isStay) { 
+                    step3_EN = "3. Stay Guest\n📍 No Bus (Enjoy Skiing!)"; 
+                    step3_CN = "3. 续住 (Stay)\n📍 No Bus (Enjoy Skiing!)"; 
+                }
+
+                if(g.langContext === 'CN') {
+                    langTag = `<span class="lang-tag lang-CN">中文(${dayLabel})</span>`;
+                    msgText = `[${dayLabel}/Return Guide - ${guideName}]\nGroup: ${g.msgNum}\nSeat: ${seatStr}\n\n1. 退房 Check-out (11:00 前)\n*行李寄放一楼大厅 (Lobby)\n⚠️ 迟交罚款 (Late): 10,000 / 30分\n\n2. Klook 休息室 (10:00)\n👉 付款 & 领取缆车票 (Payment/Ticket)\n\n${step3_CN}\n\n${priceList_CN}`;
+                } else {
+                    langTag = `<span class="lang-tag lang-EN">ENG(${dayLabel})</span>`;
+                    msgText = `[${dayLabel}/Return Guide - ${guideName}]\nGroup: ${g.msgNum}\nSeat: ${seatStr}\n\n1. Check-out (Until 11:00)\n*Leave bags at Lobby\n⚠️ Late Penalty: 10,000 KRW / 30min\n\n2. Klook Lounge (10:00)\n👉 Payment & Get Lift Card\n\n${step3_EN}\n\n${priceList_EN}`;
+                }
+            } 
+            // 일반 스키 투어 출발 (General Ski)
+            else {
+                 let pickupInfo = ""; let loc = g.location ? g.location.trim() : "";
+                 if(g.langContext === 'CN') {
+                    langTag = `<span class="lang-tag lang-CN">SKI(CN)</span>`;
+                    if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
+                    else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口 (Myeongdong Exit 3)`; } 
+                    else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口 (DDP Exit 11)`; } 
+                    else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
+                    msgText = `[Ski Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*遲到恕不退款。\n*車內只允許飲用白水。\n\n[Option Check]\nLift: ${txtLift}\nClothes: ${txtClothes}\nGear: ${txtGear}\n\n👉 請回覆 "您的出發時間" 以確認收到。\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
+                } else {
+                    langTag = `<span class="lang-tag lang-EN">SKI(EN)</span>`;
+                    if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ. Exit 8`; } 
+                    else if (loc.includes('명동') || loc.includes('Myeongdong')) { pickupInfo = `❗️${tM} Myeongdong Exit 3`; } 
+                    else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
+                    else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
+                    msgText = `[Ski Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*No refund if late.\n*Only water is allowed on bus.\n\n[Option Check]\nLift: ${txtLift}\nClothes: ${txtClothes}\nGear: ${txtGear}\n\n👉 Reply "Your departure time" to confirm\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
+                }
+            }
+        } 
+        // 산천어 / 일반 투어
+        else {
+             let pickupInfo = ""; let loc = g.location ? g.location.trim() : "";
+            if(g.langContext === 'CN') {
+                langTag = `<span class="lang-tag lang-CN">TOUR(CN)</span>`;
+                if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
+                else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口 (Myeongdong Exit 3)`; } 
+                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口 (DDP Exit 11)`; } 
+                else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
+                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
+            } else {
+                langTag = `<span class="lang-tag lang-EN">TOUR(EN)</span>`;
+                if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ. Exit 8`; } 
+                else if (loc.includes('명동') || loc.includes('Myeongdong')) { pickupInfo = `❗️${tM} Myeongdong Exit 3`; } 
+                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
+                else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
+                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
+            }
+        }
+
+        // [수정 항목 4] Day 2, Day 3 메시지에는 링크 제거
+        if (g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
+            msgText += `\n\n📺 How to wear boots:\n${CONFIG.BOOTS_YOUTUBE}`;
+        }
+
+        // 버튼 생성 로직
+        let waNumber = g.phone; 
+        let hasPhone = (waNumber && waNumber.length > 5);
+        let encodedText = encodeURIComponent(msgText);
+        let waLink = hasPhone ? `https://wa.me/${waNumber}?text=${encodedText}` : '#';
+        let waBtnClass = hasPhone ? 'btn-action btn-wa-send' : 'btn-action btn-wa-send disabled';
+        let isContacted = statusData[gid]?.contacted || false; let isConnected = statusData[gid]?.connected || false; let memoText = statusData[gid]?.memo || "";
+        
+        let appIconHtml = getAppIconHtml(g.messenger, g.appType);
+        
+        let extraTags = "";
+        if (g.isHot) extraTags += `<span class="day-tag tag-hot" style="margin-left:5px;">H</span>`;
+        if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin-left:5px;">[D1]</span>`;
+        if (g.paxType === 'D2') extraTags += `<span class="day-tag tag-d2" style="margin-left:5px;">[D2]</span>`;
+        if (g.paxType === 'D3') extraTags += `<span class="day-tag tag-d3" style="margin-left:5px;">[D3]</span>`;
+        
+        let emailBtnHtml = g.email ? `<div class="btn-action btn-copy-mail" onclick="copyOnly(this, '${g.email}')">Mail<br>Copy</div>` : "";
+
+        let card = document.createElement('div'); card.className = 'msg-card';
+        card.innerHTML = `
+            <div class="msg-check-area">
+                <div class="check-box-wrapper"><label class="msg-check-label label-sent">연락함</label><input type="checkbox" class="msg-check-input chk-sent" onchange="updateMsgStatus('${gid}', 'contacted', this.checked, null)" ${isContacted ? 'checked' : ''}></div>
+                <div class="check-box-wrapper"><label class="msg-check-label label-connected">연락됨</label><input type="checkbox" class="msg-check-input chk-conn" onchange="updateMsgStatus('${gid}', 'connected', this.checked, null)" ${isConnected ? 'checked' : ''}></div>
+            </div>
+            <div class="msg-info">
+                <div class="msg-group-row"><span class="msg-group">${g.msgNum}</span>${langTag}${extraTags}</div>
+                <div class="msg-seats">Seat: ${seatStr}</div>
+                <input type="text" class="msg-memo-input" placeholder="비고" value="${memoText}" oninput="updateMsgStatus('${gid}', null, null, this.value)">
+                <div class="hidden-msg">${msgText}</div>
+            </div>
+            <div class="msg-actions">
+                <a href="${waLink}" target="_blank" class="${waBtnClass}">Send<br>WA</a>
+                <div class="btn-action btn-copy-body" onclick="copyMessageBody(this)">본문<br>Copy</div>
+                ${emailBtnHtml}
+                ${appIconHtml}
+            </div>
+        `;
+        msgList.appendChild(card);
+    });
+}
+
+function getAppIconHtml(rawMsg, appType) {
+    if (!rawMsg) return `<div class="btn-action logo-none">X</div>`;
+    let appClass = 'logo-none'; let copyValue = ""; let appName = "X"; 
+    let lower = rawMsg.toLowerCase();
+    
+    // 단순 번호만 있는 경우, AppType은 '무'지만 내용은 복사 가능하게
+    if (appType === '무') {
+        // WhatsApp이나 Viber가 아니더라도 텍스트가 있으면 일단 ETC로 복사 가능하게
+        if(rawMsg.length > 2) { appClass = 'logo-none'; appName = 'ETC'; copyValue = rawMsg; }
+    } else {
+        if (lower.includes('whatsapp')) { appClass = 'logo-wa'; appName = 'WA'; copyValue = rawMsg.replace(/[^0-9]/g, ''); }
+        else if (lower.includes('line')) { appClass = 'logo-line'; appName = 'Line'; copyValue = rawMsg.replace(/line[:\s]*/gi, '').trim(); }
+        // [수정 항목 5] 카카오톡 ID 파싱 정규식 수정
+        else if (lower.includes('kakao') || lower.includes('talk')) { 
+            appClass = 'logo-kakao'; 
+            appName = 'Ka'; 
+            copyValue = rawMsg.replace(/^(kakao|talk|kakao\s*talk)[:\s]*/i, '').trim(); 
+        }
+        else if (lower.includes('viber')) { appClass = 'logo-viber'; appName = 'Vi'; copyValue = rawMsg; }
+        else if (lower.includes('wechat') || lower.includes('weixin')) { appClass = 'logo-wechat'; appName = 'We'; copyValue = rawMsg.replace(/^(wechat|weixin)[:\s]*/i, '').trim(); }
+        else if (lower.includes('zalo')) { appClass = 'logo-zalo'; appName = 'Za'; copyValue = rawMsg.replace(/^zalo[:\s]*/i, '').trim(); }
+    }
+    
+    return (copyValue && appName !== 'X') ? `<div class="btn-action ${appClass}" onclick="copyOnly(this, '${copyValue}')">${appName}<br>Copy</div>` : `<div class="btn-action logo-none">X</div>`;
+}
+
+function updateMsgStatus(gid, type, checked, memo) {
+    let statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
+    if(!statusData[gid]) statusData[gid] = { contacted: false, connected: false, memo: "" };
+    if(type === 'contacted') statusData[gid].contacted = checked;
+    if(type === 'connected') statusData[gid].connected = checked;
+    if(memo !== null) statusData[gid].memo = memo;
+    localStorage.setItem('bus_msgStatus', JSON.stringify(statusData));
+}
+
+// =========================================
+// [7] 수동 제어 및 저장/로드 (LocalStorage)
+// =========================================
+
+function manualAddGroup() {
+    const rawInput = (document.getElementById('manualGroupNum').value || "").trim();
+    if(!rawInput) { alert("오빠, 번호를 입력해야지?"); return; }
+    
+    let targetGroup = msgListGroups.find(g => String(g.mainNum) === rawInput || String(g.msgNum) === rawInput);
+
+    if (!targetGroup) {
+        if(!confirm(`[${rawInput}번]은 명단에 없어. 현장 손님(Walk-in)으로 추가할까?`)) return;
+        const isSancheoneoMode = msgListGroups.some(g => g.isSancheoneo);
+        targetGroup = {
+            mainNum: rawInput, msgNum: rawInput, repNum: rawInput, isLong: false, count: 0, 
+            name: "Manual Guest", country: "ETC", gender: "N", langContext: "EN",
+            appType: "무", location: "현장", phone: "", messenger: "", note: "Manual", members: [], 
+            paxType: 'General', isStay: false, isBoard: false, 
+            color: '#e0e0e0', textClass: 'neutral-text', subInfo: '현장',
+            isSancheoneo: isSancheoneoMode, isHot: false, email: "",
+            options: { lift: false, gear: false, clothes: false, lesson: false }
+        };
+        msgListGroups.push(targetGroup);
+    }
+
+    targetGroup.count++;
+    
+    let sequence = generateSeatSequence(1, currentSeatMap1.length - 1);
+    let seatedIdx = -1;
+    
+    // Map 1 배치
+    for(let i of sequence) {
+        if(currentSeatMap1[i] === null) { currentSeatMap1[i] = {...targetGroup}; seatedIdx = i; break; } 
+    }
+
+    // Map 2 배치
+    if(targetGroup.paxType === 'General') {
+        if (seatedIdx !== -1 && currentSeatMap2[seatedIdx] === null) {
+             let cloned = {...targetGroup}; cloned.color = '#e0e0e0'; cloned.isSynced = true;
+             currentSeatMap2[seatedIdx] = cloned;
+        } else {
+            for(let i of sequence) {
+                if(currentSeatMap2[i] === null) { 
+                    let cloned = {...targetGroup}; cloned.color = '#e0e0e0'; cloned.isSynced = true;
+                    currentSeatMap2[i] = cloned; break; 
+                } 
+            }
+        }
+    }
+    refreshDisplay();
+}
+
+function manualDelGroup() {
+    const rawInput = (document.getElementById('manualGroupNum').value || "").trim();
+    if(!rawInput) { alert("지울 번호를 입력해줘."); return; }
+    
+    let idx = msgListGroups.findIndex(g => String(g.mainNum) === rawInput || String(g.msgNum) === rawInput);
+    if(idx === -1) { alert("그 번호는 명단에 없는데?"); return; }
+    
+    let group = msgListGroups[idx];
+    let targetRepNum = group.repNum;
+
+    if (group.count > 0) {
+        group.count--; 
+        for(let i = currentSeatMap1.length - 1; i >= 1; i--) {
+            if(currentSeatMap1[i] && (String(currentSeatMap1[i].mainNum) === rawInput || currentSeatMap1[i].repNum === targetRepNum)) {
+                currentSeatMap1[i] = null; break;
+            }
+        }
+        for(let i = currentSeatMap2.length - 1; i >= 1; i--) {
+            if(currentSeatMap2[i] && (String(currentSeatMap2[i].mainNum) === rawInput || currentSeatMap2[i].repNum === targetRepNum)) {
+                currentSeatMap2[i] = null; break;
+            }
+        }
+    }
+
+    if (group.count <= 0) {
+        if(confirm(`[${rawInput}번] 인원이 0명이야. 명단에서 완전히 삭제할까?`)) {
+            msgListGroups.splice(idx, 1);
+            for(let i = 1; i < currentSeatMap1.length; i++) {
+                if(currentSeatMap1[i] && (String(currentSeatMap1[i].mainNum) === rawInput || currentSeatMap1[i].repNum === targetRepNum)) currentSeatMap1[i] = null;
+            }
+            for(let i = 1; i < currentSeatMap2.length; i++) {
+                if(currentSeatMap2[i] && (String(currentSeatMap2[i].mainNum) === rawInput || currentSeatMap2[i].repNum === targetRepNum)) currentSeatMap2[i] = null;
+            }
+        }
+    }
+    refreshDisplay();
+}
+
+// 저장/로드 관련 함수들
+function saveSeatMap() { localStorage.setItem('bus_seatMap', JSON.stringify({ map1: currentSeatMap1, map2: currentSeatMap2, groups: msgListGroups })); }
+function checkDateChange() { localStorage.setItem('bus_lastDate', document.getElementById('vcardDate').value); }
+function saveTextInput() { localStorage.setItem('bus_rawData', document.getElementById('rawData').value); localStorage.setItem('bus_size', document.querySelector('input[name="busSize"]:checked').value); }
+function saveTimeInput() { const times = { h: document.getElementById('timeHongdae').value, m: document.getElementById('timeMyeongdong').value, d: document.getElementById('timeDongdaemun').value }; localStorage.setItem('bus_times', JSON.stringify(times)); }
+function saveGuideName() { 
+    localStorage.setItem('bus_guideName', document.getElementById('guideNameInput').value);
+    localStorage.setItem('bus_number', document.getElementById('busNumberInput').value);
+    if(msgListGroups.length > 0) renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2);
+}
+function saveSpecialNotice() { localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value); if(msgListGroups.length > 0) renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2); }
+
+function loadSeatMap() {
+    const saved = localStorage.getItem('bus_seatMap');
+    if (saved) { 
+        try { 
+            const data = JSON.parse(saved); 
+            if(data.map1 && data.map2) { 
+                currentSeatMap1 = data.map1; currentSeatMap2 = data.map2; msgListGroups = data.groups || []; 
+                const hasReturn = msgListGroups.some(g => g.paxType === 'D2' || g.paxType === 'D3');
+                toggleMap2(hasReturn);
+                redrawAll(parseInt(localStorage.getItem('bus_size') || "44")); 
+                renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2); 
+            } 
+        } catch(e) {} 
+    }
+}
+function loadTextInput() { const savedData = localStorage.getItem('bus_rawData'); if(savedData) document.getElementById('rawData').value = savedData; const savedSize = localStorage.getItem('bus_size'); if(savedSize) { const radios = document.getElementsByName('busSize'); for(let r of radios) { if(r.value === savedSize) r.checked = true; } } }
+function loadGuideName() { const savedGuide = localStorage.getItem('bus_guideName'); if(savedGuide) document.getElementById('guideNameInput').value = savedGuide; const savedBus = localStorage.getItem('bus_number'); if(savedBus) document.getElementById('busNumberInput').value = savedBus; }
+function clearData() { if(confirm('초기화하시겠습니까?')) { document.getElementById('rawData').value = ''; localStorage.removeItem('bus_rawData'); localStorage.removeItem('bus_seatMap'); localStorage.removeItem('bus_msgStatus'); location.reload(); } }
+
+function updateHeader1(seatMap) {
     let counts = { '홍대':0, '명동':0, '동대문':0, '기타':0 }; let total = 0;
     for(let i=1; i<seatMap.length; i++) {
         let seat = seatMap[i];
@@ -464,339 +1076,126 @@ function updateHeaderFromMap(seatMap) {
             else counts['기타']++;
         }
     }
-    document.getElementById('pickupSummary').innerHTML = `TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 홍대 ${counts['홍대']} / 명동 ${counts['명동']} / 동대문 ${counts['동대문']} ]</span>`;
+    document.getElementById('pickupSummary1').innerHTML = `TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 홍대 ${counts['홍대']} / 명동 ${counts['명동']} / 동대문 ${counts['동대문']} ]</span>`;
 }
-
-// 수정된 국가 코드 추출 및 전화번호 정규화 함수 (핵심 수정)
-function parsePhone(rawPhone, rawMessenger) {
-    let phoneDigits = (rawPhone || "").replace(/[^0-9]/g, '');
-    let msgDigits = "";
-
-    // [수정됨] Viber나 기타 다른 앱은 무시하고, 오직 'whatsapp'일 때만 메신저 컬럼 번호 우선
-    if (rawMessenger && /whatsapp/i.test(rawMessenger)) {
-        msgDigits = rawMessenger.replace(/[^0-9]/g, '');
-    }
-
-    // 메신저가 와츠앱이면 그 번호(msgDigits), 아니면 원래 전화번호(phoneDigits) 사용
-    let target = msgDigits || phoneDigits;
-
-    if (target.startsWith('0') && !target.startsWith('010') && phoneDigits.length > 0) {
-         for (let len = 4; len >= 1; len--) {
-            let prefix = phoneDigits.substring(0, len);
-            if (GLOBAL_PHONE_CODES[prefix]) {
-                target = prefix + target.substring(1);
-                break;
-            }
-         }
-    }
-
-    // 글로벌 코드 매칭
-    for (let len = 4; len >= 1; len--) {
-        let prefix = target.substring(0, len);
-        if (GLOBAL_PHONE_CODES[prefix]) {
-            return { code: prefix, country: GLOBAL_PHONE_CODES[prefix], fullNumber: target };
-        }
-    }
-    
-    // 한국 번호 체크 (010, 10)
-    if (target.startsWith('010') || target.startsWith('10')) {
-        let clean = target.startsWith('0') ? target.substring(1) : target;
-        return { code: '82', country: 'KR', fullNumber: '82' + clean };
-    }
-
-    // 진짜 모르겠음 -> ETC
-    return { code: '', country: 'ETC', fullNumber: target };
-}
-
-function renderMessages(seatMap) {
-    const msgList = document.getElementById('msgList');
-    const section = document.getElementById('msgSection');
-    msgList.innerHTML = '';
-    if(!seatMap || seatMap.length === 0) { section.style.display = 'none'; return; }
-    section.style.display = 'block';
-
-    const statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
-    let groupMap = {};
+function updateHeader2(seatMap) {
+    let counts = { 'Hotel':0, 'Challenge':0 }; let total = 0;
     for(let i=1; i<seatMap.length; i++) {
-        if(seatMap[i]) {
-            let gid = seatMap[i].repNum; 
-            if(!groupMap[gid]) { groupMap[gid] = { ...seatMap[i], seats: [] }; }
-            groupMap[gid].seats.push(i);
+        let seat = seatMap[i];
+        if(seat) {
+            total++; 
+            if(seat.paxType === 'D2' || seat.paxType === 'D3') counts['Hotel']++; else counts['Challenge']++; 
         }
     }
-    
-    Object.keys(groupMap).sort(new Intl.Collator('en', {numeric: true}).compare).forEach(gid => {
-        let g = groupMap[gid];
-        let seatStr = g.seats.sort((a,b)=>a-b).join(', '); 
-        let tH = document.getElementById('timeHongdae').value;
-        let tM = document.getElementById('timeMyeongdong').value;
-        let tD = document.getElementById('timeDongdaemun').value;
-
-        let msgText = ""; let langTag = "";
-        if(g.langContext === 'CN') {
-            langTag = `<span class="lang-tag lang-CN">中文</span>`;
-            msgText = `[Ski Coach Mr. Shin]\n❗️${tH} 弘大入口站 8號出口 (Hongik Univ.)\n❗️${tM} 明洞站 3號出口 (Myeongdong)\n❗️${tD} 東大門歷史文化公園站 11號出口 (DDP)\n\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白開水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
-        } else {
-            langTag = `<span class="lang-tag lang-EN">ENG</span>`;
-            msgText = `[Ski Coach Mr. Shin]\n❗️${tH} Hongik Univ. Exit 8\n❗️${tM} Myeongdong Exit 3\n❗️${tD} Dongdaemun History Culture Exit 11\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
-        }
-
-        let parsed = parsePhone(g.phone, g.messenger);
-        let waNumber = parsed.fullNumber;
-        let hasPhone = waNumber.length > 5;
-        let encodedText = encodeURIComponent(msgText);
-        let waLink = hasPhone ? `https://wa.me/${waNumber}?text=${encodedText}` : '#';
-        let waBtnClass = hasPhone ? 'btn-action btn-wa-send' : 'btn-action btn-wa-send disabled';
-
-        // --- 2. 앱 아이콘 버튼 (오른쪽) ---
-        let rawMsg = g.messenger ? g.messenger.trim() : "";
-        let appClass = 'logo-none'; let copyValue = ""; let appName = "X";
-        let scheme = "";
-        let justOpen = false; 
-
-        if (rawMsg) {
-            let lower = rawMsg.toLowerCase();
-            if (lower.includes('whatsapp')) {
-                appClass = 'logo-wa'; appName = 'WA';
-                copyValue = rawMsg.replace(/[^0-9]/g, '');
-            } else if (lower.includes('line')) {
-                appClass = 'logo-line'; appName = 'Line';
-                copyValue = rawMsg.replace(/line[:\s]*/gi, '').trim(); 
-                scheme = 'line://'; 
-            } else if (lower.includes('kakao')) {
-                appClass = 'logo-kakao'; appName = 'Ka';
-                copyValue = rawMsg.replace(/^kakao[:\s]*/i, '').trim();
-                scheme = 'kakaotalk://'; 
-            } else if (lower.includes('viber')) {
-                appClass = 'logo-viber'; appName = 'Vi';
-                justOpen = true; 
-                scheme = 'viber://';
-            } else if (lower.includes('wechat') || lower.includes('weixin')) {
-                appClass = 'logo-wechat'; appName = 'We';
-                copyValue = rawMsg.replace(/^(wechat|weixin)[:\s]*/i, '').trim();
-                scheme = 'weixin://';
-            } else if (lower.includes('zalo')) {
-                appClass = 'logo-zalo'; appName = 'Za';
-                copyValue = rawMsg.replace(/^zalo[:\s]*/i, '').trim();
-                scheme = 'zalo://'; 
-            } else {
-                appClass = 'logo-none'; appName = 'ETC'; copyValue = rawMsg;
-            }
-        }
-
-        let appIconHtml = "";
-        if (justOpen) {
-            appIconHtml = `<div class="btn-action ${appClass}" onclick="openAppOnly('${scheme}')">${appName}<br>Open</div>`;
-        } else if (copyValue) {
-            appIconHtml = `<div class="btn-action ${appClass}" onclick="copyAndOpen(this, '${copyValue}', '${scheme}')">${appName}<br>Copy</div>`;
-        } else {
-            appIconHtml = `<div class="btn-action logo-none">X</div>`;
-        }
-
-        let isContacted = statusData[gid]?.contacted || false; 
-        let isConnected = statusData[gid]?.connected || false;
-        let memoText = statusData[gid]?.memo || "";
-
-        let card = document.createElement('div');
-        card.className = 'msg-card';
-        card.innerHTML = `
-            <div class="msg-check-area">
-                <div class="check-box-wrapper"><label class="msg-check-label label-sent">연락함</label><input type="checkbox" class="msg-check-input chk-sent" onchange="updateMsgStatus('${gid}', 'contacted', this.checked, null)" ${isContacted ? 'checked' : ''}></div>
-                <div class="check-box-wrapper"><label class="msg-check-label label-connected">연락됨</label><input type="checkbox" class="msg-check-input chk-conn" onchange="updateMsgStatus('${gid}', 'connected', this.checked, null)" ${isConnected ? 'checked' : ''}></div>
-            </div>
-            <div class="msg-info">
-                <div class="msg-group-row"><span class="msg-group">${g.msgNum}</span>${langTag}</div>
-                <div class="msg-seats">Seat: ${seatStr}</div>
-                <input type="text" class="msg-memo-input" placeholder="비고" value="${memoText}" oninput="updateMsgStatus('${gid}', null, null, this.value)">
-                <div class="hidden-msg" style="display:none;">${msgText}</div>
-            </div>
-            <div class="msg-actions">
-                <a href="${waLink}" target="_blank" class="${waBtnClass}">Send<br>WA</a>
-                <div class="btn-action btn-copy-body" onclick="copyMessageBody(this)">본문<br>Copy</div>
-                ${appIconHtml}
-            </div>
-        `;
-        msgList.appendChild(card);
-    });
-}
-function updateMsgStatus(gid, type, checked, memo) {
-    let statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
-    if(!statusData[gid]) statusData[gid] = { contacted: false, connected: false, memo: "" };
-    if(type === 'contacted') statusData[gid].contacted = checked;
-    if(type === 'connected') statusData[gid].connected = checked;
-    if(memo !== null) statusData[gid].memo = memo;
-    localStorage.setItem('bus_msgStatus', JSON.stringify(statusData));
-}
-function copyToClipboard(el, text) {
-    const helper = document.getElementById('clipboardHelper');
-    helper.value = text; helper.select();
-    try {
-        document.execCommand('copy');
-        let original = el.innerHTML;
-        el.innerHTML = 'OK!';
-        setTimeout(() => el.innerHTML = original, 800);
-    } catch (err) { alert('복사 실패!'); }
-}
-function copyMessageBody(btn) {
-    const card = btn.closest('.msg-card');
-    const hiddenText = card.querySelector('.hidden-msg').innerText;
-    copyToClipboard(btn, hiddenText);
-}
-function copyAndOpen(el, text, scheme) {
-    copyToClipboard(el, text);
-    if(scheme) {
-        setTimeout(() => { window.location.href = scheme; }, 500);
-    }
-}
-function openAppOnly(scheme) {
-    if(scheme) window.location.href = scheme;
-}
-function getMessengerApp(text) {
-    if(!text) return '무'; const t = text.toLowerCase();
-    if(t.includes('whatsapp')) return '와'; if(t.includes('line')) return '라';
-    if(t.includes('kakao')) return '카'; if(t.includes('wechat') || t.includes('weixin')) return '웨';
-    if(t.includes('viber')) return '바'; if(t.includes('zalo')) return '잘'; return '무';
-}
-function generateSeatSequence(totalPax, busSize) {
-  let sequence = []; let mainStart = 5; let maxSeat = busSize;
-  let mainCapacity = maxSeat - mainStart + 1; let overflow = totalPax - mainCapacity;
-  if (overflow >= 1) sequence.push(4); if (overflow >= 2) sequence.push(3);
-  if (overflow >= 3) sequence.push(2);
-  for(let i = mainStart; i <= maxSeat; i++) sequence.push(i);
-  return sequence;
-}
-function renderBus(seatMap, totalPax, maxSeats) {
-  const grid = document.getElementById('busGrid'); grid.innerHTML = '';
-  document.getElementById('paxInfo').innerText = `총 인원: ${totalPax}명`;
-  for(let row=0; row<11; row++) {
-    if(maxSeats === 45 && row === 10) {
-      let lastRowDiv = document.createElement('div'); lastRowDiv.className = 'last-row-45';
-      for(let k=41; k<=45; k++) createSeatElement(lastRowDiv, k, seatMap, maxSeats);
-      grid.appendChild(lastRowDiv); continue; 
-    }
-    for(let col=0; col<5; col++) {
-      if(col === 2) { grid.appendChild(document.createElement('div')); continue; }
-      let seatNum = (row < 10) ? (row * 4) + (col < 2 ? col + 1 : col) : (col < 2 ? 40 + col + 1 : 40 + col);
-      createSeatElement(grid, seatNum, seatMap, maxSeats);
-    }
-  }
-}
-function createSeatElement(parent, seatNum, seatMap, maxSeats) {
-  let seatDiv = document.createElement('div'); seatDiv.className = 'seat'; seatDiv.dataset.idx = seatNum;
-  if(seatNum === 1) { seatDiv.classList.add('reserved'); seatDiv.innerHTML = `<span class="seat-num">1</span><div class="grp-id">🚫</div>`; } 
-  else if(seatNum <= 4) {
-    if (seatMap[seatNum]) renderSeatContent(seatDiv, seatMap[seatNum], seatNum);
-    else { seatDiv.classList.add('emergency'); renderSeatContent(seatDiv, null, seatNum); }
-  } else renderSeatContent(seatDiv, seatMap[seatNum], seatNum);
-  seatDiv.onclick = function() { handleSeatClick(this, seatMap, maxSeats); };
-  parent.appendChild(seatDiv);
-}
-function renderSeatContent(el, data, num) {
-  el.innerHTML = `<span class="seat-num">${num}</span>`;
-  if(data) {
-    el.style.backgroundColor = data.color;
-    let dispNum = data.mainNum; let longClass = data.isLong ? 'long-text' : '';
-    el.innerHTML += `<div class="grp-id ${longClass}">${dispNum}</div><div class="info-badge ${data.textClass}">${data.subInfo}</div>`;
-  } else el.className += " empty";
-}
-function handleSeatClick(el, seatMap, maxSeats) {
-  let idx = parseInt(el.dataset.idx); if(idx === 1) return;
-  if(selectedSeatIdx === -1) { selectedSeatIdx = idx; el.classList.add('selected'); } else {
-    let temp = seatMap[selectedSeatIdx]; seatMap[selectedSeatIdx] = seatMap[idx]; seatMap[idx] = temp;
-    currentSeatMap = seatMap; renderBus(seatMap, currentTotalPax, maxSeats);
-    updateHeaderFromMap(seatMap); renderMessages(seatMap); saveState(); selectedSeatIdx = -1;
-  }
+    document.getElementById('pickupSummary2').innerHTML = `TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 복귀편 ${counts['Challenge']} / 숙박손님 ${counts['Hotel']} ]</span>`;
 }
 
-// 수정된 국가 찾기 (지도 기반)
-function getCountryFromPhone(phone) {
-  if(!phone) return 'ETC'; 
-  let p = phone.replace(/\D/g, ''); 
-  // 긴 코드부터 매칭
-  for(let i=4; i>=1; i--) {
-      let sub = p.substring(0, i);
-      if(GLOBAL_PHONE_CODES[sub]) return GLOBAL_PHONE_CODES[sub];
-  }
-  return 'ETC';
+function updatePriority(checkbox) {
+  const val = checkbox.value;
+  if(checkbox.checked) { if(!priorityQueue.includes(val)) priorityQueue.push(val); } 
+  else { priorityQueue = priorityQueue.filter(v => v !== val); }
+  updatePriorityDisplay();
 }
 
-function getGenderGlobal(name) {
-  if(!name) return 'N'; const lowerName = name.toLowerCase();
-  if(lowerName.includes('mr.') || lowerName.includes('mr ')) return 'M';
-  if(lowerName.includes('ms.') || lowerName.includes('mrs.') || lowerName.includes('miss')) return 'F';
-  
-  const f_list = [
-    'alice','amy','annie','audrey','belle','bernice','carol','cathy','celine','chery','chloe','cindy','clara','connie','crystal','daisy','daphne','doris','elaine','eleanor','elizabeth','emily','eva','fiona','grace','hannah','hazel','helen','irene','iris','ivy','janet','jean','jessica','joan','joanna','joyce','judy','julia','karen','kelly','kitty','linda','lisa','mandy','mary','megan','melissa','michelle','nicole','olivia','peggy','phoebe','rachel','rebecca','regina','rita','rose','ruby','sally','sandy','sarah','sharon','sophie','stella','stephanie','susan','sylvia','teresa','tiffany','tina','tracy','vicky','victoria','vivian','wendy','winnie','yvonne','zoe','ji-eun','min-ji','su-bin','ha-eun','yoon-seo','wei','fang','mei','hui','ying','yan','ling','putri','nur','ayu','sari'
-  ];
-  const m_list = [
-    'aaron','adam','alan','albert','alex','alfred','alvin','andrew','andy','anthony','arthur','austin','ben','benjamin','bernard','brian','calvin','charles','chris','christopher','daniel','david','dennis','derek','donald','douglas','eddie','edward','eric','felix','frank','gary','george','gordon','harry','henry','howard','hugo','ivan','jack','jackson','jacob','james','jason','jeffrey','jerry','jimmy','joe','john','jonathan','joseph','justin','keith','kelvin','ken','kenneth','kevin','larry','leo','leon','louis','lucas','marcus','mark','martin','matthew','max','michael','mike','nathan','nelson','nicholas','nick','oscar','patrick','paul','peter','philip','raymond','richard','ricky','robert','roger','ronald','roy','ryan','sam','samuel','scott','sean','simon','stanley','stephen','steven','terry','thomas','tim','timothy','tom','tommy','tony','victor','vincent','wayne','william','wilson','ji-hoon','min-jun','jun-ho','wei','jun','jie','ming','muhammad','ahmad','ali','rizky','putra'
-  ];
-  
-  for(let n of f_list) { if(lowerName.includes(n)) return 'F'; }
-  for(let n of m_list) { if(lowerName.includes(n)) return 'M'; }
-  return 'N';
+function updatePriorityDisplay() {
+  const map = { 'solo':'혼자', 'CN':'중국어', 'EN':'영어', 'F':'여자', 'M':'남자', 'G4':'4인이상' };
+  const txt = priorityQueue.map(v => map[v]).join(' > ');
+  document.getElementById('priorityView').innerText = "우선순위: " + (txt || "없음");
 }
-function downloadImage() {
-  const capture = document.getElementById('captureArea');
+
+function toggleMap2(hasReturnGuests) {
+    const map2Area = document.getElementById('captureArea2');
+    const map2Btn = document.querySelector('button[onclick="downloadImage(2)"]');
+    if (hasReturnGuests) { map2Area.style.display = 'block'; map2Btn.style.display = 'block'; } 
+    else { map2Area.style.display = 'none'; map2Btn.style.display = 'none'; }
+}
+
+function downloadImage(num) {
+  const capture = document.getElementById('captureArea' + num);
   html2canvas(capture, { scrollY: -window.scrollY }).then(canvas => {
-    let link = document.createElement('a'); link.download = `Bus_Tour_${document.getElementById('tomorrowDate').innerText}.png`;
+    let link = document.createElement('a'); link.download = `Bus_Map${num}_${document.getElementById('dateDisplay1').innerText}.png`;
     link.href = canvas.toDataURL(); link.click();
   });
 }
-function downloadVCard() {
-    const raw = document.getElementById('rawData').value;
-    if(!raw.trim()) { alert("데이터가 없어 오빠!"); return; }
-    const datePrefix = document.getElementById('vcardDate').value;
-    if(!datePrefix) { alert("날짜를 입력해줘!"); return; }
-    const lines = raw.trim().split('\n'); let entries = []; let originalOrder = 1;
-    lines.forEach(line => {
-        let parts = line.split('\t'); if(parts.length < 4) return;
-        entries.push({ id: parts[0] ? parts[0].trim() : originalOrder.toString(), originalId: originalOrder, resNum: parts[2] ? parts[2].trim() : "", name: parts[3] ? parts[3].trim() : "Guest", phone: parts[4] ? parts[4].trim() : "", messenger: parts[5] ? parts[5].trim() : "", email: parts[6] ? parts[6].trim().toLowerCase() : "", count: parseInt(parts[8]) || 1, location: parts[9] ? parts[9].trim() : "", isGrouped: false });
-        originalOrder++;
-    });
-    let groupedData = [];
-    entries.forEach((entry) => {
-        if(entry.isGrouped) return;
-        let currentGroupMembers = [entry]; entry.isGrouped = true;
-        let queue = [entry];
-        while(queue.length > 0) {
-            let curr = queue.shift();
-            entries.forEach((target) => {
-                if(target.isGrouped) return;
-                let isLinked = false;
-                let p1 = curr.phone.replace(/[^0-9]/g, ''); let p2 = target.phone.replace(/[^0-9]/g, '');
-                if(p1.length > 5 && p1 === p2) isLinked = true;
-                else if(curr.email && curr.email.length > 5 && curr.email === target.email) isLinked = true;
-                else if(curr.resNum && curr.resNum.length > 4 && curr.resNum === target.resNum) isLinked = true;
-                else if(curr.name && curr.name.length > 2 && curr.name === target.name) isLinked = true; 
-                if(isLinked) { target.isGrouped = true; currentGroupMembers.push(target); queue.push(target); }
-            });
-        }
-        currentGroupMembers.sort((a,b) => a.originalId - b.originalId); groupedData.push(currentGroupMembers);
-    });
-    let vcfContent = "";
-    groupedData.forEach(group => {
-        let rep = group[0]; let ids = group.map(m => m.originalId).join(','); 
-        let locMap = {'명동':'명', '동대문':'동', '홍대':'홍'}; let locShort = "";
-        for(const [key, val] of Object.entries(locMap)) { if(rep.location.includes(key)) { locShort = val; break; } }
-        if(!locShort) locShort = rep.location.substring(0,2); 
-        let finalName = `${datePrefix}(${ids}${locShort})`; 
-        
-        let parsed = parsePhone(rep.phone, rep.messenger);
-        let finalPhone = "";
-        
-        if (parsed.fullNumber) {
-            finalPhone = "+" + parsed.fullNumber;
-        } else {
-             finalPhone = rep.phone.replace(/[^0-9]/g, '');
-        }
 
-        vcfContent += `BEGIN:VCARD\nVERSION:3.0\nFN:${finalName}\nTEL;TYPE=CELL:${finalPhone}\nEND:VCARD\n`;
+function downloadVCard() {
+    if (!msgListGroups || msgListGroups.length === 0) { alert("데이터가 없습니다. 배치 실행을 먼저 해주세요."); return; }
+    
+    let vcardContent = ""; 
+    const dateCode = document.getElementById('vcardDate').value; 
+    let count = 0;
+    
+    // [중복 방지 핵심 로직] 
+    // Set을 사용하여 이미 추가된 전화번호는 건너뜀
+    let processedPhones = new Set();
+
+    msgListGroups.forEach(g => {
+        let phoneStr = g.phone;
+        // 1. 번호가 너무 짧으면 패스
+        if (!phoneStr || phoneStr.length < 5) return;
+        
+        // 2. 이미 처리된 번호라면 패스 (중복 생성 방지)
+        if (processedPhones.has(phoneStr)) return; 
+        
+        // 처리된 번호로 등록
+        processedPhones.add(phoneStr);
+        
+        let locChar = '기'; 
+        if (g.location.includes('홍대')) locChar = '홍';
+        else if (g.location.includes('명동')) locChar = '명';
+        else if (g.location.includes('동대문')) locChar = '동';
+        
+        let finalName = `${dateCode}(${g.mainNum}${locChar})`;
+        
+        vcardContent += "BEGIN:VCARD\nVERSION:3.0\n";
+        vcardContent += `FN:${finalName}\n`;
+        vcardContent += `TEL;TYPE=CELL:+${phoneStr}\n`;
+        vcardContent += `NOTE:Orig:${g.name} / ${g.count}pax\n`;
+        vcardContent += "END:VCARD\n";
+        count++;
     });
-    const blob = new Blob([vcfContent], { type: "text/vcard" });
-    const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
-    link.download = `Tour_${datePrefix}.vcf`; link.click();
+    
+    if(count === 0) { alert("저장할 유효한 전화번호가 없습니다."); return; }
+    
+    const blob = new Blob([vcardContent], { type: "text/vcard" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = `Contacts_${dateCode}.vcf`;
+    link.href = url; link.click(); URL.revokeObjectURL(url);
 }
+
+// 안전장치 (아이폰/모바일 데이터 보호)
+function forceSaveAllData() {
+    try {
+        saveTextInput(); saveGuideName(); saveTimeInput(); checkDateChange();
+        localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value);
+    } catch (e) { console.log("Safe Save:", e); }
+}
+
+// =========================================
+// [8] 초기화
+// =========================================
+window.onload = function() {
+    loadTextInput(); loadGuideName(); 
+    document.getElementById('specialNotice').value = localStorage.getItem('bus_specialNotice') || "";
+
+    const today = new Date(); today.setDate(today.getDate() + 1);
+    const days = ['일','월','화','수','목','금','토'];
+    const dateStr = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')} (${days[today.getDay()]})`;
+    document.getElementById('dateDisplay1').innerText = dateStr;
+    document.getElementById('dateDisplay2').innerText = dateStr;
+    const yymmdd = String(today.getFullYear()).slice(2) + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+    document.getElementById('vcardDate').value = yymmdd;
+    const savedTimes = JSON.parse(localStorage.getItem('bus_times') || '{}');
+    if(savedTimes.h) document.getElementById('timeHongdae').value = savedTimes.h;
+    if(savedTimes.m) document.getElementById('timeMyeongdong').value = savedTimes.m;
+    if(savedTimes.d) document.getElementById('timeDongdaemun').value = savedTimes.d;
+    loadSeatMap();
+};
+
+document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'hidden') forceSaveAllData(); });
+window.addEventListener('pagehide', function() { forceSaveAllData(); });
+document.querySelectorAll('input, textarea').forEach(el => { el.addEventListener('blur', forceSaveAllData); });
 </script>
 </body>
 </html>

@@ -474,6 +474,24 @@ function copyOnly(el, text) { copyToClipboard(text, el); }
 // =========================================
 // [2] 데이터 파싱 및 전처리
 // =========================================
+function findCount(parts) {
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (parts[i].includes('중국어') || parts[i].includes('영어')) {
+      let n = parseInt(parts[i+1]);
+      if (!isNaN(n)) return n;
+    }
+  }
+  return 1;
+}
+
+function findLocation(parts) {
+  for (let p of parts) {
+    if (p.includes('홍대') || p.includes('명동') || p.includes('동대문')) {
+      return p.trim();
+    }
+  }
+  return "";
+}
 
 function parseRawDataLine(line, originalOrder) {
     let parts = line.split('\t'); 
@@ -498,8 +516,8 @@ function parseRawDataLine(line, originalOrder) {
         rawPhone = parts[5] ? parts[5].trim() : ""; 
         messengerCol = parts[6] ? parts[6].trim() : ""; 
         rawLang = parts[8] ? parts[8].trim() : "";
-        count = parseInt(parts[9]) || 1;
-        location = parts[10] ? parts[10].trim() : "";
+        count = findCount(parts);
+        location = findLocation(parts);
         note = parts[12] ? parts[12].trim() : "";
     } else { 
         customId = parts[0] ? parts[0].trim() : originalOrder.toString();
@@ -508,8 +526,8 @@ function parseRawDataLine(line, originalOrder) {
         rawPhone = parts[4] ? parts[4].trim() : ""; 
         messengerCol = parts[5] ? parts[5].trim() : ""; 
         rawLang = parts[7] ? parts[7].trim() : "";
-        count = parseInt(parts[8]) || 1;
-        location = parts[9] ? parts[9].trim() : "";
+        count = findCount(parts);
+        location = findLocation(parts);
         note = parts[10] ? parts[10].trim() : "";
         
         if (parts[11] && parseInt(parts[11]) > 0) optLift = true;
@@ -648,7 +666,6 @@ function setGroupMeta(grp) {
 // =========================================
 // [4] 메인 컨트롤러 (runAI)
 // =========================================
-
 function runAI() {
     saveTextInput(); saveTimeInput(); saveGuideName();
     localStorage.removeItem('bus_seatMap');

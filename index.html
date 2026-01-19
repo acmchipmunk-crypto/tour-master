@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>미스터 신의 투어마스터 10.8 (Gender Free)</title>
+<title>미스터 신의 투어마스터 10.8 (Gender Free + Origin)</title>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
   /* --- [스타일은 원본 유지 + UI 개선용 스타일 추가] --- */
@@ -79,7 +79,6 @@
   
   .bus-header { text-align: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #333; position: relative; }
   
-  /* [수정 1] 맵 저장 버튼 위치 수정 (Flexbox 적용, absolute 제거) */
   .pickup-summary { 
       background: #2c3e50; 
       color: white; 
@@ -117,7 +116,7 @@
   .grp-id { font-size: 24px; font-weight: 900; color: #333; line-height: 1; margin-bottom: 4px; margin-top: 8px; text-align: center; }
   .grp-id.long-text { font-size: 20px; letter-spacing: -1px; }
   .info-badge { background: rgba(255,255,255,0.85); border-radius: 12px; padding: 3px 6px; text-align: center; font-size: 11px; font-weight: 900; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: 95%; margin-top: auto; margin-bottom: 2px; white-space: nowrap; }
-  /* [GENDER-REMOVAL] 성별 색상 클래스 삭제됨 */
+  
   .neutral-text { color: #555; } 
   .day-tag { color: white; padding: 1px 4px; border-radius: 4px; margin-right: 3px; font-size: 10px; vertical-align: middle; }
   .tag-d1 { background-color: #1976d2; } .tag-d2 { background-color: #d32f2f; } .tag-d3 { background-color: #7b1fa2; } .tag-stay { background-color: #ff9800; }
@@ -164,6 +163,41 @@
   #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #263238; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
   #lockInput { font-size: 24px; padding: 10px; text-align: center; border-radius: 8px; border: none; margin-bottom: 20px; width: 200px; font-weight: bold; letter-spacing: 5px; }
   #lockBtn { padding: 10px 30px; font-size: 18px; font-weight: bold; background: #009688; border: none; border-radius: 8px; color: white; cursor: pointer; }
+
+
+  /* [NEW] 기원 배지 스타일 (최종) */
+  .origin-badge {
+      display: inline-block;
+      width: 15px; height: 15px;
+      line-height: 15px;
+      border-radius: 50%;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 900;
+      color: white;
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  /* 회사별 색상 및 글자색 */
+  .badge-klook { background: #FF5722; } /* 클룩: 주황 */
+  .badge-kkday { background: #29B6F6; } /* 케이케이: 하늘 */
+  .badge-trip  { background: #0d47a1; color: #FFEB3B; } /* 트립: 진한파랑+노랑T */
+  .badge-gyg   { background: #000000; } /* GYG: 검정 */
+  .badge-qike  { background: #00E676; } /* 치커: 밝은초록 */
+  .badge-trazy { background: #FF4081; } /* 트레이지: 분홍 */
+  .badge-etc   { background: #78909C; } /* 미분류/현장: 회색 */
+  
+  /* 하단 배지 설명 영역 스타일 */
+  .badge-legend {
+      background: white; border: 2px solid #cfd8dc; border-radius: 12px;
+      padding: 10px; margin-top: 10px; text-align: center; font-size: 11px;
+      color: #455a64; font-weight: bold; line-height: 2.0;
+  }
+</style>
+
 </style>
 </head>
 <body>
@@ -239,7 +273,8 @@
   </div>
   
   <div class="manual-control-panel" style="margin-bottom:0; margin-top:10px;">
-      <input type="number" id="manualGroupNum" class="manual-input" placeholder="No." inputmode="numeric">
+          <input type="text" id="manualGroupNum" class="manual-input" placeholder="No. or Name">
+
       <button class="btn-manual btn-add" onclick="manualAddGroup()">+</button>
       <button class="btn-manual btn-del" onclick="manualDelGroup()">-</button>
   </div>
@@ -292,6 +327,17 @@
     <div id="msgList"></div>
 </div>
 <textarea id="clipboardHelper" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; opacity:0; pointer-events:none;"></textarea>
+<div class="badge-legend">
+    🏷️ <b>예약처 구분:</b> 
+    <span class="origin-badge badge-klook">K</span>클룩 
+    <span class="origin-badge badge-kkday">K</span>케이케이 
+    <span class="origin-badge badge-trip">T</span>트립 
+    <span class="origin-badge badge-gyg">G</span>겟 
+    <span class="origin-badge badge-qike">Q</span>치커 
+    <span class="origin-badge badge-trazy">Z</span>트레이지 
+    <span class="origin-badge badge-etc">미</span>기타/현장
+</div>
+<div class="manual-section">
 
 <div class="manual-section">
     <div class="manual-title">📘 투어마스터 10.8 사용 설명서</div>
@@ -346,6 +392,48 @@ let selectedSeat = { busNum: 0, idx: -1 };
 let msgListGroups = []; 
 let priorityQueue = [];
 let audioCtx = null;
+
+// =========================================
+// [기원 판별 로직] 최종 업데이트
+// =========================================
+function detectOrigin(rawId) {
+    if (!rawId) return "(미)";
+    
+    let temp = rawId.split('-')[0];
+    temp = temp.replace(/\(.*\)/g, '').replace(/\s+/g, '').toUpperCase();
+
+    // 1. QiKe (치커)
+    if (temp.includes('QIKE')) return "(치)";
+    // 2. GYG (겟)
+    if (temp.includes('GYG')) return "(겟)";
+    // 3. Trazy (지) - 패턴: 날짜8+영문2+숫자5
+    if (/^\d{8}[A-Z]{2}\d{5}$/.test(temp)) return "(지)";
+    // 4. Klook (클)
+    if (/^[A-Z]{3}\d{6}$/.test(temp)) return "(클)";
+    // 5. KKday (케)
+    if (/^(24|25|26)KK/.test(temp)) return "(케)";
+    // 6. Trip/Ctrip (트) - 숫자만 8자리 이상
+    if (/^\d{8,}$/.test(temp)) return "(트)";
+
+    return "(미)"; // 분류 불가
+}
+
+// [배지 HTML 생성] 미분류는 '미'로 표시
+function getOriginBadgeHtml(tag) {
+    if (!tag) return "";
+    
+    if (tag.includes('클')) return `<span class="origin-badge badge-klook">K</span>`;
+    if (tag.includes('케')) return `<span class="origin-badge badge-kkday">K</span>`;
+    if (tag.includes('트')) return `<span class="origin-badge badge-trip">T</span>`;
+    if (tag.includes('겟')) return `<span class="origin-badge badge-gyg">G</span>`;
+    if (tag.includes('치')) return `<span class="origin-badge badge-qike">Q</span>`;
+    if (tag.includes('지')) return `<span class="origin-badge badge-trazy">Z</span>`;
+    
+    // 분류 불가 또는 현장 -> 회색 '미'
+    return `<span class="origin-badge badge-etc">미</span>`;
+}
+
+
 // =========================================
 // [1] 유틸리티 및 헬퍼 함수
 // =========================================
@@ -423,8 +511,6 @@ function combinePhoneAndMessenger(phoneCol, messengerCol) {
     return { code: f_CountryCode, country: f_Country, fullNumber: fullNumber };
 }
 
-/* [GENDER-REMOVAL] getGenderGlobal 함수 삭제됨 */
-
 function getMessengerApp(text) { 
     if(!text) return '무'; const t = text.toLowerCase(); 
     if(t.includes('whatsapp')) return '와'; if(t.includes('line')) return '라'; 
@@ -434,14 +520,8 @@ function getMessengerApp(text) {
 
 function copyToClipboard(text, el) {
     if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(() => {
-            feedback(el);
-        }).catch(() => {
-            fallbackCopy(text, el);
-        });
-    } else {
-        fallbackCopy(text, el);
-    }
+        navigator.clipboard.writeText(text).then(() => { feedback(el); }).catch(() => { fallbackCopy(text, el); });
+    } else { fallbackCopy(text, el); }
 }
 
 function fallbackCopy(text, el) {
@@ -459,22 +539,8 @@ function fallbackCopy(text, el) {
 function copyAndOpen(el, text, schemeKey) {
     copyToClipboard(text, el);
     let scheme = CONFIG.SCHEMES[schemeKey];
-    
-    // [Bug 2 Fix] Viber Deep Link Logic
-    if (schemeKey === 'viber') {
-        const cleanNum = text.replace(/[^0-9]/g, '');
-        scheme = `viber://chat?number=${cleanNum}`;
-    }
-
-    if (scheme) {
-        setTimeout(() => { 
-            try {
-                window.location.href = scheme; 
-            } catch(e) {
-                console.log("App open skipped or failed.");
-            }
-        }, 300);
-    }
+    if (schemeKey === 'viber') { const cleanNum = text.replace(/[^0-9]/g, ''); scheme = `viber://chat?number=${cleanNum}`; }
+    if (scheme) { setTimeout(() => { try { window.location.href = scheme; } catch(e) {} }, 300); }
 }
 
 function feedback(el) { if(!el) return; let original = el.innerHTML; el.innerHTML = 'OK!'; setTimeout(() => el.innerHTML = original, 800); }
@@ -482,7 +548,7 @@ function copyMessageBody(btn) { const card = btn.closest('.msg-card'); const hid
 function copyOnly(el, text) { copyToClipboard(text, el); }
 
 // =========================================
-// [2] 데이터 파싱 및 전처리
+// [2] 데이터 파싱 및 전처리 (수정됨)
 // =========================================
 function findCount(parts) {
   for (let i = 0; i < parts.length - 1; i++) {
@@ -496,53 +562,80 @@ function findCount(parts) {
 
 function findLocation(parts) {
   for (let p of parts) {
-    if (p.includes('홍대') || p.includes('명동') || p.includes('동대문')) {
-      return p.trim();
-    }
+    if (p.includes('홍대') || p.includes('명동') || p.includes('동대문')) return p.trim();
   }
   return "";
 }
-function parseRawDataLine(line, originalOrder, isGlobalSki) {
-    let parts = line.split('\t'); 
-    if(parts.length < 4) return null;
+
+/**
+ * [수정됨] parseRawDataLine
+ * - Type B 헤더 인식 시 trim() 적용하여 정확도 향상
+ */
+function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
+    // [수정] 탭으로 자르되, 각 요소를 trim() 해서 공백 제거
+    let parts = line.split(/\t+/).map(p => p.trim());
     
-    let firstCol = parts[0] ? parts[0].trim() : "";
-    if (firstCol === 'No.' || firstCol.toLowerCase().startsWith('total') || firstCol.includes('엑셀') || firstCol.includes('날짜')) return null;
+    // Type B(엑셀)인데 탭이 없으면 다중 공백으로 처리
+    if (headerMap && parts.length < 2) {
+         parts = line.split(/\s{2,}/).map(p => p.trim());
+    }
+    
+    if(parts.length < 4 && !headerMap) return null;
+
+    let firstCol = parts[0] || "";
+    if (firstCol === 'No.' || firstCol.includes('예약번호') || firstCol.toLowerCase().startsWith('total') || firstCol.includes('엑셀')) return null;
 
     const lineLower = line.toLowerCase();
-    
-    /* [Bug 1 Fix] 전체 데이터 중 하나라도 스키 키워드가 있으면 스키 포맷으로 파싱 */
     const isSkiTour = isGlobalSki || lineLower.includes('ski') || lineLower.includes('snowboard');
-    
-    let customId, productName, name, rawPhone, messengerCol, count, location, rawLang, note;
-    let optLift = false, optGear = false, optClothes = false, optLesson = false;
-    
-    let emailAddr = "";
-    for(let p of parts) { if(p && p.includes('@')) { emailAddr = p.trim(); break; } }
 
-    if (!isSkiTour) { 
-        // [일반 투어 포맷]
-        customId = parts[0] ? parts[0].trim() : originalOrder.toString();
-        productName = parts[2] ? parts[2].trim() : ""; 
-        name = parts[4] ? parts[4].trim() : "Guest";
-        rawPhone = parts[5] ? parts[5].trim() : ""; 
-        messengerCol = parts[6] ? parts[6].trim() : ""; 
-        rawLang = parts[8] ? parts[8].trim() : "";
-        count = findCount(parts);
-        location = findLocation(parts);
-        note = parts[12] ? parts[12].trim() : "";
-    } else { 
-        // [스키 투어 포맷]
-        customId = parts[0] ? parts[0].trim() : originalOrder.toString();
-        productName = parts[1] ? parts[1].trim() : "";
-        name = parts[3] ? parts[3].trim() : "Guest"; 
-        rawPhone = parts[4] ? parts[4].trim() : ""; 
-        messengerCol = parts[5] ? parts[5].trim() : ""; 
-        rawLang = parts[7] ? parts[7].trim() : "";
-        count = findCount(parts);
-        location = findLocation(parts);
-        note = parts[10] ? parts[10].trim() : "";
+    let customId, productName, name, rawPhone, messengerCol, count, location, rawLang, note;
+    let resNoForOrigin = ""; 
+
+    if (headerMap) {
+        // [Type B: 엑셀 포맷]
+        customId = parts[headerMap.no] || originalOrder.toString();
+        productName = (headerMap.product !== -1 && parts[headerMap.product]) ? parts[headerMap.product] : "Ski Tour";
+        name = parts[headerMap.name] || "Guest";
+        rawPhone = (headerMap.phone !== -1 && parts[headerMap.phone]) ? parts[headerMap.phone] : "";
+        messengerCol = (headerMap.messenger !== -1 && parts[headerMap.messenger]) ? parts[headerMap.messenger] : "";
+        resNoForOrigin = (headerMap.resNo !== -1 && parts[headerMap.resNo]) ? parts[headerMap.resNo] : "";
         
+        rawLang = ""; 
+        count = findCount(parts); 
+        location = findLocation(parts);
+        note = ""; 
+        if(!customId) customId = originalOrder.toString();
+    } else {
+        // [Type A: 기존 포맷]
+        customId = parts[0] || originalOrder.toString();
+        
+        if (isSkiTour) {
+             productName = parts[1] || "";
+             resNoForOrigin = parts[2] || ""; 
+             name = parts[3] || "Guest";
+             rawPhone = parts[4] || "";
+             messengerCol = parts[5] || "";
+             rawLang = parts[7] || "";
+             count = findCount(parts);
+             location = findLocation(parts);
+             note = parts[10] || "";
+        } else {
+             productName = parts[2] || "";
+             name = parts[4] || "Guest";
+             rawPhone = parts[5] || "";
+             messengerCol = parts[6] || "";
+             rawLang = parts[8] || "";
+             count = findCount(parts);
+             location = findLocation(parts);
+             note = parts[12] || "";
+             resNoForOrigin = customId; 
+        }
+    }
+
+    let originTag = detectOrigin(resNoForOrigin);
+
+    let optLift = false, optGear = false, optClothes = false, optLesson = false;
+    if (!headerMap && isSkiTour) {
         if (parts[11] && parseInt(parts[11]) > 0) optLift = true;
         if (parts[12] && parseInt(parts[12]) > 0) optGear = true;
         if (parts[13] && parseInt(parts[13]) > 0) optClothes = true;
@@ -562,12 +655,11 @@ function parseRawDataLine(line, originalOrder, isGlobalSki) {
     if (paxType === 'General' && (location.includes('스키장') || location.includes('Resort'))) { paxType = 'D2'; }
 
     let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
-    
     let langContext = (rawLang && rawLang.includes('중국어')) ? 'CN' : 'EN';
-    
-    /* [GENDER-REMOVAL] 성별 감지 로직 삭제 및 고정값 'N' 할당 */
     let gender = 'N'; 
     let appType = getMessengerApp(messengerCol);
+    let emailAddr = "";
+    for(let p of parts) { if(p && p.includes('@')) { emailAddr = p; break; } }
 
     return {
       id: customId, originalId: originalOrder, name: name, 
@@ -576,14 +668,15 @@ function parseRawDataLine(line, originalOrder, isGlobalSki) {
       country: parsedInfo.country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false,
       paxType: paxType, isStay: isStay, isBoard: isBoard, 
       isSancheoneo: !isSkiTour, isHot: isHot, email: emailAddr,
+      originTag: originTag, 
       options: { lift: optLift, gear: optGear, clothes: optClothes, lesson: optLesson }
     };
 }
+
 function createGroupsFromEntries(entries) {
     let finalGroups = [];
     entries.forEach((entry) => {
         if(entry.isGrouped) return;
-        
         let currentGroupMembers = [entry]; entry.isGrouped = true;
         
         if (entry.phone && entry.phone.length > 5) {
@@ -593,23 +686,22 @@ function createGroupsFromEntries(entries) {
                 entries.forEach((target) => {
                     if(target.isGrouped) return;
                     if(target.phone && target.phone.length > 5 && curr.phone === target.phone) {
-                        target.isGrouped = true; 
-                        currentGroupMembers.push(target); 
-                        queue.push(target); 
+                        target.isGrouped = true; currentGroupMembers.push(target); queue.push(target); 
                     }
                 });
             }
         }
 
         let rep = currentGroupMembers[0];
-        
         let cleanIds = currentGroupMembers.map(m => m.id.replace(/\D/g, '')); 
         if (cleanIds.some(id => id === "")) cleanIds = currentGroupMembers.map(m => m.id);
         cleanIds.sort((a,b) => parseInt(a) - parseInt(b));
-        
         let displayNum = cleanIds.join('.'); 
         let totalC = currentGroupMembers.reduce((sum, m) => sum + m.count, 0);
         
+        let uniqueTags = [...new Set(currentGroupMembers.map(m => m.originTag))];
+        let combinedOrigin = uniqueTags.join('');
+
         let groupType = 'General';
         if(currentGroupMembers.some(m => m.paxType === 'D3')) groupType = 'D3';
         else if(currentGroupMembers.some(m => m.paxType === 'D2')) groupType = 'D2';
@@ -625,21 +717,13 @@ function createGroupsFromEntries(entries) {
             mainNum: displayNum, 
             msgNum: rep.id + (currentGroupMembers.length > 1 ? ".." : ""), 
             repNum: rep.id, 
-            count: totalC, 
-            name: rep.name, 
-            country: rep.country, 
-            gender: rep.gender, /* N으로 고정됨 */
-            langContext: rep.langContext, 
-            appType: rep.appType, 
-            location: rep.location, 
-            phone: rep.phone, 
-            messenger: rep.messenger, 
-            paxType: groupType, 
+            count: totalC, name: rep.name, country: rep.country, gender: rep.gender,
+            langContext: rep.langContext, appType: rep.appType, location: rep.location, 
+            phone: rep.phone, messenger: rep.messenger, paxType: groupType, 
             isStay: currentGroupMembers.some(m => m.isStay), 
             isBoard: currentGroupMembers.some(m => m.isBoard), 
-            isSancheoneo: rep.isSancheoneo,
-            isHot: currentGroupMembers.some(m => m.isHot),
-            email: rep.email,
+            isSancheoneo: rep.isSancheoneo, isHot: currentGroupMembers.some(m => m.isHot), email: rep.email,
+            originTag: combinedOrigin, 
             options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson }
         });
     });
@@ -653,13 +737,10 @@ function calculateScore(grp) {
         if (criteria === 'solo' && grp.count === 1) match = true;
         if (criteria === 'CN' && grp.langContext === 'CN') match = true;
         if (criteria === 'EN' && grp.langContext === 'EN') match = true;
-        /* [GENDER-REMOVAL] F, M 점수 계산 로직 삭제됨 */
         if (criteria === 'G4' && grp.count >= 4) match = true;
-        /* [수정 1] 우선순위 조건 추가 (홍대, 명동, 동대문) */
         if (criteria === 'HD' && grp.location.includes('홍대')) match = true;
         if (criteria === 'MY' && grp.location.includes('명동')) match = true;
         if (criteria === 'DDM' && grp.location.includes('동대문')) match = true;
-        
         if(match) score += weight;
     });
     return score;
@@ -677,13 +758,12 @@ function getPickColor(grp) {
 function setGroupMeta(grp) {
     let nation = grp.country;
     if (CONFIG.COUNTRY_MAP[grp.country]) nation = CONFIG.COUNTRY_MAP[grp.country];
-    
-    /* [GENDER-REMOVAL] 성별 기호(♀,♂) 및 색상 지정 로직 삭제 */
     grp.textClass = 'neutral-text'; 
-    grp.subInfo = `${nation}`; // 성별 기호 없이 국가만 표시
+    grp.subInfo = `${nation}${grp.originTag}`; 
 }
+
 // =========================================
-// [4] 메인 컨트롤러 (runAI)
+// [4] 메인 컨트롤러 (runAI - 수정됨)
 // =========================================
 function runAI() {
     saveTextInput(); saveTimeInput(); saveGuideName();
@@ -693,17 +773,45 @@ function runAI() {
     const busSize = parseInt(document.querySelector('input[name="busSize"]:checked').value);
     const direction = document.querySelector('input[name="direction"]:checked').value;
     const lines = raw.trim().split('\n');
-    
-    // [Bug 1 Fix] 전체 텍스트에서 스키 키워드 감지 (전역 스위치)
     const rawLower = raw.toLowerCase();
     const isGlobalSki = rawLower.includes('ski') || rawLower.includes('snowboard') || rawLower.includes('스키') || rawLower.includes('스노우');
 
+    // [수정 최종] Type B 헤더 자동 탐색 로직 (제목 줄 무시 기능 추가)
+    let headerMap = null;
+    let startLineIdx = 0;
+
+    for (let k = 0; k < Math.min(lines.length, 5); k++) {
+        let checkLine = lines[k].trim();
+        if(!checkLine) continue;
+
+        let headerParts = checkLine.split(/\t+/).map(h => h.trim());
+        if (headerParts.length < 2) headerParts = checkLine.split(/\s{2,}/).map(h => h.trim());
+
+        const idxNo = headerParts.findIndex(p => p === 'No.' || p === 'NO.');
+        const idxRes = headerParts.findIndex(p => p.includes('예약번호') || p.includes('Order'));
+
+        if (idxNo !== -1 && idxRes !== -1) {
+            headerMap = {
+                no: idxNo,
+                resNo: idxRes,
+                product: headerParts.findIndex(p => p.includes('행사명') || p.includes('상품') || p.includes('Product')),
+                name: headerParts.findIndex(p => p.includes('예약자') || p.includes('이름') || p.includes('Name')),
+                phone: headerParts.findIndex(p => p.includes('핸드폰') || p.includes('전화') || p.includes('연락처') || p.includes('Phone')),
+                messenger: headerParts.findIndex(p => p.includes('메신저') || p.includes('카톡') || p.includes('Messenger'))
+            };
+            startLineIdx = k + 1; 
+            console.log("Type B (Excel) Detected at line " + k, headerMap);
+            break; 
+        }
+    }
+
     let entries = []; let originalOrder = 1;
-    lines.forEach(line => {
-        // [Bug 1 Fix] isGlobalSki 플래그 전달
-        const parsed = parseRawDataLine(line, originalOrder, isGlobalSki);
+    for (let i = startLineIdx; i < lines.length; i++) {
+        let line = lines[i];
+        if (!line.trim()) continue;
+        const parsed = parseRawDataLine(line, originalOrder, isGlobalSki, headerMap);
         if(parsed) { entries.push(parsed); originalOrder++; }
-    });
+    }
 
     msgListGroups = createGroupsFromEntries(entries);
 
@@ -716,13 +824,11 @@ function runAI() {
     let currentSeqIdx = 0;
 
     listGoing.forEach((grp) => {
-        grp.color = getPickColor(grp); 
-        setGroupMeta(grp);
+        grp.color = getPickColor(grp); setGroupMeta(grp);
         for(let i=0; i<grp.count; i++) {
             if(currentSeqIdx < seatSequence.length) {
                 let seatNum = seatSequence[currentSeqIdx];
-                currentSeatMap1[seatNum] = { ...grp }; 
-                currentSeqIdx++;
+                currentSeatMap1[seatNum] = { ...grp }; currentSeqIdx++;
             }
         }
     });
@@ -738,7 +844,6 @@ function runAI() {
 
     let listReturnOnly = msgListGroups.filter(g => g.paxType === 'D2' || g.paxType === 'D3');
     toggleMap2(listReturnOnly.length > 0); 
-
     if (direction === 'front') listReturnOnly.sort((a,b) => calculateScore(b) - calculateScore(a));
     else listReturnOnly.sort((a,b) => calculateScore(a) - calculateScore(b));
 
@@ -747,8 +852,7 @@ function runAI() {
     
     let d23Passengers = [];
     listReturnOnly.forEach((grp) => {
-        grp.color = getPickColor(grp); 
-        setGroupMeta(grp);
+        grp.color = getPickColor(grp); setGroupMeta(grp);
         if (!grp.isStay) { for(let k=0; k<grp.count; k++) { d23Passengers.push({ ...grp, count: 1 }); } }
     });
     
@@ -818,17 +922,35 @@ function renderSeatContent(el, data, num, busNum) {
         return; 
     }
     el.style.backgroundColor = data.color;
-    let dispNum = data.mainNum; let longClass = data.isLong ? 'long-text' : '';
-    let dayTagHtml = "";
     
-    if (data.isHot) dayTagHtml += `<span class="day-tag tag-hot">H</span>`;
-    if (data.paxType === 'D1') dayTagHtml += `<span class="day-tag tag-d1">D1</span>`;
-    if (data.paxType === 'D2') dayTagHtml += `<span class="day-tag tag-d2">D2</span>`;
-    if (data.paxType === 'D3') dayTagHtml += `<span class="day-tag tag-d3">D3</span>`;
+    let dispNum = data.mainNum;
     
-    el.innerHTML += `<div class="grp-id ${longClass}">${dispNum}</div><div class="info-badge ${data.textClass}">${dayTagHtml}${data.subInfo}</div>`;
+    // [NEW] ⚡️ 글자 수에 따라 폰트 크기 자동 조절 (스마트 폰트)
+    let len = String(dispNum).length; 
+    let fSize = "24px"; // 기본 (짧을 때)
+
+    if (len > 12) fSize = "12px";       // 11.12.13.14 처럼 엄청 길 때
+    else if (len > 8) fSize = "15px";   // 꽤 길 때
+    else if (len > 5) fSize = "19px";   // 조금 길 때
+    else if (len > 3) fSize = "22px";   // 보통
+
+    // [배지 및 태그 생성]
+    let originBadgeHtml = getOriginBadgeHtml(data.originTag);
+    let cleanNation = data.subInfo ? data.subInfo.replace(/\(.\)/g, '') : "";
+    
+    // 태그 HTML 조립
+    let tagsHtml = "";
+    if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
+    if (data.paxType === 'D1') tagsHtml += `<span class="day-tag tag-d1">D1</span>`;
+    if (data.paxType === 'D2') tagsHtml += `<span class="day-tag tag-d2">D2</span>`;
+    if (data.paxType === 'D3') tagsHtml += `<span class="day-tag tag-d3">D3</span>`;
+
+    // 최종 HTML (폰트 사이즈 적용됨)
+    el.innerHTML += `<div class="grp-id" style="font-size:${fSize};">${dispNum}</div><div class="info-badge ${data.textClass}">${tagsHtml}${cleanNation}${originBadgeHtml}</div>`;
   } else el.className += " empty";
 }
+
+
 
 function handleSeatClick(el, busNum, seatIdx, busSize) {
     if(selectedSeat.idx === -1) { 
@@ -888,7 +1010,6 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
     
     const statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
     const guideName = document.getElementById('guideNameInput').value || "Mr. Shin";
-    /* [수정 2] 버스 번호 가져오기 */
     const busNo = document.getElementById('busNumberInput').value || "";
     
     const tH = document.getElementById('timeHongdae').value;
@@ -913,15 +1034,12 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
 
         let gid = g.repNum; let msgText = ""; let langTag = "";
         
-        // [복귀자용 가격표 - Day2/3 안내를 위해 유지]
         const priceList_CN = `[Price List]\n\nS. 积极心态（包含）\n\nA. 缆车 + 装备\n   周末 70,000 / 平日 60,000\nB. 头盔 20,000\nC. 护具 15,000\nD. 滑雪服 20,000\nE. 雪橇 30,000\nF. 观光缆车 20,000\n\n*(刷卡 Card +10%)`;
         const priceList_EN = `[Price List]\n\nS. Positive mindset (Included)\n\nA. Lift + Gear\n   Weekend 70,000 / Weekday 60,000\nB. Helmet 20,000\nC. Guard 15,000\nD. Ski Clothes 20,000\nE. Sled 30,000\nF. Sightseeing Lift 20,000\n\n*(Card payment +10%)`;
 
-        // 1. [복귀/숙박 손님 (Day 2, Day 3)] - 기존 로직 그대로 유지
         if (g.paxType === 'D2' || g.paxType === 'D3') {
             let isReturnGuest = (g.paxType === 'D2' || g.paxType === 'D3');
             let dayLabel = isReturnGuest ? (g.paxType === 'D3' ? "Day 3" : "Day 2") : "Day 1";
-            
             let step3_EN = "3. Gathering (15:40)\n📍 Lobby (With luggage)";
             let step3_CN = "3. 集合 Gathering (15:40)\n📍 酒店大厅 (带上所有行李)";
             
@@ -938,29 +1056,24 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
                 msgText = `[${dayLabel}/Return Guide - ${guideName}]\nGroup: ${g.msgNum}\nSeat: ${seatStr}\n\n1. Check-out (Until 11:00)\n*Leave bags at Lobby\n⚠️ Late Penalty: 10,000 KRW / 30min\n\n2. Klook Lounge (10:00)\n👉 Payment & Get Lift Card\n\n${step3_EN}\n\n${priceList_EN}`;
             }
         } 
-        // 2. [출발 손님 (일반, 스키, 산천어 등 모든 출발자)] - 통합된 새 양식 적용
         else {
              let pickupInfo = ""; let loc = g.location ? g.location.trim() : "";
              
              if(g.langContext === 'CN') {
                 langTag = `<span class="lang-tag lang-CN">TOUR(CN)</span>`;
-                // [절대 수정 금지] 출발지 로직 유지
                 if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
                 else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口 (Myeongdong Exit 3)`; } 
                 else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口`; } 
                 else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
                 
-                // [수정 2] 중국어 메시지에 버스 번호 추가 (Group 위)
                 msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。\n\nbus no : ${busNo}\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
             } else {
                 langTag = `<span class="lang-tag lang-EN">TOUR(EN)</span>`;
-                // [절대 수정 금지] 출발지 로직 유지
                 if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ. Exit 8`; } 
                 else if (loc.includes('명동') || loc.includes('Myeongdong')) { pickupInfo = `❗️${tM} Myeongdong Exit 3`; } 
                 else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
                 else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
                 
-                // [수정 2] 영어 메시지에 버스 번호 추가 (Group 위)
                 msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm\n\nbus no : ${busNo}\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
             }
         }
@@ -986,6 +1099,8 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
         
         let emailBtnHtml = g.email ? `<div class="btn-action btn-copy-mail" onclick="copyAndOpen(this, '${g.email}', 'mail')">Mail<br>Copy</div>` : "";
 
+        let uiGroupNum = g.msgNum.replace(/[a-zA-Z]/g, '');
+
         let card = document.createElement('div'); card.className = 'msg-card';
         card.innerHTML = `
             <div class="msg-check-area">
@@ -993,7 +1108,7 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
                 <div class="check-box-wrapper"><label class="msg-check-label label-connected">연락됨</label><input type="checkbox" class="msg-check-input chk-conn" onchange="updateMsgStatus('${gid}', 'connected', this.checked, null)" ${isConnected ? 'checked' : ''}></div>
             </div>
             <div class="msg-info">
-                <div class="msg-group-row"><span class="msg-group">${g.msgNum}</span>${langTag}${extraTags}</div>
+                <div class="msg-group-row"><span class="msg-group">${uiGroupNum}</span>${langTag}${extraTags}</div>
                 <div class="msg-seats">Seat: ${seatStr}</div>
                 <input type="text" class="msg-memo-input" placeholder="비고" value="${memoText}" oninput="updateMsgStatus('${gid}', null, null, this.value)">
                 <div class="hidden-msg">${msgText}</div>
@@ -1030,7 +1145,6 @@ function getAppIconHtml(rawMsg, appType) {
         }
         else if (lower.includes('viber')) { 
             appClass = 'logo-viber'; appName = 'Vi'; 
-            /* [Bug 2 Fix] Viber Deep Link용 숫자만 추출해서 전달 */
             copyValue = rawMsg.replace(/[^0-9]/g, ''); 
             schemeKey = 'viber';
         }
@@ -1083,6 +1197,7 @@ function manualAddGroup() {
             paxType: 'General', isStay: false, isBoard: false, 
             color: '#e0e0e0', textClass: 'neutral-text', subInfo: '현장',
             isSancheoneo: isSancheoneoMode, isHot: false, email: "",
+            originTag: "(현)", 
             options: { lift: false, gear: false, clothes: false, lesson: false }
         };
         msgListGroups.push(targetGroup);
@@ -1181,9 +1296,8 @@ function loadTextInput() { const savedData = localStorage.getItem('bus_rawData')
 function loadGuideName() { const savedGuide = localStorage.getItem('bus_guideName'); if(savedGuide) document.getElementById('guideNameInput').value = savedGuide; const savedBus = localStorage.getItem('bus_number'); if(savedBus) document.getElementById('busNumberInput').value = savedBus; }
 function clearData() { if(confirm('초기화하시겠습니까?')) { document.getElementById('rawData').value = ''; localStorage.removeItem('bus_rawData'); localStorage.removeItem('bus_seatMap'); localStorage.removeItem('bus_msgStatus'); location.reload(); } }
 
-/* [수정 1] 맵 저장 버튼 위치 수정 (Flexbox 구조에 맞게 텍스트/버튼 분리 생성) */
 function updateHeader1(seatMap) {
-    let counts = { '홍대':0, '명동':0, '동대문':0, '기타':0 }; let total = 0;
+    let counts = { '홍대':0, '명동':0, '동대문':0, '현장':0, '기타':0 }; let total = 0;
     for(let i=1; i<seatMap.length; i++) {
         let seat = seatMap[i];
         if(seat) {
@@ -1191,11 +1305,11 @@ function updateHeader1(seatMap) {
             if(loc.includes('홍대')) counts['홍대']++;
             else if(loc.includes('명동')) counts['명동']++;
             else if(loc.includes('동대문')) counts['동대문']++;
+            else if(loc.includes('현장')) counts['현장']++;
             else counts['기타']++;
         }
     }
-    // Part 2 CSS(space-between)에 맞춰 텍스트 div와 버튼 div를 분리하여 생성
-    const textHtml = `<div>TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 홍대 ${counts['홍대']} / 명동 ${counts['명동']} / 동대문 ${counts['동대문']} ]</span></div>`;
+    const textHtml = `<div>TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 홍대 ${counts['홍대']} / 명동 ${counts['명동']} / 동대문 ${counts['동대문']} / 현장 ${counts['현장']} ]</span></div>`;
     const btnHtml = `<div class="header-controls" data-html2canvas-ignore="true"><button class="btn-save-mini" onclick="downloadImage(1)">📸 저장</button></div>`;
     document.getElementById('pickupSummary1').innerHTML = textHtml + btnHtml;
 }
@@ -1209,7 +1323,6 @@ function updateHeader2(seatMap) {
             if(seat.paxType === 'D2' || seat.paxType === 'D3') counts['Hotel']++; else counts['Challenge']++; 
         }
     }
-    // Part 2 CSS(space-between)에 맞춰 텍스트 div와 버튼 div를 분리하여 생성
     const textHtml = `<div>TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 복귀편 ${counts['Challenge']} / 숙박손님 ${counts['Hotel']} ]</span></div>`;
     const btnHtml = `<div class="header-controls" data-html2canvas-ignore="true"><button class="btn-save-mini night" onclick="downloadImage(2)">📸 저장</button></div>`;
     document.getElementById('pickupSummary2').innerHTML = textHtml + btnHtml;
@@ -1223,7 +1336,6 @@ function updatePriority(checkbox) {
 }
 
 function updatePriorityDisplay() {
-  /* [GENDER-REMOVAL] 여자, 남자 매핑 삭제됨 */
   const map = { 'solo':'혼자', 'CN':'중국어', 'EN':'영어', 'G4':'4인이상', 'HD':'홍대', 'MY':'명동', 'DDM':'동대문' };
   const txt = priorityQueue.map(v => map[v]).join(' > ');
   document.getElementById('priorityView').innerText = "우선순위: " + (txt || "없음");
@@ -1289,7 +1401,6 @@ function forceSaveAllData() {
     } catch (e) { console.log("Safe Save:", e); }
 }
 
-/* [수정 4] 10.8 버전 인증 처리 */
 function unlock() {
     const input = document.getElementById('lockInput');
     if (input.value === '840506') {
@@ -1303,7 +1414,6 @@ function unlock() {
 }
 
 window.onload = function() {
-    /* [수정 4] 인증 체크 키 변경 */
     if (localStorage.getItem('tm_auth_10_8') !== 'true') {
         document.getElementById('lockScreen').style.display = 'flex';
     }

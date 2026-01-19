@@ -769,8 +769,13 @@ function runAI() {
     saveTextInput(); saveTimeInput(); saveGuideName();
     localStorage.removeItem('bus_seatMap');
     
-    const raw = document.getElementById('rawData').value;
+    // [수정] 21번 버그 해결! (엑셀 따옴표/줄바꿈 자동 제거)
+    let raw = document.getElementById('rawData').value;
+    // 따옴표(") 안에 있는 줄바꿈을 공백으로 바꾸고, 따옴표 자체도 없애버림
+    raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n]+/g, ' '));
+
     const busSize = parseInt(document.querySelector('input[name="busSize"]:checked').value);
+
     const direction = document.querySelector('input[name="direction"]:checked').value;
     const lines = raw.trim().split('\n');
     const rawLower = raw.toLowerCase();

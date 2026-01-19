@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>미스터 신의 투어마스터 10.8 (Update)</title>
+<title>미스터 신의 투어마스터 10.8 (Gender Free)</title>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
   /* --- [스타일은 원본 유지 + UI 개선용 스타일 추가] --- */
@@ -117,7 +117,8 @@
   .grp-id { font-size: 24px; font-weight: 900; color: #333; line-height: 1; margin-bottom: 4px; margin-top: 8px; text-align: center; }
   .grp-id.long-text { font-size: 20px; letter-spacing: -1px; }
   .info-badge { background: rgba(255,255,255,0.85); border-radius: 12px; padding: 3px 6px; text-align: center; font-size: 11px; font-weight: 900; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: 95%; margin-top: auto; margin-bottom: 2px; white-space: nowrap; }
-  .male-text { color: #1565c0; } .female-text { color: #e91e63; } .neutral-text { color: #757575; } 
+  /* [GENDER-REMOVAL] 성별 색상 클래스 삭제됨 */
+  .neutral-text { color: #555; } 
   .day-tag { color: white; padding: 1px 4px; border-radius: 4px; margin-right: 3px; font-size: 10px; vertical-align: middle; }
   .tag-d1 { background-color: #1976d2; } .tag-d2 { background-color: #d32f2f; } .tag-d3 { background-color: #7b1fa2; } .tag-stay { background-color: #ff9800; }
   .tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; }
@@ -173,7 +174,7 @@
     <button id="lockBtn" onclick="unlock()">ENTER</button>
 </div>
 
-<div class="main-title">미스터 신의 투어마스터 10.8</div>
+<div class="main-title">미스터 신의 투어마스터 10.8 (Gender Free)</div>
 
 <div class="input-box">
   <div class="info-text">1. 기본 정보 & 시간 설정</div>
@@ -226,9 +227,10 @@
       <label class="chk-label"><input type="checkbox" class="criteria" value="solo" onchange="updatePriority(this)"> 혼자(1인)</label>
       <label class="chk-label"><input type="checkbox" class="criteria" value="CN" onchange="updatePriority(this)"> 중국어권</label>
       <label class="chk-label"><input type="checkbox" class="criteria" value="EN" onchange="updatePriority(this)"> 영어권</label>
-      <label class="chk-label"><input type="checkbox" class="criteria" value="F" onchange="updatePriority(this)"> 여자</label>
-      <label class="chk-label"><input type="checkbox" class="criteria" value="M" onchange="updatePriority(this)"> 남자</label>
       <label class="chk-label"><input type="checkbox" class="criteria" value="G4" onchange="updatePriority(this)"> 4인 이상</label>
+      <label class="chk-label"><input type="checkbox" class="criteria" value="HD" onchange="updatePriority(this)"> 홍대</label>
+      <label class="chk-label"><input type="checkbox" class="criteria" value="MY" onchange="updatePriority(this)"> 명동</label>
+      <label class="chk-label"><input type="checkbox" class="criteria" value="DDM" onchange="updatePriority(this)"> 동대문</label>
     </div>
     <div class="size-selector" style="background:#eef;">
       <label><input type="radio" name="direction" value="front" checked> 조건 앞쪽</label>
@@ -305,7 +307,7 @@
 </div>
 <script>
 /**
- * [전역 상수 및 설정] - 버전 10.8
+ * [전역 상수 및 설정] - 버전 10.8 (Gender Free)
  */
 const CONFIG = {
     BOOTS_YOUTUBE: "https://youtu.be/J9S0q1QKoOY?si=V57nHSmY0NGhhHcY",
@@ -421,18 +423,7 @@ function combinePhoneAndMessenger(phoneCol, messengerCol) {
     return { code: f_CountryCode, country: f_Country, fullNumber: fullNumber };
 }
 
-function getGenderGlobal(name) {
-  if(!name) return 'N'; const lowerName = name.toLowerCase();
-  if(lowerName.includes('mr.') || lowerName.includes('mr ')) return 'M';
-  if(lowerName.includes('ms.') || lowerName.includes('mrs.') || lowerName.includes('miss')) return 'F';
-  
-  const f_list = ['alice','amy','annie','audrey','belle','bernice','carol','cathy','celine','chery','chloe','cindy','clara','connie','crystal','daisy','daphne','doris','elaine','eleanor','elizabeth','emily','eva','fiona','grace','hannah','hazel','helen','irene','iris','ivy','janet','jean','jessica','joan','joanna','joyce','judy','julia','karen','kelly','kitty','linda','lisa','mandy','mary','megan','melissa','michelle','nicole','olivia','peggy','phoebe','rachel','rebecca','regina','rita','rose','ruby','sally','sandy','sarah','sharon','sophie','stella','stephanie','susan','sylvia','teresa','tiffany','tina','tracy','vicky','victoria','vivian','wendy','winnie','yvonne','zoe','ji-eun','min-ji','su-bin','ha-eun','yoon-seo','wei','fang','mei','hui','ying','yan','ling','putri','nur','ayu','sari'];
-  const m_list = ['aaron','adam','alan','albert','alex','alfred','alvin','andrew','andy','anthony','arthur','austin','ben','benjamin','bernard','brian','calvin','charles','chris','christopher','daniel','david','dennis','derek','donald','douglas','eddie','edward','eric','felix','frank','gary','george','gordon','harry','henry','howard','hugo','ivan','jack','jackson','jacob','james','jason','jeffrey','jerry','jimmy','joe','john','jonathan','joseph','justin','keith','kelvin','ken','kenneth','kevin','larry','leo','leon','louis','lucas','marcus','mark','martin','matthew','max','michael','mike','nathan','nelson','nicholas','nick','oscar','patrick','paul','peter','philip','raymond','richard','ricky','robert','roger','ronald','roy','ryan','sam','samuel','scott','sean','simon','stanley','stephen','steven','terry','thomas','tim','timothy','tom','tommy','tony','victor','vincent','wayne','william','wilson','ji-hoon','min-jun','jun-ho','wei','jun','jie','ming','muhammad','ahmad','ali','rizky','putra'];
-  
-  for(let n of f_list) { if(lowerName.includes(n)) return 'F'; }
-  for(let n of m_list) { if(lowerName.includes(n)) return 'M'; }
-  return 'N';
-}
+/* [GENDER-REMOVAL] getGenderGlobal 함수 삭제됨 */
 
 function getMessengerApp(text) { 
     if(!text) return '무'; const t = text.toLowerCase(); 
@@ -465,19 +456,14 @@ function fallbackCopy(text, el) {
     feedback(el);
 }
 
-/* [수정 3] 앱 열기 실패 시 오류 팝업 없이 복사만 유지하는 로직 */
 function copyAndOpen(el, text, schemeKey) {
-    // 1. 복사 먼저 실행 (무조건 성공)
     copyToClipboard(text, el);
-    
-    // 2. 앱 실행 시도 (조용히 실행, 실패해도 팝업 없음)
     const scheme = CONFIG.SCHEMES[schemeKey];
     if (scheme) {
         setTimeout(() => { 
             try {
                 window.location.href = scheme; 
             } catch(e) {
-                // 앱 열기 실패해도 아무 작업 안 함 (사용자 흐름 유지)
                 console.log("App open skipped or failed.");
             }
         }, 300);
@@ -568,7 +554,9 @@ function parseRawDataLine(line, originalOrder) {
     let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
     
     let langContext = (rawLang && rawLang.includes('중국어')) ? 'CN' : 'EN';
-    let gender = getGenderGlobal(name); 
+    
+    /* [GENDER-REMOVAL] 성별 감지 로직 삭제 및 고정값 'N' 할당 */
+    let gender = 'N'; 
     let appType = getMessengerApp(messengerCol);
 
     return {
@@ -630,7 +618,7 @@ function createGroupsFromEntries(entries) {
             count: totalC, 
             name: rep.name, 
             country: rep.country, 
-            gender: rep.gender, 
+            gender: rep.gender, /* N으로 고정됨 */
             langContext: rep.langContext, 
             appType: rep.appType, 
             location: rep.location, 
@@ -655,9 +643,13 @@ function calculateScore(grp) {
         if (criteria === 'solo' && grp.count === 1) match = true;
         if (criteria === 'CN' && grp.langContext === 'CN') match = true;
         if (criteria === 'EN' && grp.langContext === 'EN') match = true;
-        if (criteria === 'F' && grp.gender === 'F') match = true;
-        if (criteria === 'M' && grp.gender === 'M') match = true;
+        /* [GENDER-REMOVAL] F, M 점수 계산 로직 삭제됨 */
         if (criteria === 'G4' && grp.count >= 4) match = true;
+        /* [수정 1] 우선순위 조건 추가 (홍대, 명동, 동대문) */
+        if (criteria === 'HD' && grp.location.includes('홍대')) match = true;
+        if (criteria === 'MY' && grp.location.includes('명동')) match = true;
+        if (criteria === 'DDM' && grp.location.includes('동대문')) match = true;
+        
         if(match) score += weight;
     });
     return score;
@@ -675,10 +667,10 @@ function getPickColor(grp) {
 function setGroupMeta(grp) {
     let nation = grp.country;
     if (CONFIG.COUNTRY_MAP[grp.country]) nation = CONFIG.COUNTRY_MAP[grp.country];
-    let genderSymbol = '△'; let txtClass = 'neutral-text';
-    if(grp.gender === 'F') { genderSymbol = '♀'; txtClass = 'female-text'; } 
-    else if(grp.gender === 'M') { genderSymbol = '♂'; txtClass = 'male-text'; }
-    grp.textClass = txtClass; grp.subInfo = `${nation}${genderSymbol}`;
+    
+    /* [GENDER-REMOVAL] 성별 기호(♀,♂) 및 색상 지정 로직 삭제 */
+    grp.textClass = 'neutral-text'; 
+    grp.subInfo = `${nation}`; // 성별 기호 없이 국가만 표시
 }
 // =========================================
 // [4] 메인 컨트롤러 (runAI)
@@ -875,7 +867,6 @@ function refreshDisplay() {
 // =========================================
 // [6] 메시지 생성 로직
 // =========================================
-
 function renderMessages(allGroups, seatMap1, seatMap2) {
     const msgList = document.getElementById('msgList');
     const section = document.getElementById('msgSection');
@@ -883,6 +874,9 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
     
     const statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
     const guideName = document.getElementById('guideNameInput').value || "Mr. Shin";
+    /* [수정 2] 버스 번호 가져오기 */
+    const busNo = document.getElementById('busNumberInput').value || "";
+    
     const tH = document.getElementById('timeHongdae').value;
     const tM = document.getElementById('timeMyeongdong').value;
     const tD = document.getElementById('timeDongdaemun').value;
@@ -942,8 +936,8 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
                 else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口 (DDP Exit 11)`; } 
                 else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
                 
-                // 중국어: 옵션 제거된 깔끔한 버전 (기존 일반투어 메시지와 동일)
-                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
+                // [수정 2] 중국어 메시지에 버스 번호 추가 (Group 위)
+                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。\n\nbus no : ${busNo}\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
             } else {
                 langTag = `<span class="lang-tag lang-EN">TOUR(EN)</span>`;
                 // [절대 수정 금지] 출발지 로직 유지
@@ -952,8 +946,8 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
                 else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
                 else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
                 
-                // [오빠 요청 양식] 모든 출발 손님에게 이 메시지 전송 (옵션 X)
-                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm\n\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
+                // [수정 2] 영어 메시지에 버스 번호 추가 (Group 위)
+                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm\n\nbus no : ${busNo}\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
             }
         }
 
@@ -1213,7 +1207,8 @@ function updatePriority(checkbox) {
 }
 
 function updatePriorityDisplay() {
-  const map = { 'solo':'혼자', 'CN':'중국어', 'EN':'영어', 'F':'여자', 'M':'남자', 'G4':'4인이상' };
+  /* [GENDER-REMOVAL] 여자, 남자 매핑 삭제됨 */
+  const map = { 'solo':'혼자', 'CN':'중국어', 'EN':'영어', 'G4':'4인이상', 'HD':'홍대', 'MY':'명동', 'DDM':'동대문' };
   const txt = priorityQueue.map(v => map[v]).join(' > ');
   document.getElementById('priorityView').innerText = "우선순위: " + (txt || "없음");
 }

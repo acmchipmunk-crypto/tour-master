@@ -458,7 +458,14 @@ function fallbackCopy(text, el) {
 
 function copyAndOpen(el, text, schemeKey) {
     copyToClipboard(text, el);
-    const scheme = CONFIG.SCHEMES[schemeKey];
+    let scheme = CONFIG.SCHEMES[schemeKey];
+    
+    // [Bug 2 Fix] Viber Deep Link Logic
+    if (schemeKey === 'viber') {
+        const cleanNum = text.replace(/[^0-9]/g, '');
+        scheme = `viber://chat?number=${cleanNum}`;
+    }
+
     if (scheme) {
         setTimeout(() => { 
             try {
@@ -495,8 +502,7 @@ function findLocation(parts) {
   }
   return "";
 }
-
-function parseRawDataLine(line, originalOrder) {
+function parseRawDataLine(line, originalOrder, isGlobalSki) {
     let parts = line.split('\t'); 
     if(parts.length < 4) return null;
     
@@ -504,7 +510,9 @@ function parseRawDataLine(line, originalOrder) {
     if (firstCol === 'No.' || firstCol.toLowerCase().startsWith('total') || firstCol.includes('엑셀') || firstCol.includes('날짜')) return null;
 
     const lineLower = line.toLowerCase();
-    const isSkiTour = lineLower.includes('ski') || lineLower.includes('snowboard');
+    
+    /* [Bug 1 Fix] 전체 데이터 중 하나라도 스키 키워드가 있으면 스키 포맷으로 파싱 */
+    const isSkiTour = isGlobalSki || lineLower.includes('ski') || lineLower.includes('snowboard');
     
     let customId, productName, name, rawPhone, messengerCol, count, location, rawLang, note;
     let optLift = false, optGear = false, optClothes = false, optLesson = false;
@@ -513,6 +521,7 @@ function parseRawDataLine(line, originalOrder) {
     for(let p of parts) { if(p && p.includes('@')) { emailAddr = p.trim(); break; } }
 
     if (!isSkiTour) { 
+        // [일반 투어 포맷]
         customId = parts[0] ? parts[0].trim() : originalOrder.toString();
         productName = parts[2] ? parts[2].trim() : ""; 
         name = parts[4] ? parts[4].trim() : "Guest";
@@ -523,6 +532,7 @@ function parseRawDataLine(line, originalOrder) {
         location = findLocation(parts);
         note = parts[12] ? parts[12].trim() : "";
     } else { 
+        // [스키 투어 포맷]
         customId = parts[0] ? parts[0].trim() : originalOrder.toString();
         productName = parts[1] ? parts[1].trim() : "";
         name = parts[3] ? parts[3].trim() : "Guest"; 
@@ -684,9 +694,14 @@ function runAI() {
     const direction = document.querySelector('input[name="direction"]:checked').value;
     const lines = raw.trim().split('\n');
     
+    // [Bug 1 Fix] 전체 텍스트에서 스키 키워드 감지 (전역 스위치)
+    const rawLower = raw.toLowerCase();
+    const isGlobalSki = rawLower.includes('ski') || rawLower.includes('snowboard') || rawLower.includes('스키') || rawLower.includes('스노우');
+
     let entries = []; let originalOrder = 1;
     lines.forEach(line => {
-        const parsed = parseRawDataLine(line, originalOrder);
+        // [Bug 1 Fix] isGlobalSki 플래그 전달
+        const parsed = parseRawDataLine(line, originalOrder, isGlobalSki);
         if(parsed) { entries.push(parsed); originalOrder++; }
     });
 
@@ -751,7 +766,6 @@ function generateSeatSequence(totalPax, busSize) {
   sequence.push(4); sequence.push(3); sequence.push(2); sequence.push(1); 
   return sequence;
 }
-
 // =========================================
 // [5] UI 렌더링 및 인터랙션
 // =========================================
@@ -933,7 +947,7 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
                 // [절대 수정 금지] 출발지 로직 유지
                 if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
                 else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口 (Myeongdong Exit 3)`; } 
-                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口 (DDP Exit 11)`; } 
+                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口`; } 
                 else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
                 
                 // [수정 2] 중국어 메시지에 버스 번호 추가 (Group 위)
@@ -1015,7 +1029,9 @@ function getAppIconHtml(rawMsg, appType) {
             schemeKey = 'kakao';
         }
         else if (lower.includes('viber')) { 
-            appClass = 'logo-viber'; appName = 'Vi'; copyValue = rawMsg; 
+            appClass = 'logo-viber'; appName = 'Vi'; 
+            /* [Bug 2 Fix] Viber Deep Link용 숫자만 추출해서 전달 */
+            copyValue = rawMsg.replace(/[^0-9]/g, ''); 
             schemeKey = 'viber';
         }
         else if (lower.includes('wechat') || lower.includes('weixin')) { 

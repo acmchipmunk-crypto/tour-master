@@ -572,8 +572,9 @@ function findLocation(parts) {
  * - Type B 헤더 인식 시 trim() 적용하여 정확도 향상
  */
 function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
-    // [수정] 탭으로 자르되, 각 요소를 trim() 해서 공백 제거
-    let parts = line.split(/\t+/).map(p => p.trim());
+// 빈 칸도 그대로 유지함 (정확한 위치 인식)
+let parts = line.split('\t').map(p => p.trim());
+
     
     // Type B(엑셀)인데 탭이 없으면 다중 공백으로 처리
         if (headerMap && parts.length < 2) {

@@ -576,9 +576,12 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
     let parts = line.split(/\t+/).map(p => p.trim());
     
     // Type B(엑셀)인데 탭이 없으면 다중 공백으로 처리
-    if (headerMap && parts.length < 2) {
+        if (headerMap && parts.length < 2) {
          parts = line.split(/\s{2,}/).map(p => p.trim());
     }
+
+    // [수정] 엑셀 모드일 때, '이름' 칸이 비어있으면 찌꺼기(줄바꿈 등)로 보고 무시
+    if (headerMap && !parts[headerMap.name]) return null;
     
     if(parts.length < 4 && !headerMap) return null;
 
@@ -657,8 +660,15 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
     let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
     let langContext = (rawLang && rawLang.includes('중국어')) ? 'CN' : 'EN';
     let gender = 'N'; 
-    let appType = getMessengerApp(messengerCol);
+        let appType = getMessengerApp(messengerCol);
+
+    // [수정] 비고(Note)란에 whatsapp이 있으면 강제로 변경
+    if (note && note.toLowerCase().includes('whatsapp')) {
+        appType = '와';
+    }
+
     let emailAddr = "";
+
     for(let p of parts) { if(p && p.includes('@')) { emailAddr = p; break; } }
 
     return {
@@ -802,7 +812,9 @@ function runAI() {
                 product: headerParts.findIndex(p => p.includes('행사명') || p.includes('상품') || p.includes('Product')),
                 name: headerParts.findIndex(p => p.includes('예약자') || p.includes('이름') || p.includes('Name')),
                 phone: headerParts.findIndex(p => p.includes('핸드폰') || p.includes('전화') || p.includes('연락처') || p.includes('Phone')),
-                messenger: headerParts.findIndex(p => p.includes('메신저') || p.includes('카톡') || p.includes('Messenger'))
+                      // [수정] '연락가능APP'이랑 '앱'도 찾도록 추가함
+        messenger: headerParts.findIndex(p => p.includes('메신저') || p.includes('카톡') || p.includes('Messenger') || p.includes('연락가능APP') || p.includes('앱'))
+
             };
             startLineIdx = k + 1; 
             console.log("Type B (Excel) Detected at line " + k, headerMap);

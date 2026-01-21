@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>미스터 신의 투어마스터 10.8 (Gender Free + Origin)</title>
+<title>미스터 신의 투어마스터 10.8 (Gender Free + FIT Mode)</title>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
-  /* --- [스타일은 원본 유지 + UI 개선용 스타일 추가] --- */
+  /* --- [기존 스타일 유지] --- */
   body, input, button, textarea, select { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; -webkit-user-select:none; }
   body { background: #f0f2f5; margin: 0; padding: 5px; max-width: 100vw; overflow-x: hidden; }
   
-  /* [수정 2] 메인 타이틀 디자인 업그레이드 (10.8) */
   .main-title { 
       text-align: center; 
       font-size: 22px; 
@@ -26,7 +25,7 @@
       text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
   }
 
-  /* 설명 문구 스타일 */
+  /* ... (기존 CSS 생략 없이 원본 유지) ... */
   .info-text { font-size: 12px; color: #546e7a; margin: 0 0 8px 0; font-weight: 600; display: block; background: #eceff1; padding: 4px 8px; border-radius: 4px; border-left: 3px solid #b0bec5; }
   .info-text.center { text-align: center; border-left: none; background: transparent; }
   
@@ -70,7 +69,6 @@
   .btn-clear { background: #ef5350; color: white; flex: 0.8; font-size: 13px; } 
   .vcard-input { width: 70px; padding: 10px; text-align: center; border: 1px solid #00897b; border-radius: 6px; font-weight: bold; color: #00695c; font-size: 13px; }
 
-  /* 맵 저장 버튼 (헤더용) */
   .btn-save-mini { background: #11998e; color: white; padding: 6px 14px; font-size: 12px; border-radius: 15px; border: 1px solid white; cursor: pointer; text-decoration: none; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
   .btn-save-mini.night { background: #e91e63; }
   
@@ -91,11 +89,10 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
       display: flex; 
       align-items: center; 
-      justify-content: space-between; /* 양쪽 정렬 */
+      justify-content: space-between;
       gap: 10px;
   }
   
-  /* 버튼 감싸는 컨테이너 - 위치 고정 제거 */
   .header-controls { position: static; transform: none; display: flex; align-items: center; }
 
   .bus-date { font-size: 1.0rem; color: #555; margin-top: 6px; font-weight: 800; }
@@ -196,7 +193,6 @@
       padding: 10px; margin-top: 10px; text-align: center; font-size: 11px;
       color: #455a64; font-weight: bold; line-height: 2.0;
   }
-</style>
 
 </style>
 </head>
@@ -208,7 +204,7 @@
     <button id="lockBtn" onclick="unlock()">ENTER</button>
 </div>
 
-<div class="main-title">미스터 신의 투어마스터 10.8 (Gender Free)</div>
+<div class="main-title">미스터 신의 투어마스터 10.8 (FIT Mode)</div>
 
 <div class="input-box">
   <div class="info-text">1. 기본 정보 & 시간 설정</div>
@@ -237,6 +233,7 @@
   <div class="size-selector">
     <label><input type="radio" name="busSize" value="44" checked onchange="saveTextInput()"> 44인승</label>
     <label><input type="radio" name="busSize" value="45" onchange="saveTextInput()"> 45인승</label>
+    <label><input type="radio" name="busSize" value="FIT" onchange="saveTextInput()"> FIT(자동)</label>
   </div>
 </div>
 
@@ -337,7 +334,6 @@
     <span class="origin-badge badge-trazy">Z</span>트레이지 
     <span class="origin-badge badge-etc">미</span>기타/현장
 </div>
-<div class="manual-section">
 
 <div class="manual-section">
     <div class="manual-title">📘 투어마스터 10.8 사용 설명서</div>
@@ -353,7 +349,7 @@
 </div>
 <script>
 /**
- * [전역 상수 및 설정] - 버전 10.8 (Gender Free)
+ * [전역 상수 및 설정] - 버전 10.8 (Gender Free + FIT)
  */
 const CONFIG = {
     BOOTS_YOUTUBE: "https://youtu.be/J9S0q1QKoOY?si=V57nHSmY0NGhhHcY",
@@ -376,7 +372,6 @@ const CONFIG = {
         'KR':'한국','CN':'중국','TW':'대만','HK':'홍콩','SG':'싱가','MY':'말레','TH':'태국','PH':'필리',
         'VN':'베트','ID':'인니','US':'미국','UK':'영국','AU':'호주','JP':'일본' 
     },
-    /* 메신저 URL 스킴 관리 */
     SCHEMES: {
         'kakao': 'kakaotalk://',
         'line': 'line://',
@@ -394,48 +389,34 @@ let priorityQueue = [];
 let audioCtx = null;
 
 // =========================================
-// [기원 판별 로직] 최종 업데이트
+// [기원 판별 로직]
 // =========================================
 function detectOrigin(rawId) {
     if (!rawId) return "(미)";
-    
     let temp = rawId.split('-')[0];
     temp = temp.replace(/\(.*\)/g, '').replace(/\s+/g, '').toUpperCase();
-
-    // 1. QiKe (치커)
     if (temp.includes('QIKE')) return "(치)";
-    // 2. GYG (겟)
     if (temp.includes('GYG')) return "(겟)";
-    // 3. Trazy (지) - 패턴: 날짜8+영문2+숫자5
     if (/^\d{8}[A-Z]{2}\d{5}$/.test(temp)) return "(지)";
-    // 4. Klook (클)
     if (/^[A-Z]{3}\d{6}$/.test(temp)) return "(클)";
-    // 5. KKday (케)
     if (/^(24|25|26)KK/.test(temp)) return "(케)";
-    // 6. Trip/Ctrip (트) - 숫자만 8자리 이상
     if (/^\d{8,}$/.test(temp)) return "(트)";
-
-    return "(미)"; // 분류 불가
+    return "(미)";
 }
 
-// [배지 HTML 생성] 미분류는 '미'로 표시
 function getOriginBadgeHtml(tag) {
     if (!tag) return "";
-    
     if (tag.includes('클')) return `<span class="origin-badge badge-klook">K</span>`;
     if (tag.includes('케')) return `<span class="origin-badge badge-kkday">K</span>`;
     if (tag.includes('트')) return `<span class="origin-badge badge-trip">T</span>`;
     if (tag.includes('겟')) return `<span class="origin-badge badge-gyg">G</span>`;
     if (tag.includes('치')) return `<span class="origin-badge badge-qike">Q</span>`;
     if (tag.includes('지')) return `<span class="origin-badge badge-trazy">Z</span>`;
-    
-    // 분류 불가 또는 현장 -> 회색 '미'
     return `<span class="origin-badge badge-etc">미</span>`;
 }
 
-
 // =========================================
-// [1] 유틸리티 및 헬퍼 함수
+// [1] 유틸리티 및 헬퍼 함수 (기존 유지)
 // =========================================
 
 function initAudio() {
@@ -467,6 +448,7 @@ document.addEventListener('click', function(e) {
         playPopSound();
     }
 });
+
 function combinePhoneAndMessenger(phoneCol, messengerCol) {
     let cleanPhoneCol = (phoneCol || "").trim();
     let splitPhone = cleanPhoneCol.split(/[,\/]/);
@@ -512,10 +494,24 @@ function combinePhoneAndMessenger(phoneCol, messengerCol) {
 }
 
 function getMessengerApp(text) { 
-    if(!text) return '무'; const t = text.toLowerCase(); 
-    if(t.includes('whatsapp')) return '와'; if(t.includes('line')) return '라'; 
-    if(t.includes('kakao')) return '카'; if(t.includes('wechat') || t.includes('weixin')) return '웨'; 
-    if(t.includes('viber')) return '바'; if(t.includes('zalo')) return '잘'; return '무'; 
+    if(!text) return '무'; 
+
+    const raw = String(text || "");
+    const t = raw.toLowerCase();
+
+    if(t.includes('whatsapp')) return '와'; 
+    if(t.includes('line')) return '라'; 
+    if(t.includes('kakao')) return '카'; 
+
+    if (
+        t.includes("wechat") ||
+        t.includes("weixin") ||
+        raw.includes("微信")
+    ) return "웨";
+
+    if(t.includes('viber')) return '바'; 
+    if(t.includes('zalo')) return '잘'; 
+    return '무'; 
 }
 
 function copyToClipboard(text, el) {
@@ -548,7 +544,7 @@ function copyMessageBody(btn) { const card = btn.closest('.msg-card'); const hid
 function copyOnly(el, text) { copyToClipboard(text, el); }
 
 // =========================================
-// [2] 데이터 파싱 및 전처리 (수정됨)
+// [2] 데이터 파싱 및 전처리 (기존 로직 유지)
 // =========================================
 function findCount(parts) {
   for (let i = 0; i < parts.length - 1; i++) {
@@ -567,23 +563,10 @@ function findLocation(parts) {
   return "";
 }
 
-/**
- * [수정됨] parseRawDataLine
- * - Type B 헤더 인식 시 trim() 적용하여 정확도 향상
- */
 function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
-// 빈 칸도 그대로 유지함 (정확한 위치 인식)
-let parts = line.split('\t').map(p => p.trim());
-
-    
-    // Type B(엑셀)인데 탭이 없으면 다중 공백으로 처리
-        if (headerMap && parts.length < 2) {
-         parts = line.split(/\s{2,}/).map(p => p.trim());
-    }
-
-    // [수정] 엑셀 모드일 때, '이름' 칸이 비어있으면 찌꺼기(줄바꿈 등)로 보고 무시
+    let parts = line.split('\t').map(p => p.trim());
+    if (headerMap && parts.length < 2) { parts = line.split(/\s{2,}/).map(p => p.trim()); }
     if (headerMap && !parts[headerMap.name]) return null;
-    
     if(parts.length < 4 && !headerMap) return null;
 
     let firstCol = parts[0] || "";
@@ -596,23 +579,19 @@ let parts = line.split('\t').map(p => p.trim());
     let resNoForOrigin = ""; 
 
     if (headerMap) {
-        // [Type B: 엑셀 포맷]
         customId = parts[headerMap.no] || originalOrder.toString();
         productName = (headerMap.product !== -1 && parts[headerMap.product]) ? parts[headerMap.product] : "Ski Tour";
         name = parts[headerMap.name] || "Guest";
         rawPhone = (headerMap.phone !== -1 && parts[headerMap.phone]) ? parts[headerMap.phone] : "";
         messengerCol = (headerMap.messenger !== -1 && parts[headerMap.messenger]) ? parts[headerMap.messenger] : "";
         resNoForOrigin = (headerMap.resNo !== -1 && parts[headerMap.resNo]) ? parts[headerMap.resNo] : "";
-        
         rawLang = ""; 
         count = findCount(parts); 
         location = findLocation(parts);
         note = ""; 
         if(!customId) customId = originalOrder.toString();
     } else {
-        // [Type A: 기존 포맷]
         customId = parts[0] || originalOrder.toString();
-        
         if (isSkiTour) {
              productName = parts[1] || "";
              resNoForOrigin = parts[2] || ""; 
@@ -637,7 +616,6 @@ let parts = line.split('\t').map(p => p.trim());
     }
 
     let originTag = detectOrigin(resNoForOrigin);
-
     let optLift = false, optGear = false, optClothes = false, optLesson = false;
     if (!headerMap && isSkiTour) {
         if (parts[11] && parseInt(parts[11]) > 0) optLift = true;
@@ -661,15 +639,10 @@ let parts = line.split('\t').map(p => p.trim());
     let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
     let langContext = (rawLang && rawLang.includes('중국어')) ? 'CN' : 'EN';
     let gender = 'N'; 
-        let appType = getMessengerApp(messengerCol);
-
-    // [수정] 비고(Note)란에 whatsapp이 있으면 강제로 변경
-    if (note && note.toLowerCase().includes('whatsapp')) {
-        appType = '와';
-    }
+    let appType = getMessengerApp(messengerCol);
+    if (note && note.toLowerCase().includes('whatsapp')) { appType = '와'; }
 
     let emailAddr = "";
-
     for(let p of parts) { if(p && p.includes('@')) { emailAddr = p; break; } }
 
     return {
@@ -709,7 +682,6 @@ function createGroupsFromEntries(entries) {
         cleanIds.sort((a,b) => parseInt(a) - parseInt(b));
         let displayNum = cleanIds.join('.'); 
         let totalC = currentGroupMembers.reduce((sum, m) => sum + m.count, 0);
-        
         let uniqueTags = [...new Set(currentGroupMembers.map(m => m.originTag))];
         let combinedOrigin = uniqueTags.join('');
 
@@ -774,35 +746,35 @@ function setGroupMeta(grp) {
 }
 
 // =========================================
-// [4] 메인 컨트롤러 (runAI - 수정됨)
+// [4] 메인 컨트롤러 (runAI - FIT 수정됨)
 // =========================================
 function runAI() {
     saveTextInput(); saveTimeInput(); saveGuideName();
     localStorage.removeItem('bus_seatMap');
     
-    // [수정] 21번 버그 해결! (엑셀 따옴표/줄바꿈 자동 제거)
     let raw = document.getElementById('rawData').value;
-    // 따옴표(") 안에 있는 줄바꿈을 공백으로 바꾸고, 따옴표 자체도 없애버림
     raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n]+/g, ' '));
 
-    const busSize = parseInt(document.querySelector('input[name="busSize"]:checked').value);
+    // [수정] FIT 모드 분기 처리
+    let rawSizeVal = document.querySelector('input[name="busSize"]:checked').value;
+    const isFit = (rawSizeVal === 'FIT');
+    
+    // FIT인 경우 초기값 0, 아니면 parseInt
+    let busSize = isFit ? 0 : parseInt(rawSizeVal);
 
     const direction = document.querySelector('input[name="direction"]:checked').value;
     const lines = raw.trim().split('\n');
     const rawLower = raw.toLowerCase();
     const isGlobalSki = rawLower.includes('ski') || rawLower.includes('snowboard') || rawLower.includes('스키') || rawLower.includes('스노우');
 
-    // [수정 최종] Type B 헤더 자동 탐색 로직 (제목 줄 무시 기능 추가)
     let headerMap = null;
     let startLineIdx = 0;
 
     for (let k = 0; k < Math.min(lines.length, 5); k++) {
         let checkLine = lines[k].trim();
         if(!checkLine) continue;
-
         let headerParts = checkLine.split(/\t+/).map(h => h.trim());
         if (headerParts.length < 2) headerParts = checkLine.split(/\s{2,}/).map(h => h.trim());
-
         const idxNo = headerParts.findIndex(p => p === 'No.' || p === 'NO.');
         const idxRes = headerParts.findIndex(p => p.includes('예약번호') || p.includes('Order'));
 
@@ -813,12 +785,9 @@ function runAI() {
                 product: headerParts.findIndex(p => p.includes('행사명') || p.includes('상품') || p.includes('Product')),
                 name: headerParts.findIndex(p => p.includes('예약자') || p.includes('이름') || p.includes('Name')),
                 phone: headerParts.findIndex(p => p.includes('핸드폰') || p.includes('전화') || p.includes('연락처') || p.includes('Phone')),
-                      // [수정] '연락가능APP'이랑 '앱'도 찾도록 추가함
-        messenger: headerParts.findIndex(p => p.includes('메신저') || p.includes('카톡') || p.includes('Messenger') || p.includes('연락가능APP') || p.includes('앱'))
-
+                messenger: headerParts.findIndex(p => p.includes('메신저') || p.includes('카톡') || p.includes('Messenger') || p.includes('연락가능APP') || p.includes('앱'))
             };
             startLineIdx = k + 1; 
-            console.log("Type B (Excel) Detected at line " + k, headerMap);
             break; 
         }
     }
@@ -833,12 +802,23 @@ function runAI() {
 
     msgListGroups = createGroupsFromEntries(entries);
 
+    // [추가] FIT 모드일 경우: 배정 대상 인원수만큼 busSize 자동 설정
+    if (isFit) {
+        let totalGoing = msgListGroups
+            .filter(g => g.paxType === 'General' || g.paxType === 'D1')
+            .reduce((sum, g) => sum + g.count, 0);
+        
+        busSize = totalGoing > 0 ? totalGoing : 1; 
+    }
+
     let listGoing = msgListGroups.filter(g => g.paxType === 'General' || g.paxType === 'D1');
     if (direction === 'front') listGoing.sort((a,b) => calculateScore(b) - calculateScore(a));
     else listGoing.sort((a,b) => calculateScore(a) - calculateScore(b));
 
     currentSeatMap1 = new Array(busSize + 1).fill(null);
-    let seatSequence = generateSeatSequence(999, busSize);
+    
+    // [수정] 시퀀스 생성 시 isFit 플래그 전달
+    let seatSequence = generateSeatSequence(999, busSize, isFit);
     let currentSeqIdx = 0;
 
     listGoing.forEach((grp) => {
@@ -880,36 +860,126 @@ function runAI() {
         let seatNum = emptySeatsMap2[k]; currentSeatMap2[seatNum] = d23Passengers[pIdx]; pIdx++;
     }
 
-    saveSeatMap(); redrawAll(busSize); renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2);
+    saveSeatMap(); redrawAll(busSize, isFit); // [수정] isFit 전달
+    renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2, isFit); // [수정] isFit 전달
 }
 
-function generateSeatSequence(totalPax, busSize) {
-  let sequence = []; for(let i = 5; i <= busSize; i++) sequence.push(i);
+// [수정] isFit 매개변수 추가 및 단순 시퀀스 처리
+function generateSeatSequence(totalPax, busSize, isFit) {
+  // 1. FIT 모드: 단순 1, 2, 3... 순서
+  if (isFit) {
+      let seq = [];
+      for(let i=1; i<=busSize; i++) seq.push(i);
+      return seq;
+  }
+  // 2. 기존 14인승 (코드상 남겨둠, 필요시 호환)
+  if (busSize === 14) {
+    let seq = [];
+    for (let i = 1; i <= 14; i++) seq.push(i);
+    return seq;
+  }
+
+  // 3. 기존 44/45인승 로직 (유지)
+  let sequence = [];
+  for(let i = 5; i <= busSize; i++) sequence.push(i);
   sequence.push(4); sequence.push(3); sequence.push(2); sequence.push(1); 
   return sequence;
 }
 // =========================================
-// [5] UI 렌더링 및 인터랙션
+// [5] UI 렌더링 및 인터랙션 (FIT 수정됨)
 // =========================================
 
-function redrawAll(busSize) {
-    renderBus(currentSeatMap1, busSize, 'busGrid1', 1); 
-    renderBus(currentSeatMap2, busSize, 'busGrid2', 2);
+function redrawAll(busSize, isFit) {
+    // [수정] isFit 플래그를 renderBus에 전달
+    renderBus(currentSeatMap1, busSize, 'busGrid1', 1, isFit); 
+    renderBus(currentSeatMap2, busSize, 'busGrid2', 2, isFit);
     updateHeader1(currentSeatMap1); 
     updateHeader2(currentSeatMap2);
 }
 
-function renderBus(seatMap, maxSeats, gridId, busNum) {
-  const grid = document.getElementById(gridId); grid.innerHTML = '';
+function renderFitBus(seatMap, gridId, busNum) {
+    const grid = document.getElementById(gridId);
+    grid.innerHTML = "";
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(4, 1fr)";
+    grid.style.gap = "4px";
+
+    // 가족(repNum) 기준으로 묶기
+    let grouped = {};
+    for (let i = 1; i < seatMap.length; i++) {
+        const s = seatMap[i];
+        if (!s) continue;
+        const key = s.repNum || ("solo_" + i);
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(i);
+    }
+
+    // 가족 단위로 출력
+    Object.values(grouped).forEach(seats => {
+        // 좌석 출력
+        for (let i = 0; i < seats.length; i++) {
+            createSeatElement(grid, seats[i], seatMap, seatMap.length - 1, busNum);
+        }
+
+        // 4칸 맞추기용 더미
+        const mod = seats.length % 4;
+        if (mod !== 0) {
+            for (let k = 0; k < 4 - mod; k++) {
+                const dummy = document.createElement("div");
+dummy.style.visibility = "hidden";
+dummy.style.height = "0px";
+dummy.style.margin = "0";
+grid.appendChild(dummy);
+            }
+        }
+
+        // 가족 구분선
+        const line = document.createElement("div");
+        line.style.gridColumn = "1 / -1";
+        line.style.height = "3px";
+        line.style.background = "#000";
+        line.style.margin = "3px 0";
+        grid.appendChild(line);
+    });
+}
+
+// [수정] 기존 renderBus를 감싸서 FIT 분기 처리
+function renderBus(seatMap, maxSeats, gridId, busNum, isFit) {
+  // 1. FIT 모드일 경우 전용 함수로 납치
+  if (isFit) {
+      renderFitBus(seatMap, gridId, busNum);
+      return;
+  }
+
+  // 2. 이하 기존 코드 절대 건드리지 않음
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = '';
+  // 기존 스타일 복구 (FIT에서 변경되었을 수 있으므로)
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = "1fr 1fr 0.2fr 1fr 1fr";
+  grid.style.gap = "4px";
+
+  if (maxSeats === 14) {
+    grid.style.gridTemplateColumns = "repeat(4, 1fr)";
+    for (let i = 1; i <= 14; i++) {
+      createSeatElement(grid, i, seatMap, maxSeats, busNum);
+    }
+    return;
+  }
+
   for(let row=0; row<11; row++) {
     if(maxSeats === 45 && row === 10) {
-      let lastRowDiv = document.createElement('div'); lastRowDiv.className = 'last-row-45';
+      let lastRowDiv = document.createElement('div');
+      lastRowDiv.className = 'last-row-45';
       for(let k=41; k<=45; k++) createSeatElement(lastRowDiv, k, seatMap, maxSeats, busNum);
-      grid.appendChild(lastRowDiv); continue; 
+      grid.appendChild(lastRowDiv);
+      continue;
     }
     for(let col=0; col<5; col++) {
       if(col === 2) { grid.appendChild(document.createElement('div')); continue; }
-      let seatNum = (row < 10) ? (row * 4) + (col < 2 ? col + 1 : col) : (col < 2 ? 40 + col + 1 : 40 + col);
+      let seatNum = (row < 10)
+        ? (row * 4) + (col < 2 ? col + 1 : col)
+        : (col < 2 ? 40 + col + 1 : 40 + col);
       createSeatElement(grid, seatNum, seatMap, maxSeats, busNum);
     }
   }
@@ -920,7 +990,8 @@ function createSeatElement(parent, seatNum, seatMap, maxSeats, busNum) {
   if(selectedSeat.busNum === busNum && selectedSeat.idx === seatNum) seatDiv.classList.add('selected');
   if (busNum === 2 && seatMap[seatNum] && seatMap[seatNum].paxType === 'General') { seatDiv.classList.add('synced-general'); }
   
-  if(seatNum <= 4) {
+  // FIT 모드나 44/45인승의 앞자리 처리 (FIT는 모든 자리가 일반 자리처럼 보이게 처리)
+  if(seatNum <= 4 && maxSeats > 14) {
     if (seatMap[seatNum]) renderSeatContent(seatDiv, seatMap[seatNum], seatNum, busNum);
     else { seatDiv.classList.add('emergency'); renderSeatContent(seatDiv, null, seatNum, busNum); }
   } else {
@@ -942,33 +1013,26 @@ function renderSeatContent(el, data, num, busNum) {
     el.style.backgroundColor = data.color;
     
     let dispNum = data.mainNum;
-    
-    // [NEW] ⚡️ 글자 수에 따라 폰트 크기 자동 조절 (스마트 폰트)
     let len = String(dispNum).length; 
-    let fSize = "24px"; // 기본 (짧을 때)
+    let fSize = "24px"; 
 
-    if (len > 12) fSize = "12px";       // 11.12.13.14 처럼 엄청 길 때
-    else if (len > 8) fSize = "15px";   // 꽤 길 때
-    else if (len > 5) fSize = "19px";   // 조금 길 때
-    else if (len > 3) fSize = "22px";   // 보통
+    if (len > 12) fSize = "12px";       
+    else if (len > 8) fSize = "15px";   
+    else if (len > 5) fSize = "19px";   
+    else if (len > 3) fSize = "22px";   
 
-    // [배지 및 태그 생성]
     let originBadgeHtml = getOriginBadgeHtml(data.originTag);
     let cleanNation = data.subInfo ? data.subInfo.replace(/\(.\)/g, '') : "";
     
-    // 태그 HTML 조립
     let tagsHtml = "";
     if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
     if (data.paxType === 'D1') tagsHtml += `<span class="day-tag tag-d1">D1</span>`;
     if (data.paxType === 'D2') tagsHtml += `<span class="day-tag tag-d2">D2</span>`;
     if (data.paxType === 'D3') tagsHtml += `<span class="day-tag tag-d3">D3</span>`;
 
-    // 최종 HTML (폰트 사이즈 적용됨)
     el.innerHTML += `<div class="grp-id" style="font-size:${fSize};">${dispNum}</div><div class="info-badge ${data.textClass}">${tagsHtml}${cleanNation}${originBadgeHtml}</div>`;
   } else el.className += " empty";
 }
-
-
 
 function handleSeatClick(el, busNum, seatIdx, busSize) {
     if(selectedSeat.idx === -1) { 
@@ -1003,7 +1067,9 @@ function syncMoveToMap2(fromIdx, toIdx, busSize) {
 }
 
 function findEmptySeatMap2(busSize) {
-    let sequence = generateSeatSequence(999, busSize); 
+    // FIT 모드에서는 시퀀스가 단순 1~N이므로 호환됨
+    let isFit = (document.querySelector('input[name="busSize"]:checked').value === 'FIT');
+    let sequence = generateSeatSequence(999, busSize, isFit); 
     for (let idx of sequence) { if (currentSeatMap2[idx] === null) return idx; } 
     return -1;
 }
@@ -1014,14 +1080,22 @@ function resetSelection() {
 }
 
 function refreshDisplay() {
-    const scrollY = window.scrollY; const busSize = parseInt(localStorage.getItem('bus_size') || "44");
-    saveSeatMap(); redrawAll(busSize); renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2);
+    const scrollY = window.scrollY; 
+    let rawSize = localStorage.getItem('bus_size') || "44";
+    const isFit = (rawSize === 'FIT');
+    // FIT면 맵 크기가 busSize, 아니면 44/45
+    let busSize = isFit ? (currentSeatMap1.length - 1) : parseInt(rawSize);
+
+    saveSeatMap(); 
+    redrawAll(busSize, isFit); 
+    renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2, isFit);
     window.scrollTo(0, scrollY);
 }
+
 // =========================================
-// [6] 메시지 생성 로직
+// [6] 메시지 생성 로직 (FIT 수정됨)
 // =========================================
-function renderMessages(allGroups, seatMap1, seatMap2) {
+function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
     const msgList = document.getElementById('msgList');
     const section = document.getElementById('msgSection');
     msgList.innerHTML = ''; section.style.display = 'block';
@@ -1055,6 +1129,11 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
         const priceList_CN = `[Price List]\n\nS. 积极心态（包含）\n\nA. 缆车 + 装备\n   周末 70,000 / 平日 60,000\nB. 头盔 20,000\nC. 护具 15,000\nD. 滑雪服 20,000\nE. 雪橇 30,000\nF. 观光缆车 20,000\n\n*(刷卡 Card +10%)`;
         const priceList_EN = `[Price List]\n\nS. Positive mindset (Included)\n\nA. Lift + Gear\n   Weekend 70,000 / Weekday 60,000\nB. Helmet 20,000\nC. Guard 15,000\nD. Ski Clothes 20,000\nE. Sled 30,000\nF. Sightseeing Lift 20,000\n\n*(Card payment +10%)`;
 
+        // [수정] FIT 모드일 때 메시지 내용 변경 (버스번호/그룹/좌석 제거)
+        let groupLine = isFit ? "" : `Group: ${g.msgNum}\n`;
+        let seatLine = isFit ? "" : `Seat: ${seatStr}\n`;
+        let busLine = isFit ? "" : `\nbus no : ${busNo}`;
+
         if (g.paxType === 'D2' || g.paxType === 'D3') {
             let isReturnGuest = (g.paxType === 'D2' || g.paxType === 'D3');
             let dayLabel = isReturnGuest ? (g.paxType === 'D3' ? "Day 3" : "Day 2") : "Day 1";
@@ -1068,10 +1147,10 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
 
             if(g.langContext === 'CN') {
                 langTag = `<span class="lang-tag lang-CN">中文(${dayLabel})</span>`;
-                msgText = `[${dayLabel}/Return Guide - ${guideName}]\nGroup: ${g.msgNum}\nSeat: ${seatStr}\n\n1. 退房 Check-out (11:00 前)\n*行李寄放一楼大厅 (Lobby)\n⚠️ 迟交罚款 (Late): 10,000 / 30分\n\n2. Klook 休息室 (10:00)\n👉 付款 & 领取缆车票 (Payment/Ticket)\n\n${step3_CN}\n\n${priceList_CN}`;
+                msgText = `[${dayLabel}/Return Guide - ${guideName}]\n${groupLine}${seatLine}\n1. 退房 Check-out (11:00 前)\n*行李寄放一楼大厅 (Lobby)\n⚠️ 迟交罚款 (Late): 10,000 / 30分\n\n2. Klook 休息室 (10:00)\n👉 付款 & 领取缆车票 (Payment/Ticket)\n\n${step3_CN}\n\n${priceList_CN}`;
             } else {
                 langTag = `<span class="lang-tag lang-EN">ENG(${dayLabel})</span>`;
-                msgText = `[${dayLabel}/Return Guide - ${guideName}]\nGroup: ${g.msgNum}\nSeat: ${seatStr}\n\n1. Check-out (Until 11:00)\n*Leave bags at Lobby\n⚠️ Late Penalty: 10,000 KRW / 30min\n\n2. Klook Lounge (10:00)\n👉 Payment & Get Lift Card\n\n${step3_EN}\n\n${priceList_EN}`;
+                msgText = `[${dayLabel}/Return Guide - ${guideName}]\n${groupLine}${seatLine}\n1. Check-out (Until 11:00)\n*Leave bags at Lobby\n⚠️ Late Penalty: 10,000 KRW / 30min\n\n2. Klook Lounge (10:00)\n👉 Payment & Get Lift Card\n\n${step3_EN}\n\n${priceList_EN}`;
             }
         } 
         else {
@@ -1084,7 +1163,7 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
                 else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口`; } 
                 else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
                 
-                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。\n\nbus no : ${busNo}\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
+                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。${busLine}\n${groupLine}${seatLine}`;
             } else {
                 langTag = `<span class="lang-tag lang-EN">TOUR(EN)</span>`;
                 if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ. Exit 8`; } 
@@ -1092,7 +1171,7 @@ function renderMessages(allGroups, seatMap1, seatMap2) {
                 else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
                 else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
                 
-                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm\n\nbus no : ${busNo}\nGroup: ${g.msgNum}\nSeat: ${seatStr}`;
+                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm${busLine}\n${groupLine}${seatLine}`;
             }
         }
 
@@ -1223,7 +1302,11 @@ function manualAddGroup() {
 
     targetGroup.count++;
     
-    let sequence = generateSeatSequence(1, currentSeatMap1.length - 1);
+    // [수정] 수동 추가 시에도 FIT 시퀀스 사용 (일반 1,2,3... 또는 버스시퀀스)
+    let isFit = (document.querySelector('input[name="busSize"]:checked').value === 'FIT');
+    // FIT 모드면 좌석이 부족할 수 있으므로 맵을 확장해야 하지만, 
+    // 여기서는 간단히 기존 맵의 빈자리만 찾음 (FIT는 보통 자동실행으로 리셋하므로)
+    let sequence = generateSeatSequence(1, currentSeatMap1.length - 1, isFit);
     let seatedIdx = -1;
     
     for(let i of sequence) {
@@ -1291,9 +1374,9 @@ function saveTimeInput() { const times = { h: document.getElementById('timeHongd
 function saveGuideName() { 
     localStorage.setItem('bus_guideName', document.getElementById('guideNameInput').value);
     localStorage.setItem('bus_number', document.getElementById('busNumberInput').value);
-    if(msgListGroups.length > 0) renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2);
+    if(msgListGroups.length > 0) refreshDisplay(); // 변경 시 메시지 업데이트
 }
-function saveSpecialNotice() { localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value); if(msgListGroups.length > 0) renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2); }
+function saveSpecialNotice() { localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value); if(msgListGroups.length > 0) refreshDisplay(); }
 
 function loadSeatMap() {
     const saved = localStorage.getItem('bus_seatMap');
@@ -1304,8 +1387,7 @@ function loadSeatMap() {
                 currentSeatMap1 = data.map1; currentSeatMap2 = data.map2; msgListGroups = data.groups || []; 
                 const hasReturn = msgListGroups.some(g => g.paxType === 'D2' || g.paxType === 'D3');
                 toggleMap2(hasReturn);
-                redrawAll(parseInt(localStorage.getItem('bus_size') || "44")); 
-                renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2); 
+                refreshDisplay(); // 통합 리프레시 호출
             } 
         } catch(e) {} 
     }
@@ -1450,6 +1532,7 @@ window.onload = function() {
     if(savedTimes.h) document.getElementById('timeHongdae').value = savedTimes.h;
     if(savedTimes.m) document.getElementById('timeMyeongdong').value = savedTimes.m;
     if(savedTimes.d) document.getElementById('timeDongdaemun').value = savedTimes.d;
+    
     loadSeatMap();
 };
 

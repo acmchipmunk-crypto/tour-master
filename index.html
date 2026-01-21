@@ -771,7 +771,9 @@ function getPickColor(grp) {
 
 function setGroupMeta(grp) {
     let nation = grp.country;
-    if (CONFIG.COUNTRY_MAP[grp.country]) nation = CONFIG.COUNTRY_MAP[grp.country];
+// 뒤에 .substring(0, 2)를 붙여서 2글자만 가져오게 수정
+if (CONFIG.COUNTRY_MAP[grp.country]) nation = CONFIG.COUNTRY_MAP[grp.country].substring(0, 2);
+
     grp.textClass = 'neutral-text'; 
     grp.subInfo = `${nation}${grp.originTag}`; 
 }

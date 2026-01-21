@@ -369,8 +369,19 @@ const CONFIG = {
         "98": "IR", "852": "HK", "886": "TW" 
     },
     COUNTRY_MAP: { 
+        // 아시아 & 태평양
         'KR':'한국','CN':'중국','TW':'대만','HK':'홍콩','SG':'싱가','MY':'말레','TH':'태국','PH':'필리',
-        'VN':'베트','ID':'인니','US':'미국','UK':'영국','AU':'호주','JP':'일본' 
+        'VN':'베트','ID':'인니','JP':'일본','AU':'호주','NZ':'뉴질','IN':'인도','PK':'파키','LK':'스리',
+        'MM':'미얀','AF':'아프','IR':'이란',
+        // 북미 & 남미
+        'US':'미국','MX':'멕시','BR':'브라','AR':'아르','CL':'칠레','PE':'페루','CO':'콜롬','VE':'베네',
+        'CU':'쿠바',
+        // 유럽
+        'UK':'영국','DE':'독일','FR':'프랑','IT':'이탈','ES':'스페','RU':'러시','NL':'네덜','BE':'벨기',
+        'CH':'스위','AT':'오스','DK':'덴마','SE':'스웨','NO':'노르','PL':'폴란','HU':'헝가','RO':'루마',
+        'GR':'그리','TR':'튀르',
+        // 아프리카
+        'EG':'이집','ZA':'남아'
     },
     SCHEMES: {
         'kakao': 'kakaotalk://',
@@ -473,7 +484,9 @@ function combinePhoneAndMessenger(phoneCol, messengerCol) {
     let isMessengerValid = false;
     
     if (lowerMsg.includes('whatsapp') || lowerMsg.includes('viber')) {
-        targetBody = cleanMsgCol.replace(/[^0-9]/g, '');
+        // [수정] 슬래시(/)나 쉼표(,)가 있으면 앞쪽 번호만 잘라서 사용
+        let splitMsg = cleanMsgCol.split(/[,\/]/);
+        targetBody = splitMsg[0].replace(/[^0-9]/g, '');
         isMessengerValid = true;
     } 
     
@@ -753,9 +766,11 @@ function runAI() {
     localStorage.removeItem('bus_seatMap');
     
     let raw = document.getElementById('rawData').value;
-    raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n]+/g, ' '));
+    // [수정] 따옴표 안의 줄바꿈 뿐만 아니라 탭(\t)도 공백으로 치환해서 밀림 방지
+    raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
 
     // [수정] FIT 모드 분기 처리
+
     let rawSizeVal = document.querySelector('input[name="busSize"]:checked').value;
     const isFit = (rawSizeVal === 'FIT');
     
@@ -1129,10 +1144,10 @@ function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
         const priceList_CN = `[Price List]\n\nS. 积极心态（包含）\n\nA. 缆车 + 装备\n   周末 70,000 / 平日 60,000\nB. 头盔 20,000\nC. 护具 15,000\nD. 滑雪服 20,000\nE. 雪橇 30,000\nF. 观光缆车 20,000\n\n*(刷卡 Card +10%)`;
         const priceList_EN = `[Price List]\n\nS. Positive mindset (Included)\n\nA. Lift + Gear\n   Weekend 70,000 / Weekday 60,000\nB. Helmet 20,000\nC. Guard 15,000\nD. Ski Clothes 20,000\nE. Sled 30,000\nF. Sightseeing Lift 20,000\n\n*(Card payment +10%)`;
 
-        // [수정] FIT 모드일 때 메시지 내용 변경 (버스번호/그룹/좌석 제거)
-        let groupLine = isFit ? "" : `Group: ${g.msgNum}\n`;
-        let seatLine = isFit ? "" : `Seat: ${seatStr}\n`;
-        let busLine = isFit ? "" : `\nbus no : ${busNo}`;
+        // FIT: 버스번호 + 그룹번호만 / 일반: 버스+그룹+좌석
+let groupLine = isFit
+  ? `Bus ${busNo} / Group ${gid}\n`
+  : `Bus ${busNo} / Group ${gid} / Seat ${seatStr}\n`;
 
         if (g.paxType === 'D2' || g.paxType === 'D3') {
             let isReturnGuest = (g.paxType === 'D2' || g.paxType === 'D3');

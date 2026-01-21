@@ -784,7 +784,9 @@ function runAI() {
     localStorage.removeItem('bus_seatMap');
     
     let raw = document.getElementById('rawData').value;
-    raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n]+/g, ' '));
+    // 따옴표 안에 있는 줄바꿈(\r\n) 뿐만 아니라 탭(\t)도 공백으로 바꿔서 칸 밀림 방지
+raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
+
 
     // [수정] FIT 모드 분기 처리
     let rawSizeVal = document.querySelector('input[name="busSize"]:checked').value;

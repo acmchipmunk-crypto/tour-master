@@ -1,1559 +1,1544 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>미스터 신의 투어마스터 10.8 (Gender Free + FIT Mode)</title>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<style>
-  /* --- [기존 스타일 유지] --- */
-  body, input, button, textarea, select { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; -webkit-user-select:none; }
-  body { background: #f0f2f5; margin: 0; padding: 5px; max-width: 100vw; overflow-x: hidden; }
-  
-  .main-title { 
-      text-align: center; 
-      font-size: 22px; 
-      font-weight: 900; 
-      color: #ffffff; 
-      background: linear-gradient(135deg, #3f51b5, #1a237e);
-      margin: 10px 0 15px 0; 
-      padding: 12px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-  }
-
-  /* ... (기존 CSS 생략 없이 원본 유지) ... */
-  .info-text { font-size: 12px; color: #546e7a; margin: 0 0 8px 0; font-weight: 600; display: block; background: #eceff1; padding: 4px 8px; border-radius: 4px; border-left: 3px solid #b0bec5; }
-  .info-text.center { text-align: center; border-left: none; background: transparent; }
-  
-  .guide-panel { background: #fff3e0; padding: 10px; border-radius: 12px; margin-bottom: 10px; text-align: center; border: 2px solid #ffe0b2; display: flex; justify-content: space-around; gap: 5px; }
-  .guide-input-group { display: flex; flex-direction: column; align-items: center; }
-  .guide-input { font-size: 16px; font-weight: 900; color: #e65100; border: none; border-bottom: 2px solid #e65100; background: transparent; text-align: center; width: 120px; outline: none; }
-  
-  .input-box { background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px; box-sizing: border-box; width: 100%; }
-  
-  .manual-control-panel { display: flex; gap: 5px; background: #e8eaf6; padding: 10px; border-radius: 8px; margin-bottom: 10px; align-items: center; border: 1px solid #c5cae9; width: 100%; box-sizing: border-box; }
-  .manual-input { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; text-align: center; border: 2px solid #3f51b5; border-radius: 6px; color: #333; outline: none; min-width: 0; }
-  .btn-manual { width: 50px; height: 45px; font-size: 20px; font-weight: 900; border: none; border-radius: 6px; cursor: pointer; color: white; flex-shrink: 0; }
-  .btn-add { background: #3f51b5; }
-  .btn-del { background: #f44336; }
-
-  textarea { width: 100%; height: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 8px; font-size: 12px; box-sizing: border-box; }
-  
-  .time-setting-panel { background: #e3f2fd; padding: 8px; border-radius: 8px; margin-bottom: 8px; display: flex; gap: 5px; justify-content: space-between; align-items: center; }
-  .time-input-group { display: flex; flex-direction: column; flex: 1; }
-  .time-input-group label { font-size: 10px; font-weight: bold; color: #1565c0; margin-bottom: 2px; text-align: center; }
-  .time-input-group input { text-align: center; border: 1px solid #90caf9; border-radius: 4px; padding: 4px; font-weight: bold; color: #333; width: 100%; box-sizing: border-box; }
-  
-  .control-panel { margin-top: 8px; border-top: 1px dashed #ddd; padding-top: 8px; }
-  .chk-label { background: #f1f3f5; border: 1px solid #d1d1d1; border-radius: 4px; padding: 6px 9px; font-size: 11px; font-weight: 800; cursor: pointer; color: #333; display: flex; align-items: center; }
-  .chk-label input { margin-right: 4px; }
-  .chk-label:has(input:checked) { background: #007bff; border-color: #0056b3; color: white; }
-  
-  .priority-display { font-size: 12px; color: #0056b3; font-weight: bold; margin: 5px 0; padding: 5px; background: #fff; border-radius: 4px; min-height: 15px; border: 1px solid #eee; }
-  .size-selector { display: flex; gap: 10px; margin-bottom: 5px; font-size: 12px; font-weight: bold; justify-content: center; background: #eee; padding: 5px; border-radius: 8px;}
-  .control-group { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 5px; }
-  
-  /* 버튼 그룹 스타일 */
-  .action-box { background: #e0f2f1; padding: 10px; border-radius: 12px; border: 1px solid #b2dfdb; display: flex; flex-direction: column; gap: 8px; }
-  .action-row { display: flex; gap: 5px; align-items: center; }
-  
-  button { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: transform 0.1s; }
-  button:active { transform: scale(0.98); }
-
-  .btn-vcard { background: #009688; color: white; flex: 1.5; font-size: 13px; }
-  .btn-run { background: #4e54c8; color: white; flex: 2; font-size: 15px; box-shadow: 0 2px 5px rgba(78, 84, 200, 0.3); }
-  .btn-clear { background: #ef5350; color: white; flex: 0.8; font-size: 13px; } 
-  .vcard-input { width: 70px; padding: 10px; text-align: center; border: 1px solid #00897b; border-radius: 6px; font-weight: bold; color: #00695c; font-size: 13px; }
-
-  .btn-save-mini { background: #11998e; color: white; padding: 6px 14px; font-size: 12px; border-radius: 15px; border: 1px solid white; cursor: pointer; text-decoration: none; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-  .btn-save-mini.night { background: #e91e63; }
-  
-  .capture-wrapper { margin-bottom: 30px; border: 5px solid #eee; position: relative; }
-  #captureArea1, #captureArea2 { background: white; padding: 15px 5px; border-radius: 0; width: 100%; max-width: 500px; margin: 0 auto; box-sizing: border-box; }
-  
-  .bus-header { text-align: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #333; position: relative; }
-  
-  .pickup-summary { 
-      background: #2c3e50; 
-      color: white; 
-      padding: 10px; 
-      border-radius: 6px; 
-      font-size: 1.2rem; 
-      font-weight: 900; 
-      margin-bottom: 5px; 
-      letter-spacing: -0.5px; 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
-      display: flex; 
-      align-items: center; 
-      justify-content: space-between;
-      gap: 10px;
-  }
-  
-  .header-controls { position: static; transform: none; display: flex; align-items: center; }
-
-  .bus-date { font-size: 1.0rem; color: #555; margin-top: 6px; font-weight: 800; }
-  .bus-title-label { background: #333; color: #fff; display:inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 5px; font-weight: bold; }
-  
-  .bus-grid { display: grid; grid-template-columns: 1fr 1fr 0.2fr 1fr 1fr; grid-auto-rows: 1fr; gap: 4px; width: 100%; }
-  .last-row-45 { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 4px; height: 100%; }
-  .last-row-45 .seat { flex: 1; width: auto; }
-  
-  .seat { aspect-ratio: 1.1 / 1; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; position: relative; cursor: pointer; box-shadow: 1px 2px 3px rgba(0,0,0,0.1); padding: 3px; height: 100%; box-sizing: border-box; background: white; justify-content: center; align-items: center; }
-  .seat.empty { background: white; opacity: 1; border: 2px dashed #ddd; } 
-  .seat.reserved { background: #bbb; color: white; opacity: 0.5; pointer-events: none; border:none; } 
-  .seat.emergency { border: 2px dashed #ff9800; background-color: #fff8e1; } 
-  .seat.selected { border: 3px solid #ff0000; transform: scale(1.05); z-index: 20; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
-  .seat.synced-general { background-color: #e0e0e0 !important; border: 1px solid #bdbdbd; opacity: 0.8; }
-  
-  .seat-num { position: absolute; top: 2px; left: 4px; font-size: 11px; font-weight: bold; color: rgba(0,0,0,0.4); z-index: 2; }
-  .grp-id { font-size: 24px; font-weight: 900; color: #333; line-height: 1; margin-bottom: 4px; margin-top: 8px; text-align: center; }
-  .grp-id.long-text { font-size: 20px; letter-spacing: -1px; }
-  .info-badge { background: rgba(255,255,255,0.85); border-radius: 12px; padding: 3px 6px; text-align: center; font-size: 11px; font-weight: 900; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: 95%; margin-top: auto; margin-bottom: 2px; white-space: nowrap; }
-  
-  .neutral-text { color: #555; } 
-  .day-tag { color: white; padding: 1px 4px; border-radius: 4px; margin-right: 3px; font-size: 10px; vertical-align: middle; }
-  .tag-d1 { background-color: #1976d2; } .tag-d2 { background-color: #d32f2f; } .tag-d3 { background-color: #7b1fa2; } .tag-stay { background-color: #ff9800; }
-  .tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; }
-
-  .status { font-size: 11px; color: #666; text-align: right; margin-top: 5px; }
-
-  .msg-section { margin-top: 20px; border-top: 2px solid #333; padding-top: 10px; }
-  .msg-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-  .msg-check-area { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-right: 8px; width: 45px; gap: 8px; }
-  .check-box-wrapper { display: flex; flex-direction: column; align-items: center; }
-  .msg-check-label { font-size: 10px; font-weight: 800; color: #555; margin-bottom: 2px; text-align: center; white-space: nowrap; }
-  .label-sent { color: #1976d2; } .label-connected { color: #d32f2f; }
-  .msg-check-input { transform: scale(1.5); margin: 0; cursor: pointer; }
-  .chk-sent { accent-color: #2196f3; } .chk-conn { accent-color: #f44336; } 
-  .msg-info { flex: 1; margin-right: 5px; min-width: 0; }
-  .msg-group-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
-  .msg-group { font-size: 18px; font-weight: 900; color: #333; }
-  .msg-seats { font-size: 14px; font-weight: bold; color: #d32f2f; margin-top: 4px; }
-  .msg-memo-input { width: 100%; margin-top: 5px; border: none; border-bottom: 1px solid #ccc; font-size: 12px; padding: 5px 2px; background: #fafafa; }
-  .lang-tag { font-size: 10px; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
-  .lang-CN { background: #fce4ec; color: #c2185b; }
-  .lang-EN { background: #e3f2fd; color: #1565c0; }
-  .msg-actions { display: flex; gap: 5px; align-items: center; }
-  .btn-action { width: 45px; height: 45px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; font-size: 10px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; text-align: center; line-height: 1.2; transition: transform 0.1s; }
-  .btn-action:active { transform: scale(0.95); }
-  .btn-wa-send { background: #25D366; color: white; }
-  .btn-wa-send.disabled { background: #ccc; pointer-events: none; }
-  .btn-copy-body { background: #607d8b; color: white; }
-  .btn-copy-mail { background: #4fc3f7; color: white; }
-  
-  .logo-wa { background: #25D366; color: white; } .logo-line { background: white; border: 2px solid #06C755; color: #06C755; box-sizing: border-box; } .logo-kakao { background: #FEE500; color: #3c1e1e; }
-  .logo-viber { background: #7360f2; color: white; } .logo-wechat { background: #000000; color: #07C160; border: 1px solid #07C160; } .logo-zalo { background: #0068FF; color: white; } .logo-none { background: #e0e0e0; color: #999; cursor: default; }
-  .hidden-msg { display: none; white-space: pre-wrap; }
-
-  /* 설명서 스타일 */
-  .manual-section { background: white; padding: 15px; border-radius: 12px; margin-top: 30px; border: 2px solid #cfd8dc; }
-  .manual-title { font-size: 16px; font-weight: 900; color: #455a64; margin-bottom: 10px; border-bottom: 2px solid #cfd8dc; padding-bottom: 5px; }
-  .manual-list { padding-left: 20px; font-size: 13px; color: #37474f; line-height: 1.6; }
-  .manual-list li { margin-bottom: 6px; }
-  .manual-list span { font-weight: bold; color: #00695c; }
-  
-  /* 잠금 화면 스타일 */
-  #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #263238; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-  #lockInput { font-size: 24px; padding: 10px; text-align: center; border-radius: 8px; border: none; margin-bottom: 20px; width: 200px; font-weight: bold; letter-spacing: 5px; }
-  #lockBtn { padding: 10px 30px; font-size: 18px; font-weight: bold; background: #009688; border: none; border-radius: 8px; color: white; cursor: pointer; }
-
-
-  /* [NEW] 기원 배지 스타일 (최종) */
-  .origin-badge {
-      display: inline-block;
-      width: 15px; height: 15px;
-      line-height: 15px;
-      border-radius: 50%;
-      text-align: center;
-      font-size: 9px;
-      font-weight: 900;
-      color: white;
-      margin-left: 3px;
-      vertical-align: text-bottom;
-      box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
-  }
-
-  /* 회사별 색상 및 글자색 */
-  .badge-klook { background: #FF5722; } /* 클룩: 주황 */
-  .badge-kkday { background: #29B6F6; } /* 케이케이: 하늘 */
-  .badge-trip  { background: #0d47a1; color: #FFEB3B; } /* 트립: 진한파랑+노랑T */
-  .badge-gyg   { background: #000000; } /* GYG: 검정 */
-  .badge-qike  { background: #00E676; } /* 치커: 밝은초록 */
-  .badge-trazy { background: #FF4081; } /* 트레이지: 분홍 */
-  .badge-etc   { background: #78909C; } /* 미분류/현장: 회색 */
-  
-  /* 하단 배지 설명 영역 스타일 */
-  .badge-legend {
-      background: white; border: 2px solid #cfd8dc; border-radius: 12px;
-      padding: 10px; margin-top: 10px; text-align: center; font-size: 11px;
-      color: #455a64; font-weight: bold; line-height: 2.0;
-  }
-
-</style>
-</head>
-<body>
-
-<div id="lockScreen" style="display:none;">
-    <h2 style="margin-bottom:20px;">🔒 ACCESS LOCKED</h2>
-    <input type="password" id="lockInput" placeholder="Password" maxlength="6" inputmode="numeric">
-    <button id="lockBtn" onclick="unlock()">ENTER</button>
-</div>
-
-<div class="main-title">미스터 신의 투어마스터 10.8 (FIT Mode)</div>
-
-<div class="input-box">
-  <div class="info-text">1. 기본 정보 & 시간 설정</div>
-  <div class="guide-panel">
-      <div class="guide-input-group">
-          <label style="font-weight:bold; font-size:12px; color:#ef6c00;">가이드명 (Guide)</label>
-          <input type="text" id="guideNameInput" class="guide-input" value="Mr. Shin" oninput="saveGuideName()">
-      </div>
-      <div class="guide-input-group">
-          <label style="font-weight:bold; font-size:12px; color:#0277bd;">버스 번호 (Bus)</label>
-          <input type="text" id="busNumberInput" class="guide-input" value="4044" oninput="saveGuideName()">
-      </div>
-  </div>
-  
-  <div class="time-setting-panel">
-    <div class="time-input-group"><label>홍대(8번)</label><input type="text" id="timeHongdae" value="06:40" onchange="saveTimeInput()"></div>
-    <div class="time-input-group"><label>명동(3번)</label><input type="text" id="timeMyeongdong" value="07:10" onchange="saveTimeInput()"></div>
-    <div class="time-input-group"><label>동대문(11번)</label><input type="text" id="timeDongdaemun" value="07:20" onchange="saveTimeInput()"></div>
-  </div>
-  <div style="font-size:11px; color:#888; text-align:center;">* 이 시간은 메시지에 자동으로 들어갑니다.</div>
-</div>
-
-<div class="input-box">
-  <div class="info-text">2. 데이터 입력 (카톡/엑셀 복사)</div>
-  <textarea id="rawData" placeholder="여기에 명단 데이터를 붙여넣으세요... (스키/산천어/일반 자동 감지)" oninput="saveTextInput()"></textarea>
-  <div class="size-selector">
-    <label><input type="radio" name="busSize" value="44" checked onchange="saveTextInput()"> 44인승</label>
-    <label><input type="radio" name="busSize" value="45" onchange="saveTextInput()"> 45인승</label>
-    <label><input type="radio" name="busSize" value="FIT" onchange="saveTextInput()"> FIT(자동)</label>
-  </div>
-</div>
-
-<div class="action-box">
-  <div class="info-text center">3. 실행 및 연락처 저장 (핵심 기능)</div>
-  <div class="action-row">
-      <input type="text" id="vcardDate" class="vcard-input" placeholder="YYMMDD" onchange="checkDateChange()">
-      <button class="btn-vcard" onclick="downloadVCard()">📞 연락처 저장(.vcf)</button>
-  </div>
-  <div class="action-row">
-      <button class="btn-clear" onclick="clearData()">🗑 초기화</button>
-      <button class="btn-run" onclick="runAI()">🤖 자동 배치 실행 (Run)</button>
-  </div>
-  <div class="status" id="paxInfo" style="text-align:center;">준비됨</div>
-</div>
-
-<div class="input-box">
-  <div class="info-text">4. 정렬 및 수정 (옵션)</div>
-  <div class="control-panel" style="margin-top:0; border-top:none; padding-top:0;">
-    <div class="priority-display" id="priorityView">우선순위: 없음</div>
-    <div class="control-group">
-      <label class="chk-label"><input type="checkbox" class="criteria" value="solo" onchange="updatePriority(this)"> 혼자(1인)</label>
-      <label class="chk-label"><input type="checkbox" class="criteria" value="CN" onchange="updatePriority(this)"> 중국어권</label>
-      <label class="chk-label"><input type="checkbox" class="criteria" value="EN" onchange="updatePriority(this)"> 영어권</label>
-      <label class="chk-label"><input type="checkbox" class="criteria" value="G4" onchange="updatePriority(this)"> 4인 이상</label>
-      <label class="chk-label"><input type="checkbox" class="criteria" value="HD" onchange="updatePriority(this)"> 홍대</label>
-      <label class="chk-label"><input type="checkbox" class="criteria" value="MY" onchange="updatePriority(this)"> 명동</label>
-      <label class="chk-label"><input type="checkbox" class="criteria" value="DDM" onchange="updatePriority(this)"> 동대문</label>
-    </div>
-    <div class="size-selector" style="background:#eef;">
-      <label><input type="radio" name="direction" value="front" checked> 조건 앞쪽</label>
-      <label><input type="radio" name="direction" value="back"> 조건 뒤쪽</label>
-    </div>
-  </div>
-  
-  <div class="manual-control-panel" style="margin-bottom:0; margin-top:10px;">
-          <input type="text" id="manualGroupNum" class="manual-input" placeholder="No. or Name">
-
-      <button class="btn-manual btn-add" onclick="manualAddGroup()">+</button>
-      <button class="btn-manual btn-del" onclick="manualDelGroup()">-</button>
-  </div>
-  <div style="font-size:11px; color:#888; text-align:center; margin-top:5px;">* 현장 손님 추가나 제외할 때 쓰세요.</div>
-</div>
-
-<div class="input-box" style="background:transparent; box-shadow:none; padding:0;">
-  <div class="info-text center" style="margin-bottom:10px;">5. 좌석 배치 확인 & 저장 (Maps)</div>
-</div>
-<div class="capture-wrapper">
-  <div id="captureArea1">
-    <div class="bus-header">
-      <div class="bus-title-label">☀️ Map 1 (Seoul → Dest)</div>
-      <div class="pickup-summary" id="pickupSummary1">
-          준비중...
-          <div class="header-controls" data-html2canvas-ignore="true">
-             <button class="btn-save-mini" onclick="downloadImage(1)">📸 저장</button>
-          </div>
-      </div>
-      <div class="bus-date" id="dateDisplay1">2026-00-00</div>
-    </div>
-    <div class="bus-grid" id="busGrid1"></div>
-  </div>
-</div>
-
-<div class="capture-wrapper">
-  <div id="captureArea2">
-    <div class="bus-header">
-      <div class="bus-title-label">🌙 Map 2 (Dest → Seoul)</div>
-      <div class="pickup-summary" id="pickupSummary2">
-          준비중...
-          <div class="header-controls" data-html2canvas-ignore="true">
-            <button class="btn-save-mini night" onclick="downloadImage(2)">📸 저장</button>
-          </div>
-      </div>
-      <div class="bus-date" id="dateDisplay2">2026-00-00</div>
-    </div>
-    <div class="bus-grid" id="busGrid2"></div>
-  </div>
-</div>
-
-<div class="input-box" style="background: #fff9c4; border: 2px solid #fbc02d;">
-  <div class="info-text" style="text-align:left; color:#f9a825;">6. 특수 공지 (오늘만 나가는 메시지)</div>
-  <textarea id="specialNotice" style="height: 100px; margin-top:5px; border-color:#fbc02d;" placeholder="예: 비가 오니 우산을 챙기세요. (이 내용은 전송 메시지 중간에 삽입됩니다)" oninput="saveSpecialNotice()"></textarea>
-</div>
-
-<div class="msg-section" id="msgSection" style="display:none;">
-    <h3 style="text-align:center; margin:0 0 10px 0;">7. 💬 메시지 발송 & 체크</h3>
-    <div class="info-text" style="margin-bottom:15px; text-align:center;">Send 버튼을 누르면 WhatsApp이 열립니다.</div>
-    <div id="msgList"></div>
-</div>
-<textarea id="clipboardHelper" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; opacity:0; pointer-events:none;"></textarea>
-<div class="badge-legend">
-    🏷️ <b>예약처 구분:</b> 
-    <span class="origin-badge badge-klook">K</span>클룩 
-    <span class="origin-badge badge-kkday">K</span>케이케이 
-    <span class="origin-badge badge-trip">T</span>트립 
-    <span class="origin-badge badge-gyg">G</span>겟 
-    <span class="origin-badge badge-qike">Q</span>치커 
-    <span class="origin-badge badge-trazy">Z</span>트레이지 
-    <span class="origin-badge badge-etc">미</span>기타/현장
-</div>
-
-<div class="manual-section">
-    <div class="manual-title">📘 투어마스터 10.8 사용 설명서</div>
-    <ul class="manual-list">
-        <li><span>1단계 (준비):</span> 맨 위 <b>가이드명, 버스 번호, 출발 시간</b>을 먼저 확인하세요.</li>
-        <li><span>2단계 (입력):</span> 카카오톡이나 엑셀의 명단을 복사해서 <b>데이터 입력창</b>에 붙여넣으세요. 버스 인승(44/45)도 체크하세요.</li>
-        <li><span>3단계 (저장):</span> <b>[연락처 저장]</b> 버튼을 눌러 핸드폰에 손님 번호를 저장하세요. (필수!)</li>
-        <li><span>4단계 (실행):</span> <b>[자동 배치 실행]</b>을 누르면 AI가 자리를 배정합니다.</li>
-        <li><span>5단계 (조정):</span> 자리를 바꾸고 싶으면 <b>좌석을 클릭</b>해서 서로 맞바꾸세요. (같은 맵끼리만 가능)</li>
-        <li><span>6단계 (이미지):</span> 각 맵 상단의 <b>[📸 저장]</b> 버튼을 눌러 이미지를 저장하고 기사님께 보내세요.</li>
-        <li><span>7단계 (전송):</span> 맨 아래 메시지 목록에서 <b>[Send WA]</b>를 눌러 손님에게 메시지를 보내고, 체크박스로 완료 표시를 하세요.</li>
-    </ul>
-</div>
-<script>
-/**
- * [전역 상수 및 설정] - 버전 10.8 (Gender Free + FIT)
- */
-const CONFIG = {
-    BOOTS_YOUTUBE: "https://youtu.be/J9S0q1QKoOY?si=V57nHSmY0NGhhHcY",
-    COLORS: {
-        hongdae: '#C8E6C9',    // 홍대 (초록)
-        myeongdong: '#BBDEFB', // 명동 (파랑)
-        dongdaemun: '#E1BEE7', // 동대문 (보라)
-        resort: '#FFF9C4',     // 스키장/D2/D3 (노랑)
-        etc: '#E0E0E0'         // 기타/현장 (회색)
-    },
-    PHONE_CODES: { 
-        "1": "US", "7": "RU", "20": "EG", "27": "ZA", "30": "GR", "31": "NL", "32": "BE", "33": "FR", "34": "ES", 
-        "36": "HU", "39": "IT", "40": "RO", "41": "CH", "43": "AT", "44": "UK", "45": "DK", "46": "SE", "47": "NO", 
-        "48": "PL", "49": "DE", "51": "PE", "52": "MX", "53": "CU", "54": "AR", "55": "BR", "56": "CL", "57": "CO", 
-        "58": "VE", "60": "MY", "61": "AU", "62": "ID", "63": "PH", "64": "NZ", "65": "SG", "66": "TH", "81": "JP", 
-        "82": "KR", "84": "VN", "86": "CN", "90": "TR", "91": "IN", "92": "PK", "93": "AF", "94": "LK", "95": "MM", 
-        "98": "IR", "852": "HK", "886": "TW" 
-    },
-    COUNTRY_MAP: { 
-        // 아시아 & 태평양
-        'KR':'한국','CN':'중국','TW':'대만','HK':'홍콩','SG':'싱가','MY':'말레','TH':'태국','PH':'필리',
-        'VN':'베트','ID':'인니','JP':'일본','AU':'호주','NZ':'뉴질','IN':'인도','PK':'파키','LK':'스리',
-        'MM':'미얀','AF':'아프','IR':'이란',
-        // 북미 & 남미
-        'US':'미국','MX':'멕시','BR':'브라','AR':'아르','CL':'칠레','PE':'페루','CO':'콜롬','VE':'베네',
-        'CU':'쿠바',
-        // 유럽
-        'UK':'영국','DE':'독일','FR':'프랑','IT':'이탈','ES':'스페','RU':'러시','NL':'네덜','BE':'벨기',
-        'CH':'스위','AT':'오스','DK':'덴마','SE':'스웨','NO':'노르','PL':'폴란','HU':'헝가','RO':'루마',
-        'GR':'그리','TR':'튀르',
-        // 아프리카
-        'EG':'이집','ZA':'남아'
-    },
-    SCHEMES: {
-        'kakao': 'kakaotalk://',
-        'line': 'line://',
-        'wechat': 'weixin://', 
-        'viber': 'viber://',
-        'mail': 'mailto:'
-    }
-};
-
-let currentSeatMap1 = [];
-let currentSeatMap2 = [];
-let selectedSeat = { busNum: 0, idx: -1 };
-let msgListGroups = []; 
-let priorityQueue = [];
-let audioCtx = null;
-
-// =========================================
-// [기원 판별 로직]
-// =========================================
-function detectOrigin(rawId) {
-    if (!rawId) return "(미)";
-    let temp = rawId.split('-')[0];
-    temp = temp.replace(/\(.*\)/g, '').replace(/\s+/g, '').toUpperCase();
-    if (temp.includes('QIKE')) return "(치)";
-    if (temp.includes('GYG')) return "(겟)";
-    if (/^\d{8}[A-Z]{2}\d{5}$/.test(temp)) return "(지)";
-    if (/^[A-Z]{3}\d{6}$/.test(temp)) return "(클)";
-    if (/^(24|25|26)KK/.test(temp)) return "(케)";
-    if (/^\d{8,}$/.test(temp)) return "(트)";
-    return "(미)";
-}
-
-function getOriginBadgeHtml(tag) {
-    if (!tag) return "";
-    if (tag.includes('클')) return `<span class="origin-badge badge-klook">K</span>`;
-    if (tag.includes('케')) return `<span class="origin-badge badge-kkday">K</span>`;
-    if (tag.includes('트')) return `<span class="origin-badge badge-trip">T</span>`;
-    if (tag.includes('겟')) return `<span class="origin-badge badge-gyg">G</span>`;
-    if (tag.includes('치')) return `<span class="origin-badge badge-qike">Q</span>`;
-    if (tag.includes('지')) return `<span class="origin-badge badge-trazy">Z</span>`;
-    return `<span class="origin-badge badge-etc">미</span>`;
-}
-
-// =========================================
-// [1] 유틸리티 및 헬퍼 함수 (기존 유지)
-// =========================================
-
-function initAudio() {
-  if (!audioCtx) {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    audioCtx = new AudioContext();
-  }
-  if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-}
-
-function playPopSound() {
-  initAudio();
-  if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
-  osc.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
-  gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-  osc.start(audioCtx.currentTime);
-  osc.stop(audioCtx.currentTime + 0.1);
-}
-
-document.addEventListener('click', function(e) {
-    if (e.target.tagName === 'BUTTON' || (e.target.tagName === 'INPUT' && (e.target.type === 'checkbox' || e.target.type === 'radio')) || e.target.closest('.seat') || e.target.classList.contains('btn-action')) {
-        playPopSound();
-    }
-});
-
-function combinePhoneAndMessenger(phoneCol, messengerCol) {
-    let cleanPhoneCol = (phoneCol || "").trim();
-    let splitPhone = cleanPhoneCol.split(/[,\/]/);
-    let firstPhone = splitPhone[0] ? splitPhone[0].trim() : "";
-    let cleanMsgCol = (messengerCol || "").trim();
-    let lowerMsg = cleanMsgCol.toLowerCase();
-    
-    let rawPhoneDigits = firstPhone.replace(/[^0-9]/g, '');
-    let f_CountryCode = "82"; 
-    let f_Country = "ETC";
-    
-    for (let len = 4; len >= 1; len--) {
-        let prefix = rawPhoneDigits.substring(0, len);
-        if (CONFIG.PHONE_CODES[prefix]) { 
-            f_CountryCode = prefix; 
-            f_Country = CONFIG.PHONE_CODES[prefix]; 
-            break; 
-        }
-    }
-    
-    let targetBody = "";
-    let isMessengerValid = false;
-    
-    if (lowerMsg.includes('whatsapp') || lowerMsg.includes('viber')) {
-        // [수정] 슬래시(/)나 쉼표(,)가 있으면 앞쪽 번호만 잘라서 사용
-        let splitMsg = cleanMsgCol.split(/[,\/]/);
-        targetBody = splitMsg[0].replace(/[^0-9]/g, '');
-        isMessengerValid = true;
-    } 
-    
-    if (!isMessengerValid) {
-        targetBody = rawPhoneDigits;
-    }
-    
-    if (targetBody.startsWith('0')) targetBody = targetBody.substring(1);
-    
-    let fullNumber = "";
-    if (targetBody.startsWith(f_CountryCode)) {
-        fullNumber = targetBody;
-    } else {
-        fullNumber = f_CountryCode + targetBody;
-    }
-    
-    return { code: f_CountryCode, country: f_Country, fullNumber: fullNumber };
-}
-
-function getMessengerApp(text) { 
-    if(!text) return '무'; 
-
-    const raw = String(text || "");
-    const t = raw.toLowerCase();
-
-    if(t.includes('whatsapp')) return '와'; 
-    if(t.includes('line')) return '라'; 
-    if(t.includes('kakao')) return '카'; 
-
-    if (
-        t.includes("wechat") ||
-        t.includes("weixin") ||
-        raw.includes("微信")
-    ) return "웨";
-
-    if(t.includes('viber')) return '바'; 
-    if(t.includes('zalo')) return '잘'; 
-    return '무'; 
-}
-
-function copyToClipboard(text, el) {
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(() => { feedback(el); }).catch(() => { fallbackCopy(text, el); });
-    } else { fallbackCopy(text, el); }
-}
-
-function fallbackCopy(text, el) {
-    const scrollY = window.scrollY;
-    const helper = document.getElementById('clipboardHelper');
-    helper.value = text;
-    helper.focus({ preventScroll: true });
-    helper.select();
-    document.execCommand('copy');
-    helper.blur();
-    window.scrollTo(0, scrollY);
-    feedback(el);
-}
-
-function copyAndOpen(el, text, schemeKey) {
-    copyToClipboard(text, el);
-    let scheme = CONFIG.SCHEMES[schemeKey];
-    if (schemeKey === 'viber') { const cleanNum = text.replace(/[^0-9]/g, ''); scheme = `viber://chat?number=${cleanNum}`; }
-    if (scheme) { setTimeout(() => { try { window.location.href = scheme; } catch(e) {} }, 300); }
-}
-
-function feedback(el) { if(!el) return; let original = el.innerHTML; el.innerHTML = 'OK!'; setTimeout(() => el.innerHTML = original, 800); }
-function copyMessageBody(btn) { const card = btn.closest('.msg-card'); const hiddenDiv = card.querySelector('.hidden-msg'); copyToClipboard(hiddenDiv.textContent, btn); }
-function copyOnly(el, text) { copyToClipboard(text, el); }
-
-// =========================================
-// [2] 데이터 파싱 및 전처리 (기존 로직 유지)
-// =========================================
-function findCount(parts) {
-  for (let i = 0; i < parts.length - 1; i++) {
-    if (parts[i].includes('중국어') || parts[i].includes('영어')) {
-      let n = parseInt(parts[i+1]);
-      if (!isNaN(n)) return n;
-    }
-  }
-  return 1;
-}
-
-function findLocation(parts) {
-  for (let p of parts) {
-    if (p.includes('홍대') || p.includes('명동') || p.includes('동대문')) return p.trim();
-  }
-  return "";
-}
-
-function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
-    let parts = line.split('\t').map(p => p.trim());
-    if (headerMap && parts.length < 2) { parts = line.split(/\s{2,}/).map(p => p.trim()); }
-    if (headerMap && !parts[headerMap.name]) return null;
-    if(parts.length < 4 && !headerMap) return null;
-
-    let firstCol = parts[0] || "";
-    if (firstCol === 'No.' || firstCol.includes('예약번호') || firstCol.toLowerCase().startsWith('total') || firstCol.includes('엑셀')) return null;
-
-    const lineLower = line.toLowerCase();
-    const isSkiTour = isGlobalSki || lineLower.includes('ski') || lineLower.includes('snowboard');
-
-    let customId, productName, name, rawPhone, messengerCol, count, location, rawLang, note;
-    let resNoForOrigin = ""; 
-
-    if (headerMap) {
-        customId = parts[headerMap.no] || originalOrder.toString();
-        productName = (headerMap.product !== -1 && parts[headerMap.product]) ? parts[headerMap.product] : "Ski Tour";
-        name = parts[headerMap.name] || "Guest";
-        rawPhone = (headerMap.phone !== -1 && parts[headerMap.phone]) ? parts[headerMap.phone] : "";
-        messengerCol = (headerMap.messenger !== -1 && parts[headerMap.messenger]) ? parts[headerMap.messenger] : "";
-        resNoForOrigin = (headerMap.resNo !== -1 && parts[headerMap.resNo]) ? parts[headerMap.resNo] : "";
-        rawLang = ""; 
-        count = findCount(parts); 
-        location = findLocation(parts);
-        note = ""; 
-        if(!customId) customId = originalOrder.toString();
-    } else {
-        customId = parts[0] || originalOrder.toString();
-        if (isSkiTour) {
-             productName = parts[1] || "";
-             resNoForOrigin = parts[2] || ""; 
-             name = parts[3] || "Guest";
-             rawPhone = parts[4] || "";
-             messengerCol = parts[5] || "";
-             rawLang = parts[7] || "";
-             count = findCount(parts);
-             location = findLocation(parts);
-             note = parts[10] || "";
-        } else {
-             productName = parts[2] || "";
-             name = parts[4] || "Guest";
-             rawPhone = parts[5] || "";
-             messengerCol = parts[6] || "";
-             rawLang = parts[8] || "";
-             count = findCount(parts);
-             location = findLocation(parts);
-             note = parts[12] || "";
-             resNoForOrigin = customId; 
-        }
-    }
-
-    let originTag = detectOrigin(resNoForOrigin);
-    let optLift = false, optGear = false, optClothes = false, optLesson = false;
-    if (!headerMap && isSkiTour) {
-        if (parts[11] && parseInt(parts[11]) > 0) optLift = true;
-        if (parts[12] && parseInt(parts[12]) > 0) optGear = true;
-        if (parts[13] && parseInt(parts[13]) > 0) optClothes = true;
-        if (parts[14] && parseInt(parts[14]) > 0) optLesson = true;
-    }
-
-    let paxType = 'General'; let isStay = false; 
-    let isBoard = (productName.toLowerCase().includes('board') || productName.includes('보드'));
-    let isHot = (productName.toLowerCase().includes('hot')); 
-
-    let lowerP = productName.toLowerCase();
-    if (lowerP.includes('day1') || lowerP.includes('day 1')) { paxType = 'D1'; }
-    else if (lowerP.includes('day2') || lowerP.includes('day 2')) { paxType = 'D2'; }
-    else if (lowerP.includes('day3') || lowerP.includes('day 3')) { paxType = 'D3'; }
-    else if (lowerP.includes('편도') || lowerP.includes('one way')) { paxType = 'D1'; }
-    
-    if (paxType === 'General' && (location.includes('스키장') || location.includes('Resort'))) { paxType = 'D2'; }
-
-    let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
-    let langContext = (rawLang && rawLang.includes('중국어')) ? 'CN' : 'EN';
-    let gender = 'N'; 
-    let appType = getMessengerApp(messengerCol);
-    if (note && note.toLowerCase().includes('whatsapp')) { appType = '와'; }
-
-    let emailAddr = "";
-    for(let p of parts) { if(p && p.includes('@')) { emailAddr = p; break; } }
-
-    return {
-      id: customId, originalId: originalOrder, name: name, 
-      phone: parsedInfo.fullNumber, 
-      count: count, location: location, note: note,
-      country: parsedInfo.country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false,
-      paxType: paxType, isStay: isStay, isBoard: isBoard, 
-      isSancheoneo: !isSkiTour, isHot: isHot, email: emailAddr,
-      originTag: originTag, 
-      options: { lift: optLift, gear: optGear, clothes: optClothes, lesson: optLesson }
-    };
-}
-
-function createGroupsFromEntries(entries) {
-    let finalGroups = [];
-    entries.forEach((entry) => {
-        if(entry.isGrouped) return;
-        let currentGroupMembers = [entry]; entry.isGrouped = true;
-        
-        if (entry.phone && entry.phone.length > 5) {
-            let queue = [entry];
-            while(queue.length > 0) {
-                let curr = queue.shift();
-                entries.forEach((target) => {
-                    if(target.isGrouped) return;
-                    if(target.phone && target.phone.length > 5 && curr.phone === target.phone) {
-                        target.isGrouped = true; currentGroupMembers.push(target); queue.push(target); 
-                    }
-                });
-            }
-        }
-
-        let rep = currentGroupMembers[0];
-        let cleanIds = currentGroupMembers.map(m => m.id.replace(/\D/g, '')); 
-        if (cleanIds.some(id => id === "")) cleanIds = currentGroupMembers.map(m => m.id);
-        cleanIds.sort((a,b) => parseInt(a) - parseInt(b));
-        let displayNum = cleanIds.join('.'); 
-        let totalC = currentGroupMembers.reduce((sum, m) => sum + m.count, 0);
-        let uniqueTags = [...new Set(currentGroupMembers.map(m => m.originTag))];
-        let combinedOrigin = uniqueTags.join('');
-
-        let groupType = 'General';
-        if(currentGroupMembers.some(m => m.paxType === 'D3')) groupType = 'D3';
-        else if(currentGroupMembers.some(m => m.paxType === 'D2')) groupType = 'D2';
-        else if(currentGroupMembers.some(m => m.paxType === 'D1')) groupType = 'D1';
-        if (groupType === 'D1' && currentGroupMembers.some(m => m.paxType === 'General')) groupType = 'D1';
-
-        let gLift = currentGroupMembers.some(m => m.options.lift);
-        let gGear = currentGroupMembers.some(m => m.options.gear);
-        let gClothes = currentGroupMembers.some(m => m.options.clothes);
-        let gLesson = currentGroupMembers.some(m => m.options.lesson);
-
-        finalGroups.push({
-            mainNum: displayNum, 
-            msgNum: rep.id + (currentGroupMembers.length > 1 ? ".." : ""), 
-            repNum: rep.id, 
-            count: totalC, name: rep.name, country: rep.country, gender: rep.gender,
-            langContext: rep.langContext, appType: rep.appType, location: rep.location, 
-            phone: rep.phone, messenger: rep.messenger, paxType: groupType, 
-            isStay: currentGroupMembers.some(m => m.isStay), 
-            isBoard: currentGroupMembers.some(m => m.isBoard), 
-            isSancheoneo: rep.isSancheoneo, isHot: currentGroupMembers.some(m => m.isHot), email: rep.email,
-            originTag: combinedOrigin, 
-            options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson }
-        });
-    });
-    return finalGroups;
-}
-
-function calculateScore(grp) {
-    let score = 0;
-    priorityQueue.forEach((criteria, idx) => {
-        let weight = Math.pow(10, 6 - idx); let match = false;
-        if (criteria === 'solo' && grp.count === 1) match = true;
-        if (criteria === 'CN' && grp.langContext === 'CN') match = true;
-        if (criteria === 'EN' && grp.langContext === 'EN') match = true;
-        if (criteria === 'G4' && grp.count >= 4) match = true;
-        if (criteria === 'HD' && grp.location.includes('홍대')) match = true;
-        if (criteria === 'MY' && grp.location.includes('명동')) match = true;
-        if (criteria === 'DDM' && grp.location.includes('동대문')) match = true;
-        if(match) score += weight;
-    });
-    return score;
-}
-
-function getPickColor(grp) {
-    let loc = grp.location || '';
-    if (grp.paxType === 'D2' || grp.paxType === 'D3') return CONFIG.COLORS.resort;
-    if (loc.includes('홍대')) return CONFIG.COLORS.hongdae;
-    if (loc.includes('명동')) return CONFIG.COLORS.myeongdong;
-    if (loc.includes('동대문')) return CONFIG.COLORS.dongdaemun;
-    return CONFIG.COLORS.etc;
-}
-
-function setGroupMeta(grp) {
-    let nation = grp.country;
-    if (CONFIG.COUNTRY_MAP[grp.country]) nation = CONFIG.COUNTRY_MAP[grp.country];
-    grp.textClass = 'neutral-text'; 
-    grp.subInfo = `${nation}${grp.originTag}`; 
-}
-
-// =========================================
-// [4] 메인 컨트롤러 (runAI - FIT 수정됨)
-// =========================================
-function runAI() {
-    saveTextInput(); saveTimeInput(); saveGuideName();
-    localStorage.removeItem('bus_seatMap');
-    
-    let raw = document.getElementById('rawData').value;
-    // [수정] 따옴표 안의 줄바꿈 뿐만 아니라 탭(\t)도 공백으로 치환해서 밀림 방지
-    raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
-
-    // [수정] FIT 모드 분기 처리
-
-    let rawSizeVal = document.querySelector('input[name="busSize"]:checked').value;
-    const isFit = (rawSizeVal === 'FIT');
-    
-    // FIT인 경우 초기값 0, 아니면 parseInt
-    let busSize = isFit ? 0 : parseInt(rawSizeVal);
-
-    const direction = document.querySelector('input[name="direction"]:checked').value;
-    const lines = raw.trim().split('\n');
-    const rawLower = raw.toLowerCase();
-    const isGlobalSki = rawLower.includes('ski') || rawLower.includes('snowboard') || rawLower.includes('스키') || rawLower.includes('스노우');
-
-    let headerMap = null;
-    let startLineIdx = 0;
-
-    for (let k = 0; k < Math.min(lines.length, 5); k++) {
-        let checkLine = lines[k].trim();
-        if(!checkLine) continue;
-        let headerParts = checkLine.split(/\t+/).map(h => h.trim());
-        if (headerParts.length < 2) headerParts = checkLine.split(/\s{2,}/).map(h => h.trim());
-        const idxNo = headerParts.findIndex(p => p === 'No.' || p === 'NO.');
-        const idxRes = headerParts.findIndex(p => p.includes('예약번호') || p.includes('Order'));
-
-        if (idxNo !== -1 && idxRes !== -1) {
-            headerMap = {
-                no: idxNo,
-                resNo: idxRes,
-                product: headerParts.findIndex(p => p.includes('행사명') || p.includes('상품') || p.includes('Product')),
-                name: headerParts.findIndex(p => p.includes('예약자') || p.includes('이름') || p.includes('Name')),
-                phone: headerParts.findIndex(p => p.includes('핸드폰') || p.includes('전화') || p.includes('연락처') || p.includes('Phone')),
-                messenger: headerParts.findIndex(p => p.includes('메신저') || p.includes('카톡') || p.includes('Messenger') || p.includes('연락가능APP') || p.includes('앱'))
-            };
-            startLineIdx = k + 1; 
-            break; 
-        }
-    }
-
-    let entries = []; let originalOrder = 1;
-    for (let i = startLineIdx; i < lines.length; i++) {
-        let line = lines[i];
-        if (!line.trim()) continue;
-        const parsed = parseRawDataLine(line, originalOrder, isGlobalSki, headerMap);
-        if(parsed) { entries.push(parsed); originalOrder++; }
-    }
-
-    msgListGroups = createGroupsFromEntries(entries);
-
-    // [추가] FIT 모드일 경우: 배정 대상 인원수만큼 busSize 자동 설정
-    if (isFit) {
-        let totalGoing = msgListGroups
-            .filter(g => g.paxType === 'General' || g.paxType === 'D1')
-            .reduce((sum, g) => sum + g.count, 0);
-        
-        busSize = totalGoing > 0 ? totalGoing : 1; 
-    }
-
-    let listGoing = msgListGroups.filter(g => g.paxType === 'General' || g.paxType === 'D1');
-    if (direction === 'front') listGoing.sort((a,b) => calculateScore(b) - calculateScore(a));
-    else listGoing.sort((a,b) => calculateScore(a) - calculateScore(b));
-
-    currentSeatMap1 = new Array(busSize + 1).fill(null);
-    
-    // [수정] 시퀀스 생성 시 isFit 플래그 전달
-    let seatSequence = generateSeatSequence(999, busSize, isFit);
-    let currentSeqIdx = 0;
-
-    listGoing.forEach((grp) => {
-        grp.color = getPickColor(grp); setGroupMeta(grp);
-        for(let i=0; i<grp.count; i++) {
-            if(currentSeqIdx < seatSequence.length) {
-                let seatNum = seatSequence[currentSeqIdx];
-                currentSeatMap1[seatNum] = { ...grp }; currentSeqIdx++;
-            }
-        }
-    });
-
-    currentSeatMap2 = new Array(busSize + 1).fill(null);
-    for(let i=1; i<=busSize; i++) {
-        if(currentSeatMap1[i]) {
-            if (currentSeatMap1[i].paxType === 'General') {
-                let cloned = { ...currentSeatMap1[i] }; cloned.color = '#e0e0e0'; cloned.isSynced = true; currentSeatMap2[i] = cloned;
-            }
-        }
-    }
-
-    let listReturnOnly = msgListGroups.filter(g => g.paxType === 'D2' || g.paxType === 'D3');
-    toggleMap2(listReturnOnly.length > 0); 
-    if (direction === 'front') listReturnOnly.sort((a,b) => calculateScore(b) - calculateScore(a));
-    else listReturnOnly.sort((a,b) => calculateScore(a) - calculateScore(b));
-
-    let emptySeatsMap2 = [];
-    seatSequence.forEach(seatNum => { if(!currentSeatMap2[seatNum]) emptySeatsMap2.push(seatNum); });
-    
-    let d23Passengers = [];
-    listReturnOnly.forEach((grp) => {
-        grp.color = getPickColor(grp); setGroupMeta(grp);
-        if (!grp.isStay) { for(let k=0; k<grp.count; k++) { d23Passengers.push({ ...grp, count: 1 }); } }
-    });
-    
-    let pIdx = 0;
-    for(let k=0; k<emptySeatsMap2.length; k++) {
-        if(pIdx >= d23Passengers.length) break;
-        let seatNum = emptySeatsMap2[k]; currentSeatMap2[seatNum] = d23Passengers[pIdx]; pIdx++;
-    }
-
-    saveSeatMap(); redrawAll(busSize, isFit); // [수정] isFit 전달
-    renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2, isFit); // [수정] isFit 전달
-}
-
-// [수정] isFit 매개변수 추가 및 단순 시퀀스 처리
-function generateSeatSequence(totalPax, busSize, isFit) {
-  // 1. FIT 모드: 단순 1, 2, 3... 순서
-  if (isFit) {
-      let seq = [];
-      for(let i=1; i<=busSize; i++) seq.push(i);
-      return seq;
-  }
-  // 2. 기존 14인승 (코드상 남겨둠, 필요시 호환)
-  if (busSize === 14) {
-    let seq = [];
-    for (let i = 1; i <= 14; i++) seq.push(i);
-    return seq;
-  }
-
-  // 3. 기존 44/45인승 로직 (유지)
-  let sequence = [];
-  for(let i = 5; i <= busSize; i++) sequence.push(i);
-  sequence.push(4); sequence.push(3); sequence.push(2); sequence.push(1); 
-  return sequence;
-}
-// =========================================
-// [5] UI 렌더링 및 인터랙션 (FIT 수정됨)
-// =========================================
-
-function redrawAll(busSize, isFit) {
-    // [수정] isFit 플래그를 renderBus에 전달
-    renderBus(currentSeatMap1, busSize, 'busGrid1', 1, isFit); 
-    renderBus(currentSeatMap2, busSize, 'busGrid2', 2, isFit);
-    updateHeader1(currentSeatMap1); 
-    updateHeader2(currentSeatMap2);
-}
-
-function renderFitBus(seatMap, gridId, busNum) {
-    const grid = document.getElementById(gridId);
-    grid.innerHTML = "";
-    grid.style.display = "grid";
-    grid.style.gridTemplateColumns = "repeat(4, 1fr)";
-    grid.style.gap = "4px";
-
-    // 가족(repNum) 기준으로 묶기
-    let grouped = {};
-    for (let i = 1; i < seatMap.length; i++) {
-        const s = seatMap[i];
-        if (!s) continue;
-        const key = s.repNum || ("solo_" + i);
-        if (!grouped[key]) grouped[key] = [];
-        grouped[key].push(i);
-    }
-
-    // 가족 단위로 출력
-    Object.values(grouped).forEach(seats => {
-        // 좌석 출력
-        for (let i = 0; i < seats.length; i++) {
-            createSeatElement(grid, seats[i], seatMap, seatMap.length - 1, busNum);
-        }
-
-        // 4칸 맞추기용 더미
-        const mod = seats.length % 4;
-        if (mod !== 0) {
-            for (let k = 0; k < 4 - mod; k++) {
-                const dummy = document.createElement("div");
-dummy.style.visibility = "hidden";
-dummy.style.height = "0px";
-dummy.style.margin = "0";
-grid.appendChild(dummy);
-            }
-        }
-
-        // 가족 구분선
-        const line = document.createElement("div");
-        line.style.gridColumn = "1 / -1";
-        line.style.height = "3px";
-        line.style.background = "#000";
-        line.style.margin = "3px 0";
-        grid.appendChild(line);
-    });
-}
-
-// [수정] 기존 renderBus를 감싸서 FIT 분기 처리
-function renderBus(seatMap, maxSeats, gridId, busNum, isFit) {
-  // 1. FIT 모드일 경우 전용 함수로 납치
-  if (isFit) {
-      renderFitBus(seatMap, gridId, busNum);
-      return;
-  }
-
-  // 2. 이하 기존 코드 절대 건드리지 않음
-  const grid = document.getElementById(gridId);
-  grid.innerHTML = '';
-  // 기존 스타일 복구 (FIT에서 변경되었을 수 있으므로)
-  grid.style.display = "grid";
-  grid.style.gridTemplateColumns = "1fr 1fr 0.2fr 1fr 1fr";
-  grid.style.gap = "4px";
-
-  if (maxSeats === 14) {
-    grid.style.gridTemplateColumns = "repeat(4, 1fr)";
-    for (let i = 1; i <= 14; i++) {
-      createSeatElement(grid, i, seatMap, maxSeats, busNum);
-    }
-    return;
-  }
-
-  for(let row=0; row<11; row++) {
-    if(maxSeats === 45 && row === 10) {
-      let lastRowDiv = document.createElement('div');
-      lastRowDiv.className = 'last-row-45';
-      for(let k=41; k<=45; k++) createSeatElement(lastRowDiv, k, seatMap, maxSeats, busNum);
-      grid.appendChild(lastRowDiv);
-      continue;
-    }
-    for(let col=0; col<5; col++) {
-      if(col === 2) { grid.appendChild(document.createElement('div')); continue; }
-      let seatNum = (row < 10)
-        ? (row * 4) + (col < 2 ? col + 1 : col)
-        : (col < 2 ? 40 + col + 1 : 40 + col);
-      createSeatElement(grid, seatNum, seatMap, maxSeats, busNum);
-    }
-  }
-}
-
-function createSeatElement(parent, seatNum, seatMap, maxSeats, busNum) {
-  let seatDiv = document.createElement('div'); seatDiv.className = 'seat'; seatDiv.dataset.idx = seatNum;
-  if(selectedSeat.busNum === busNum && selectedSeat.idx === seatNum) seatDiv.classList.add('selected');
-  if (busNum === 2 && seatMap[seatNum] && seatMap[seatNum].paxType === 'General') { seatDiv.classList.add('synced-general'); }
-  
-  // FIT 모드나 44/45인승의 앞자리 처리 (FIT는 모든 자리가 일반 자리처럼 보이게 처리)
-  if(seatNum <= 4 && maxSeats > 14) {
-    if (seatMap[seatNum]) renderSeatContent(seatDiv, seatMap[seatNum], seatNum, busNum);
-    else { seatDiv.classList.add('emergency'); renderSeatContent(seatDiv, null, seatNum, busNum); }
-  } else {
-    renderSeatContent(seatDiv, seatMap[seatNum], seatNum, busNum);
-  }
-  
-  seatDiv.onclick = function() { handleSeatClick(this, busNum, seatNum, maxSeats); };
-  parent.appendChild(seatDiv);
-}
-
-function renderSeatContent(el, data, num, busNum) {
-  el.innerHTML = `<span class="seat-num">${num}</span>`;
-  if(data) {
-    if (busNum === 2 && data.paxType === 'General') { 
-        el.style.backgroundColor = data.color; 
-        el.innerHTML += `<div style="font-size:30px; color:#757575; font-weight:bold; margin-top:10px;">❌</div>`; 
-        return; 
-    }
-    el.style.backgroundColor = data.color;
-    
-    let dispNum = data.mainNum;
-    let len = String(dispNum).length; 
-    let fSize = "24px"; 
-
-    if (len > 12) fSize = "12px";       
-    else if (len > 8) fSize = "15px";   
-    else if (len > 5) fSize = "19px";   
-    else if (len > 3) fSize = "22px";   
-
-    let originBadgeHtml = getOriginBadgeHtml(data.originTag);
-    let cleanNation = data.subInfo ? data.subInfo.replace(/\(.\)/g, '') : "";
-    
-    let tagsHtml = "";
-    if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
-    if (data.paxType === 'D1') tagsHtml += `<span class="day-tag tag-d1">D1</span>`;
-    if (data.paxType === 'D2') tagsHtml += `<span class="day-tag tag-d2">D2</span>`;
-    if (data.paxType === 'D3') tagsHtml += `<span class="day-tag tag-d3">D3</span>`;
-
-    el.innerHTML += `<div class="grp-id" style="font-size:${fSize};">${dispNum}</div><div class="info-badge ${data.textClass}">${tagsHtml}${cleanNation}${originBadgeHtml}</div>`;
-  } else el.className += " empty";
-}
-
-function handleSeatClick(el, busNum, seatIdx, busSize) {
-    if(selectedSeat.idx === -1) { 
-        selectedSeat = { busNum: busNum, idx: seatIdx }; el.classList.add('selected'); 
-    } else {
-        let sourceBus = selectedSeat.busNum; let sourceIdx = selectedSeat.idx; let targetBus = busNum; let targetIdx = seatIdx;
-        if (sourceBus !== targetBus) { alert("같은 버스끼리만 이동 가능!"); resetSelection(); return; }
-        
-        let mapMain = (sourceBus === 1) ? currentSeatMap1 : currentSeatMap2;
-        let paxS = mapMain[sourceIdx]; let paxT = mapMain[targetIdx];
-        
-        mapMain[sourceIdx] = paxT; mapMain[targetIdx] = paxS;
-        
-        if (sourceBus === 1) {
-            if (paxS && paxS.paxType === 'General') syncMoveToMap2(sourceIdx, targetIdx, busSize);
-            if (paxT && paxT.paxType === 'General') syncMoveToMap2(targetIdx, sourceIdx, busSize);
-        }
-        resetSelection(); refreshDisplay();
-    }
-}
-
-function syncMoveToMap2(fromIdx, toIdx, busSize) {
-    let mover = currentSeatMap2[fromIdx]; if (!mover || mover.paxType !== 'General') return;
-    let obstacle = currentSeatMap2[toIdx]; 
-    if (!obstacle || obstacle.paxType === 'General') { 
-        currentSeatMap2[fromIdx] = obstacle; currentSeatMap2[toIdx] = mover; 
-    } else if (obstacle.paxType === 'D2' || obstacle.paxType === 'D3') {
-        currentSeatMap2[toIdx] = mover; currentSeatMap2[fromIdx] = null; 
-        let newSeat = findEmptySeatMap2(busSize);
-        if (newSeat !== -1) { currentSeatMap2[newSeat] = obstacle; }
-    }
-}
-
-function findEmptySeatMap2(busSize) {
-    // FIT 모드에서는 시퀀스가 단순 1~N이므로 호환됨
-    let isFit = (document.querySelector('input[name="busSize"]:checked').value === 'FIT');
-    let sequence = generateSeatSequence(999, busSize, isFit); 
-    for (let idx of sequence) { if (currentSeatMap2[idx] === null) return idx; } 
-    return -1;
-}
-
-function resetSelection() { 
-    document.querySelectorAll('.seat.selected').forEach(e => e.classList.remove('selected')); 
-    selectedSeat = { busNum: 0, idx: -1 }; 
-}
-
-function refreshDisplay() {
-    const scrollY = window.scrollY; 
-    let rawSize = localStorage.getItem('bus_size') || "44";
-    const isFit = (rawSize === 'FIT');
-    // FIT면 맵 크기가 busSize, 아니면 44/45
-    let busSize = isFit ? (currentSeatMap1.length - 1) : parseInt(rawSize);
-
-    saveSeatMap(); 
-    redrawAll(busSize, isFit); 
-    renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2, isFit);
-    window.scrollTo(0, scrollY);
-}
-
-// =========================================
-// [6] 메시지 생성 로직 (FIT 수정됨)
-// =========================================
-function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
-    const msgList = document.getElementById('msgList');
-    const section = document.getElementById('msgSection');
-    msgList.innerHTML = ''; section.style.display = 'block';
-    
-    const statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
-    const guideName = document.getElementById('guideNameInput').value || "Mr. Shin";
-    const busNo = document.getElementById('busNumberInput').value || "";
-    
-    const tH = document.getElementById('timeHongdae').value;
-    const tM = document.getElementById('timeMyeongdong').value;
-    const tD = document.getElementById('timeDongdaemun').value;
-    const specialMsg = document.getElementById('specialNotice').value;
-    const finalSpecial = specialMsg ? `\n\n${specialMsg}\n` : "";
-
-    allGroups.sort((a, b) => {
-        let numA = parseInt(a.repNum.replace(/\D/g, '')) || 0; let numB = parseInt(b.repNum.replace(/\D/g, '')) || 0;
-        return numA - numB;
-    });
-
-    allGroups.forEach((g, idx) => {
-        let seatStr = ""; let targetMap = (g.paxType === 'D2' || g.paxType === 'D3') ? seatMap2 : seatMap1;
-        if (g.isStay) seatStr = "STAY (No Seat)";
-        else {
-            let seats = [];
-            for(let i=1; i<targetMap.length; i++) { if(targetMap[i] && targetMap[i].repNum === g.repNum) seats.push(i); }
-            seatStr = seats.sort((a,b)=>a-b).join('-');
-        }
-
-        let gid = g.repNum; let msgText = ""; let langTag = "";
-        
-        const priceList_CN = `[Price List]\n\nS. 积极心态（包含）\n\nA. 缆车 + 装备\n   周末 70,000 / 平日 60,000\nB. 头盔 20,000\nC. 护具 15,000\nD. 滑雪服 20,000\nE. 雪橇 30,000\nF. 观光缆车 20,000\n\n*(刷卡 Card +10%)`;
-        const priceList_EN = `[Price List]\n\nS. Positive mindset (Included)\n\nA. Lift + Gear\n   Weekend 70,000 / Weekday 60,000\nB. Helmet 20,000\nC. Guard 15,000\nD. Ski Clothes 20,000\nE. Sled 30,000\nF. Sightseeing Lift 20,000\n\n*(Card payment +10%)`;
-
-        // FIT: 버스번호 + 그룹번호만 / 일반: 버스+그룹+좌석
-let groupLine = isFit
-  ? `Bus ${busNo} / Group ${gid}\n`
-  : `Bus ${busNo} / Group ${gid} / Seat ${seatStr}\n`;
-
-        if (g.paxType === 'D2' || g.paxType === 'D3') {
-            let isReturnGuest = (g.paxType === 'D2' || g.paxType === 'D3');
-            let dayLabel = isReturnGuest ? (g.paxType === 'D3' ? "Day 3" : "Day 2") : "Day 1";
-            let step3_EN = "3. Gathering (15:40)\n📍 Lobby (With luggage)";
-            let step3_CN = "3. 集合 Gathering (15:40)\n📍 酒店大厅 (带上所有行李)";
-            
-            if (g.isStay) { 
-                step3_EN = "3. Stay Guest\n📍 No Bus (Enjoy Skiing!)"; 
-                step3_CN = "3. 续住 (Stay)\n📍 No Bus (Enjoy Skiing!)"; 
-            }
-
-            if(g.langContext === 'CN') {
-                langTag = `<span class="lang-tag lang-CN">中文(${dayLabel})</span>`;
-                msgText = `[${dayLabel}/Return Guide - ${guideName}]\n${groupLine}${seatLine}\n1. 退房 Check-out (11:00 前)\n*行李寄放一楼大厅 (Lobby)\n⚠️ 迟交罚款 (Late): 10,000 / 30分\n\n2. Klook 休息室 (10:00)\n👉 付款 & 领取缆车票 (Payment/Ticket)\n\n${step3_CN}\n\n${priceList_CN}`;
-            } else {
-                langTag = `<span class="lang-tag lang-EN">ENG(${dayLabel})</span>`;
-                msgText = `[${dayLabel}/Return Guide - ${guideName}]\n${groupLine}${seatLine}\n1. Check-out (Until 11:00)\n*Leave bags at Lobby\n⚠️ Late Penalty: 10,000 KRW / 30min\n\n2. Klook Lounge (10:00)\n👉 Payment & Get Lift Card\n\n${step3_EN}\n\n${priceList_EN}`;
-            }
-        } 
-        else {
-             let pickupInfo = ""; let loc = g.location ? g.location.trim() : "";
-             
-             if(g.langContext === 'CN') {
-                langTag = `<span class="lang-tag lang-CN">TOUR(CN)</span>`;
-                if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
-                else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口 (Myeongdong Exit 3)`; } 
-                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口`; } 
-                else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
-                
-                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。${busLine}\n${groupLine}${seatLine}`;
-            } else {
-                langTag = `<span class="lang-tag lang-EN">TOUR(EN)</span>`;
-                if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ. Exit 8`; } 
-                else if (loc.includes('명동') || loc.includes('Myeongdong')) { pickupInfo = `❗️${tM} Myeongdong Exit 3`; } 
-                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
-                else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
-                
-                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm${busLine}\n${groupLine}${seatLine}`;
-            }
-        }
-
-        if (g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
-            msgText += `\n\n📺 How to wear boots:\n${CONFIG.BOOTS_YOUTUBE}`;
-        }
-
-        let waNumber = g.phone; 
-        let hasPhone = (waNumber && waNumber.length > 5);
-        let encodedText = encodeURIComponent(msgText);
-        let waLink = hasPhone ? `https://wa.me/${waNumber}?text=${encodedText}` : '#';
-        let waBtnClass = hasPhone ? 'btn-action btn-wa-send' : 'btn-action btn-wa-send disabled';
-        let isContacted = statusData[gid]?.contacted || false; let isConnected = statusData[gid]?.connected || false; let memoText = statusData[gid]?.memo || "";
-        
-        let appIconHtml = getAppIconHtml(g.messenger, g.appType);
-        
-        let extraTags = "";
-        if (g.isHot) extraTags += `<span class="day-tag tag-hot" style="margin-left:5px;">H</span>`;
-        if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin-left:5px;">[D1]</span>`;
-        if (g.paxType === 'D2') extraTags += `<span class="day-tag tag-d2" style="margin-left:5px;">[D2]</span>`;
-        if (g.paxType === 'D3') extraTags += `<span class="day-tag tag-d3" style="margin-left:5px;">[D3]</span>`;
-        
-        let emailBtnHtml = g.email ? `<div class="btn-action btn-copy-mail" onclick="copyAndOpen(this, '${g.email}', 'mail')">Mail<br>Copy</div>` : "";
-
-        let uiGroupNum = g.msgNum.replace(/[a-zA-Z]/g, '');
-
-        let card = document.createElement('div'); card.className = 'msg-card';
-        card.innerHTML = `
-            <div class="msg-check-area">
-                <div class="check-box-wrapper"><label class="msg-check-label label-sent">연락함</label><input type="checkbox" class="msg-check-input chk-sent" onchange="updateMsgStatus('${gid}', 'contacted', this.checked, null)" ${isContacted ? 'checked' : ''}></div>
-                <div class="check-box-wrapper"><label class="msg-check-label label-connected">연락됨</label><input type="checkbox" class="msg-check-input chk-conn" onchange="updateMsgStatus('${gid}', 'connected', this.checked, null)" ${isConnected ? 'checked' : ''}></div>
-            </div>
-            <div class="msg-info">
-                <div class="msg-group-row"><span class="msg-group">${uiGroupNum}</span>${langTag}${extraTags}</div>
-                <div class="msg-seats">Seat: ${seatStr}</div>
-                <input type="text" class="msg-memo-input" placeholder="비고" value="${memoText}" oninput="updateMsgStatus('${gid}', null, null, this.value)">
-                <div class="hidden-msg">${msgText}</div>
-            </div>
-            <div class="msg-actions">
-                <a href="${waLink}" target="_blank" class="${waBtnClass}">Send<br>WA</a>
-                <div class="btn-action btn-copy-body" onclick="copyMessageBody(this)">본문<br>Copy</div>
-                ${emailBtnHtml}
-                ${appIconHtml}
-            </div>
-        `;
-        msgList.appendChild(card);
-    });
-}
-
-function getAppIconHtml(rawMsg, appType) {
-    if (!rawMsg) return `<div class="btn-action logo-none">X</div>`;
-    let appClass = 'logo-none'; let copyValue = ""; let appName = "X"; let schemeKey = null;
-    let lower = rawMsg.toLowerCase();
-    
-    if (appType === '무') {
-        if(rawMsg.length > 2) { appClass = 'logo-none'; appName = 'ETC'; copyValue = rawMsg; }
-    } else {
-        if (lower.includes('whatsapp')) { 
-            appClass = 'logo-wa'; appName = 'WA'; copyValue = rawMsg.replace(/[^0-9]/g, ''); 
-        }
-        else if (lower.includes('line')) { 
-            appClass = 'logo-line'; appName = 'Line'; copyValue = rawMsg.replace(/line[:\s]*/gi, '').trim(); 
-            schemeKey = 'line';
-        }
-        else if (lower.includes('kakao') || lower.includes('talk')) { 
-            appClass = 'logo-kakao'; appName = 'Ka'; copyValue = rawMsg.replace(/^(kakao|talk|kakao\s*talk)[:\s]*/i, '').trim(); 
-            schemeKey = 'kakao';
-        }
-        else if (lower.includes('viber')) { 
-            appClass = 'logo-viber'; appName = 'Vi'; 
-            copyValue = rawMsg.replace(/[^0-9]/g, ''); 
-            schemeKey = 'viber';
-        }
-        else if (lower.includes('wechat') || lower.includes('weixin')) { 
-            appClass = 'logo-wechat'; appName = 'We'; copyValue = rawMsg.replace(/^(wechat|weixin)[:\s]*/i, '').trim(); 
-            schemeKey = 'wechat';
-        }
-        else if (lower.includes('zalo')) { 
-            appClass = 'logo-zalo'; appName = 'Za'; copyValue = rawMsg.replace(/^zalo[:\s]*/i, '').trim(); 
-        }
-    }
-    
-    if (copyValue && appName !== 'X') {
-        if (schemeKey) {
-            return `<div class="btn-action ${appClass}" onclick="copyAndOpen(this, '${copyValue}', '${schemeKey}')">${appName}<br>Copy</div>`;
-        } else {
-            return `<div class="btn-action ${appClass}" onclick="copyOnly(this, '${copyValue}')">${appName}<br>Copy</div>`;
-        }
-    } else {
-        return `<div class="btn-action logo-none">X</div>`;
-    }
-}
-
-function updateMsgStatus(gid, type, checked, memo) {
-    let statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
-    if(!statusData[gid]) statusData[gid] = { contacted: false, connected: false, memo: "" };
-    if(type === 'contacted') statusData[gid].contacted = checked;
-    if(type === 'connected') statusData[gid].connected = checked;
-    if(memo !== null) statusData[gid].memo = memo;
-    localStorage.setItem('bus_msgStatus', JSON.stringify(statusData));
-}
-
-// =========================================
-// [7] 수동 제어 및 저장/로드
-// =========================================
-
-function manualAddGroup() {
-    const rawInput = (document.getElementById('manualGroupNum').value || "").trim();
-    if(!rawInput) { alert("오빠, 번호를 입력해야지?"); return; }
-    
-    let targetGroup = msgListGroups.find(g => String(g.mainNum) === rawInput || String(g.msgNum) === rawInput);
-
-    if (!targetGroup) {
-        if(!confirm(`[${rawInput}번]은 명단에 없어. 현장 손님(Walk-in)으로 추가할까?`)) return;
-        const isSancheoneoMode = msgListGroups.some(g => g.isSancheoneo);
-        targetGroup = {
-            mainNum: rawInput, msgNum: rawInput, repNum: rawInput, isLong: false, count: 0, 
-            name: "Manual Guest", country: "ETC", gender: "N", langContext: "EN",
-            appType: "무", location: "현장", phone: "", messenger: "", note: "Manual", members: [], 
-            paxType: 'General', isStay: false, isBoard: false, 
-            color: '#e0e0e0', textClass: 'neutral-text', subInfo: '현장',
-            isSancheoneo: isSancheoneoMode, isHot: false, email: "",
-            originTag: "(현)", 
-            options: { lift: false, gear: false, clothes: false, lesson: false }
-        };
-        msgListGroups.push(targetGroup);
-    }
-
-    targetGroup.count++;
-    
-    // [수정] 수동 추가 시에도 FIT 시퀀스 사용 (일반 1,2,3... 또는 버스시퀀스)
-    let isFit = (document.querySelector('input[name="busSize"]:checked').value === 'FIT');
-    // FIT 모드면 좌석이 부족할 수 있으므로 맵을 확장해야 하지만, 
-    // 여기서는 간단히 기존 맵의 빈자리만 찾음 (FIT는 보통 자동실행으로 리셋하므로)
-    let sequence = generateSeatSequence(1, currentSeatMap1.length - 1, isFit);
-    let seatedIdx = -1;
-    
-    for(let i of sequence) {
-        if(currentSeatMap1[i] === null) { currentSeatMap1[i] = {...targetGroup}; seatedIdx = i; break; } 
-    }
-
-    if(targetGroup.paxType === 'General') {
-        if (seatedIdx !== -1 && currentSeatMap2[seatedIdx] === null) {
-             let cloned = {...targetGroup}; cloned.color = '#e0e0e0'; cloned.isSynced = true;
-             currentSeatMap2[seatedIdx] = cloned;
-        } else {
-            for(let i of sequence) {
-                if(currentSeatMap2[i] === null) { 
-                    let cloned = {...targetGroup}; cloned.color = '#e0e0e0'; cloned.isSynced = true;
-                    currentSeatMap2[i] = cloned; break; 
-                } 
-            }
-        }
-    }
-    refreshDisplay();
-}
-
-function manualDelGroup() {
-    const rawInput = (document.getElementById('manualGroupNum').value || "").trim();
-    if(!rawInput) { alert("지울 번호를 입력해줘."); return; }
-    
-    let idx = msgListGroups.findIndex(g => String(g.mainNum) === rawInput || String(g.msgNum) === rawInput);
-    if(idx === -1) { alert("그 번호는 명단에 없는데?"); return; }
-    
-    let group = msgListGroups[idx];
-    let targetRepNum = group.repNum;
-
-    if (group.count > 0) {
-        group.count--; 
-        for(let i = currentSeatMap1.length - 1; i >= 1; i--) {
-            if(currentSeatMap1[i] && (String(currentSeatMap1[i].mainNum) === rawInput || currentSeatMap1[i].repNum === targetRepNum)) {
-                currentSeatMap1[i] = null; break;
-            }
-        }
-        for(let i = currentSeatMap2.length - 1; i >= 1; i--) {
-            if(currentSeatMap2[i] && (String(currentSeatMap2[i].mainNum) === rawInput || currentSeatMap2[i].repNum === targetRepNum)) {
-                currentSeatMap2[i] = null; break;
-            }
-        }
-    }
-
-    if (group.count <= 0) {
-        if(confirm(`[${rawInput}번] 인원이 0명이야. 명단에서 완전히 삭제할까?`)) {
-            msgListGroups.splice(idx, 1);
-            for(let i = 1; i < currentSeatMap1.length; i++) {
-                if(currentSeatMap1[i] && (String(currentSeatMap1[i].mainNum) === rawInput || currentSeatMap1[i].repNum === targetRepNum)) currentSeatMap1[i] = null;
-            }
-            for(let i = 1; i < currentSeatMap2.length; i++) {
-                if(currentSeatMap2[i] && (String(currentSeatMap2[i].mainNum) === rawInput || currentSeatMap2[i].repNum === targetRepNum)) currentSeatMap2[i] = null;
-            }
-        }
-    }
-    refreshDisplay();
-}
-
-function saveSeatMap() { localStorage.setItem('bus_seatMap', JSON.stringify({ map1: currentSeatMap1, map2: currentSeatMap2, groups: msgListGroups })); }
-function checkDateChange() { localStorage.setItem('bus_lastDate', document.getElementById('vcardDate').value); }
-function saveTextInput() { localStorage.setItem('bus_rawData', document.getElementById('rawData').value); localStorage.setItem('bus_size', document.querySelector('input[name="busSize"]:checked').value); }
-function saveTimeInput() { const times = { h: document.getElementById('timeHongdae').value, m: document.getElementById('timeMyeongdong').value, d: document.getElementById('timeDongdaemun').value }; localStorage.setItem('bus_times', JSON.stringify(times)); }
-function saveGuideName() { 
-    localStorage.setItem('bus_guideName', document.getElementById('guideNameInput').value);
-    localStorage.setItem('bus_number', document.getElementById('busNumberInput').value);
-    if(msgListGroups.length > 0) refreshDisplay(); // 변경 시 메시지 업데이트
-}
-function saveSpecialNotice() { localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value); if(msgListGroups.length > 0) refreshDisplay(); }
-
-function loadSeatMap() {
-    const saved = localStorage.getItem('bus_seatMap');
-    if (saved) { 
-        try { 
-            const data = JSON.parse(saved); 
-            if(data.map1 && data.map2) { 
-                currentSeatMap1 = data.map1; currentSeatMap2 = data.map2; msgListGroups = data.groups || []; 
-                const hasReturn = msgListGroups.some(g => g.paxType === 'D2' || g.paxType === 'D3');
-                toggleMap2(hasReturn);
-                refreshDisplay(); // 통합 리프레시 호출
-            } 
-        } catch(e) {} 
-    }
-}
-function loadTextInput() { const savedData = localStorage.getItem('bus_rawData'); if(savedData) document.getElementById('rawData').value = savedData; const savedSize = localStorage.getItem('bus_size'); if(savedSize) { const radios = document.getElementsByName('busSize'); for(let r of radios) { if(r.value === savedSize) r.checked = true; } } }
-function loadGuideName() { const savedGuide = localStorage.getItem('bus_guideName'); if(savedGuide) document.getElementById('guideNameInput').value = savedGuide; const savedBus = localStorage.getItem('bus_number'); if(savedBus) document.getElementById('busNumberInput').value = savedBus; }
-function clearData() { if(confirm('초기화하시겠습니까?')) { document.getElementById('rawData').value = ''; localStorage.removeItem('bus_rawData'); localStorage.removeItem('bus_seatMap'); localStorage.removeItem('bus_msgStatus'); location.reload(); } }
-
-function updateHeader1(seatMap) {
-    let counts = { '홍대':0, '명동':0, '동대문':0, '현장':0, '기타':0 }; let total = 0;
-    for(let i=1; i<seatMap.length; i++) {
-        let seat = seatMap[i];
-        if(seat) {
-            total++; let loc = seat.location || '';
-            if(loc.includes('홍대')) counts['홍대']++;
-            else if(loc.includes('명동')) counts['명동']++;
-            else if(loc.includes('동대문')) counts['동대문']++;
-            else if(loc.includes('현장')) counts['현장']++;
-            else counts['기타']++;
-        }
-    }
-    const textHtml = `<div>TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 홍대 ${counts['홍대']} / 명동 ${counts['명동']} / 동대문 ${counts['동대문']} / 현장 ${counts['현장']} ]</span></div>`;
-    const btnHtml = `<div class="header-controls" data-html2canvas-ignore="true"><button class="btn-save-mini" onclick="downloadImage(1)">📸 저장</button></div>`;
-    document.getElementById('pickupSummary1').innerHTML = textHtml + btnHtml;
-}
-
-function updateHeader2(seatMap) {
-    let counts = { 'Hotel':0, 'Challenge':0 }; let total = 0;
-    for(let i=1; i<seatMap.length; i++) {
-        let seat = seatMap[i];
-        if(seat) {
-            total++; 
-            if(seat.paxType === 'D2' || seat.paxType === 'D3') counts['Hotel']++; else counts['Challenge']++; 
-        }
-    }
-    const textHtml = `<div>TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 복귀편 ${counts['Challenge']} / 숙박손님 ${counts['Hotel']} ]</span></div>`;
-    const btnHtml = `<div class="header-controls" data-html2canvas-ignore="true"><button class="btn-save-mini night" onclick="downloadImage(2)">📸 저장</button></div>`;
-    document.getElementById('pickupSummary2').innerHTML = textHtml + btnHtml;
-}
-
-function updatePriority(checkbox) {
-  const val = checkbox.value;
-  if(checkbox.checked) { if(!priorityQueue.includes(val)) priorityQueue.push(val); } 
-  else { priorityQueue = priorityQueue.filter(v => v !== val); }
-  updatePriorityDisplay();
-}
-
-function updatePriorityDisplay() {
-  const map = { 'solo':'혼자', 'CN':'중국어', 'EN':'영어', 'G4':'4인이상', 'HD':'홍대', 'MY':'명동', 'DDM':'동대문' };
-  const txt = priorityQueue.map(v => map[v]).join(' > ');
-  document.getElementById('priorityView').innerText = "우선순위: " + (txt || "없음");
-}
-
-function toggleMap2(hasReturnGuests) {
-    const map2Area = document.getElementById('captureArea2');
-    if (hasReturnGuests) { map2Area.style.display = 'block'; } 
-    else { map2Area.style.display = 'none'; }
-}
-
-function downloadImage(num) {
-  const capture = document.getElementById('captureArea' + num);
-  html2canvas(capture, { scrollY: -window.scrollY }).then(canvas => {
-    let link = document.createElement('a'); link.download = `Bus_Map${num}_${document.getElementById('dateDisplay1').innerText}.png`;
-    link.href = canvas.toDataURL(); link.click();
-  });
-}
-
-function downloadVCard() {
-    if (!msgListGroups || msgListGroups.length === 0) { alert("데이터가 없습니다. 배치 실행을 먼저 해주세요."); return; }
-    
-    let vcardContent = ""; 
-    const dateCode = document.getElementById('vcardDate').value; 
-    let count = 0;
-    let processedPhones = new Set();
-
-    msgListGroups.forEach(g => {
-        let phoneStr = g.phone;
-        if (!phoneStr || phoneStr.length < 5) return;
-        if (processedPhones.has(phoneStr)) return; 
-        
-        processedPhones.add(phoneStr);
-        
-        let locChar = '기'; 
-        if (g.location.includes('홍대')) locChar = '홍';
-        else if (g.location.includes('명동')) locChar = '명';
-        else if (g.location.includes('동대문')) locChar = '동';
-        
-        let finalName = `${dateCode}(${g.mainNum}${locChar})`;
-        
-        vcardContent += "BEGIN:VCARD\nVERSION:3.0\n";
-        vcardContent += `FN:${finalName}\n`;
-        vcardContent += `TEL;TYPE=CELL:+${phoneStr}\n`;
-        vcardContent += `NOTE:Orig:${g.name} / ${g.count}pax\n`;
-        vcardContent += "END:VCARD\n";
-        count++;
-    });
-    
-    if(count === 0) { alert("저장할 유효한 전화번호가 없습니다."); return; }
-    
-    const blob = new Blob([vcardContent], { type: "text/vcard" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = `Contacts_${dateCode}.vcf`;
-    link.href = url; link.click(); URL.revokeObjectURL(url);
-}
-
-function forceSaveAllData() {
-    try {
-        saveTextInput(); saveGuideName(); saveTimeInput(); checkDateChange();
-        localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value);
-    } catch (e) { console.log("Safe Save:", e); }
-}
-
-function unlock() {
-    const input = document.getElementById('lockInput');
-    if (input.value === '840506') {
-        localStorage.setItem('tm_auth_10_8', 'true');
-        document.getElementById('lockScreen').style.display = 'none';
-    } else {
-        alert('Wrong Password!');
-        input.value = '';
-        input.focus();
-    }
-}
-
-window.onload = function() {
-    if (localStorage.getItem('tm_auth_10_8') !== 'true') {
-        document.getElementById('lockScreen').style.display = 'flex';
-    }
-
-    loadTextInput(); loadGuideName(); 
-    document.getElementById('specialNotice').value = localStorage.getItem('bus_specialNotice') || "";
-
-    const today = new Date(); today.setDate(today.getDate() + 1);
-    const days = ['일','월','화','수','목','금','토'];
-    const dateStr = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')} (${days[today.getDay()]})`;
-    document.getElementById('dateDisplay1').innerText = dateStr;
-    document.getElementById('dateDisplay2').innerText = dateStr;
-    const yymmdd = String(today.getFullYear()).slice(2) + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
-    document.getElementById('vcardDate').value = yymmdd;
-    const savedTimes = JSON.parse(localStorage.getItem('bus_times') || '{}');
-    if(savedTimes.h) document.getElementById('timeHongdae').value = savedTimes.h;
-    if(savedTimes.m) document.getElementById('timeMyeongdong').value = savedTimes.m;
-    if(savedTimes.d) document.getElementById('timeDongdaemun').value = savedTimes.d;
-    
-    loadSeatMap();
-};
-
-document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'hidden') forceSaveAllData(); });
-window.addEventListener('pagehide', function() { forceSaveAllData(); });
-document.querySelectorAll('input, textarea').forEach(el => { el.addEventListener('blur', forceSaveAllData); });
-</script>
-</body>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>미스터 신의 투어마스터 10.8 (Gender Free + FIT Mode)</title>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<style>
+  /* --- [기존 스타일 유지] --- */
+  body, input, button, textarea, select { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; -webkit-user-select:none; }
+  body { background: #f0f2f5; margin: 0; padding: 5px; max-width: 100vw; overflow-x: hidden; }
+  
+  .main-title { 
+      text-align: center; 
+      font-size: 22px; 
+      font-weight: 900; 
+      color: #ffffff; 
+      background: linear-gradient(135deg, #3f51b5, #1a237e);
+      margin: 10px 0 15px 0; 
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+
+  /* ... (기존 CSS 생략 없이 원본 유지) ... */
+  .info-text { font-size: 12px; color: #546e7a; margin: 0 0 8px 0; font-weight: 600; display: block; background: #eceff1; padding: 4px 8px; border-radius: 4px; border-left: 3px solid #b0bec5; }
+  .info-text.center { text-align: center; border-left: none; background: transparent; }
+  
+  .guide-panel { background: #fff3e0; padding: 10px; border-radius: 12px; margin-bottom: 10px; text-align: center; border: 2px solid #ffe0b2; display: flex; justify-content: space-around; gap: 5px; }
+  .guide-input-group { display: flex; flex-direction: column; align-items: center; }
+  .guide-input { font-size: 16px; font-weight: 900; color: #e65100; border: none; border-bottom: 2px solid #e65100; background: transparent; text-align: center; width: 120px; outline: none; }
+  
+  .input-box { background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px; box-sizing: border-box; width: 100%; }
+  
+  .manual-control-panel { display: flex; gap: 5px; background: #e8eaf6; padding: 10px; border-radius: 8px; margin-bottom: 10px; align-items: center; border: 1px solid #c5cae9; width: 100%; box-sizing: border-box; }
+  .manual-input { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; text-align: center; border: 2px solid #3f51b5; border-radius: 6px; color: #333; outline: none; min-width: 0; }
+  .btn-manual { width: 50px; height: 45px; font-size: 20px; font-weight: 900; border: none; border-radius: 6px; cursor: pointer; color: white; flex-shrink: 0; }
+  .btn-add { background: #3f51b5; }
+  .btn-del { background: #f44336; }
+
+  textarea { width: 100%; height: 100px; border: 1px solid #ddd; border-radius: 8px; padding: 8px; font-size: 12px; box-sizing: border-box; }
+  
+  .time-setting-panel { background: #e3f2fd; padding: 8px; border-radius: 8px; margin-bottom: 8px; display: flex; gap: 5px; justify-content: space-between; align-items: center; }
+  .time-input-group { display: flex; flex-direction: column; flex: 1; }
+  .time-input-group label { font-size: 10px; font-weight: bold; color: #1565c0; margin-bottom: 2px; text-align: center; }
+  .time-input-group input { text-align: center; border: 1px solid #90caf9; border-radius: 4px; padding: 4px; font-weight: bold; color: #333; width: 100%; box-sizing: border-box; }
+  
+  .control-panel { margin-top: 8px; border-top: 1px dashed #ddd; padding-top: 8px; }
+  .chk-label { background: #f1f3f5; border: 1px solid #d1d1d1; border-radius: 4px; padding: 6px 9px; font-size: 11px; font-weight: 800; cursor: pointer; color: #333; display: flex; align-items: center; }
+  .chk-label input { margin-right: 4px; }
+  .chk-label:has(input:checked) { background: #007bff; border-color: #0056b3; color: white; }
+  
+  .priority-display { font-size: 12px; color: #0056b3; font-weight: bold; margin: 5px 0; padding: 5px; background: #fff; border-radius: 4px; min-height: 15px; border: 1px solid #eee; }
+  .size-selector { display: flex; gap: 10px; margin-bottom: 5px; font-size: 12px; font-weight: bold; justify-content: center; background: #eee; padding: 5px; border-radius: 8px;}
+  .control-group { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 5px; }
+  
+  /* 버튼 그룹 스타일 */
+  .action-box { background: #e0f2f1; padding: 10px; border-radius: 12px; border: 1px solid #b2dfdb; display: flex; flex-direction: column; gap: 8px; }
+  .action-row { display: flex; gap: 5px; align-items: center; }
+  
+  button { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: transform 0.1s; }
+  button:active { transform: scale(0.98); }
+
+  .btn-vcard { background: #009688; color: white; flex: 1.5; font-size: 13px; }
+  .btn-run { background: #4e54c8; color: white; flex: 2; font-size: 15px; box-shadow: 0 2px 5px rgba(78, 84, 200, 0.3); }
+  .btn-clear { background: #ef5350; color: white; flex: 0.8; font-size: 13px; } 
+  .vcard-input { width: 70px; padding: 10px; text-align: center; border: 1px solid #00897b; border-radius: 6px; font-weight: bold; color: #00695c; font-size: 13px; }
+
+  .btn-save-mini { background: #11998e; color: white; padding: 6px 14px; font-size: 12px; border-radius: 15px; border: 1px solid white; cursor: pointer; text-decoration: none; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+  .btn-save-mini.night { background: #e91e63; }
+  
+  .capture-wrapper { margin-bottom: 30px; border: 5px solid #eee; position: relative; }
+  #captureArea1, #captureArea2 { background: white; padding: 15px 5px; border-radius: 0; width: 100%; max-width: 500px; margin: 0 auto; box-sizing: border-box; }
+  
+  .bus-header { text-align: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #333; position: relative; }
+  
+  .pickup-summary { 
+      background: #2c3e50; 
+      color: white; 
+      padding: 10px; 
+      border-radius: 6px; 
+      font-size: 1.2rem; 
+      font-weight: 900; 
+      margin-bottom: 5px; 
+      letter-spacing: -0.5px; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between;
+      gap: 10px;
+  }
+  
+  .header-controls { position: static; transform: none; display: flex; align-items: center; }
+
+  .bus-date { font-size: 1.0rem; color: #555; margin-top: 6px; font-weight: 800; }
+  .bus-title-label { background: #333; color: #fff; display:inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 5px; font-weight: bold; }
+  
+  .bus-grid { display: grid; grid-template-columns: 1fr 1fr 0.2fr 1fr 1fr; grid-auto-rows: 1fr; gap: 4px; width: 100%; }
+  .last-row-45 { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 4px; height: 100%; }
+  .last-row-45 .seat { flex: 1; width: auto; }
+  
+  .seat { aspect-ratio: 1.1 / 1; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; position: relative; cursor: pointer; box-shadow: 1px 2px 3px rgba(0,0,0,0.1); padding: 3px; height: 100%; box-sizing: border-box; background: white; justify-content: center; align-items: center; }
+  .seat.empty { background: white; opacity: 1; border: 2px dashed #ddd; } 
+  .seat.reserved { background: #bbb; color: white; opacity: 0.5; pointer-events: none; border:none; } 
+  .seat.emergency { border: 2px dashed #ff9800; background-color: #fff8e1; } 
+  .seat.selected { border: 3px solid #ff0000; transform: scale(1.05); z-index: 20; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+  .seat.synced-general { background-color: #e0e0e0 !important; border: 1px solid #bdbdbd; opacity: 0.8; }
+  
+  .seat-num { position: absolute; top: 2px; left: 4px; font-size: 11px; font-weight: bold; color: rgba(0,0,0,0.4); z-index: 2; }
+  .grp-id { font-size: 24px; font-weight: 900; color: #333; line-height: 1; margin-bottom: 4px; margin-top: 8px; text-align: center; }
+  .grp-id.long-text { font-size: 20px; letter-spacing: -1px; }
+  .info-badge { background: rgba(255,255,255,0.85); border-radius: 12px; padding: 3px 6px; text-align: center; font-size: 11px; font-weight: 900; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: 95%; margin-top: auto; margin-bottom: 2px; white-space: nowrap; }
+  
+  .neutral-text { color: #555; } 
+  .day-tag { color: white; padding: 1px 4px; border-radius: 4px; margin-right: 3px; font-size: 10px; vertical-align: middle; }
+  .tag-d1 { background-color: #1976d2; } .tag-d2 { background-color: #d32f2f; } .tag-d3 { background-color: #7b1fa2; } .tag-stay { background-color: #ff9800; }
+  .tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; }
+
+  .status { font-size: 11px; color: #666; text-align: right; margin-top: 5px; }
+
+  .msg-section { margin-top: 20px; border-top: 2px solid #333; padding-top: 10px; }
+  .msg-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .msg-check-area { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-right: 8px; width: 45px; gap: 8px; }
+  .check-box-wrapper { display: flex; flex-direction: column; align-items: center; }
+  .msg-check-label { font-size: 10px; font-weight: 800; color: #555; margin-bottom: 2px; text-align: center; white-space: nowrap; }
+  .label-sent { color: #1976d2; } .label-connected { color: #d32f2f; }
+  .msg-check-input { transform: scale(1.5); margin: 0; cursor: pointer; }
+  .chk-sent { accent-color: #2196f3; } .chk-conn { accent-color: #f44336; } 
+  .msg-info { flex: 1; margin-right: 5px; min-width: 0; }
+  .msg-group-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+  .msg-group { font-size: 18px; font-weight: 900; color: #333; }
+  .msg-seats { font-size: 14px; font-weight: bold; color: #d32f2f; margin-top: 4px; }
+  .msg-memo-input { width: 100%; margin-top: 5px; border: none; border-bottom: 1px solid #ccc; font-size: 12px; padding: 5px 2px; background: #fafafa; }
+  .lang-tag { font-size: 10px; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
+  .lang-CN { background: #fce4ec; color: #c2185b; }
+  .lang-EN { background: #e3f2fd; color: #1565c0; }
+  .msg-actions { display: flex; gap: 5px; align-items: center; }
+  .btn-action { width: 45px; height: 45px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; font-size: 10px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; text-align: center; line-height: 1.2; transition: transform 0.1s; }
+  .btn-action:active { transform: scale(0.95); }
+  .btn-wa-send { background: #25D366; color: white; }
+  .btn-wa-send.disabled { background: #ccc; pointer-events: none; }
+  .btn-copy-body { background: #607d8b; color: white; }
+  .btn-copy-mail { background: #4fc3f7; color: white; }
+  
+  .logo-wa { background: #25D366; color: white; } .logo-line { background: white; border: 2px solid #06C755; color: #06C755; box-sizing: border-box; } .logo-kakao { background: #FEE500; color: #3c1e1e; }
+  .logo-viber { background: #7360f2; color: white; } .logo-wechat { background: #000000; color: #07C160; border: 1px solid #07C160; } .logo-zalo { background: #0068FF; color: white; } .logo-none { background: #e0e0e0; color: #999; cursor: default; }
+  .hidden-msg { display: none; white-space: pre-wrap; }
+
+  /* 설명서 스타일 */
+  .manual-section { background: white; padding: 15px; border-radius: 12px; margin-top: 30px; border: 2px solid #cfd8dc; }
+  .manual-title { font-size: 16px; font-weight: 900; color: #455a64; margin-bottom: 10px; border-bottom: 2px solid #cfd8dc; padding-bottom: 5px; }
+  .manual-list { padding-left: 20px; font-size: 13px; color: #37474f; line-height: 1.6; }
+  .manual-list li { margin-bottom: 6px; }
+  .manual-list span { font-weight: bold; color: #00695c; }
+  
+  /* 잠금 화면 스타일 */
+  #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #263238; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+  #lockInput { font-size: 24px; padding: 10px; text-align: center; border-radius: 8px; border: none; margin-bottom: 20px; width: 200px; font-weight: bold; letter-spacing: 5px; }
+  #lockBtn { padding: 10px 30px; font-size: 18px; font-weight: bold; background: #009688; border: none; border-radius: 8px; color: white; cursor: pointer; }
+
+
+  /* [NEW] 기원 배지 스타일 (최종) */
+  .origin-badge {
+      display: inline-block;
+      width: 15px; height: 15px;
+      line-height: 15px;
+      border-radius: 50%;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 900;
+      color: white;
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  /* 회사별 색상 및 글자색 */
+  .badge-klook { background: #FF5722; } /* 클룩: 주황 */
+  .badge-kkday { background: #29B6F6; } /* 케이케이: 하늘 */
+  .badge-trip  { background: #0d47a1; color: #FFEB3B; } /* 트립: 진한파랑+노랑T */
+  .badge-gyg   { background: #000000; } /* GYG: 검정 */
+  .badge-qike  { background: #00E676; } /* 치커: 밝은초록 */
+  .badge-trazy { background: #FF4081; } /* 트레이지: 분홍 */
+  .badge-etc   { background: #78909C; } /* 미분류/현장: 회색 */
+  
+  /* 하단 배지 설명 영역 스타일 */
+  .badge-legend {
+      background: white; border: 2px solid #cfd8dc; border-radius: 12px;
+      padding: 10px; margin-top: 10px; text-align: center; font-size: 11px;
+      color: #455a64; font-weight: bold; line-height: 2.0;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="lockScreen" style="display:none;">
+    <h2 style="margin-bottom:20px;">🔒 ACCESS LOCKED</h2>
+    <input type="password" id="lockInput" placeholder="Password" maxlength="6" inputmode="numeric">
+    <button id="lockBtn" onclick="unlock()">ENTER</button>
+</div>
+
+<div class="main-title">미스터 신의 투어마스터 10.8 (FIT Mode)</div>
+
+<div class="input-box">
+  <div class="info-text">1. 기본 정보 & 시간 설정</div>
+  <div class="guide-panel">
+      <div class="guide-input-group">
+          <label style="font-weight:bold; font-size:12px; color:#ef6c00;">가이드명 (Guide)</label>
+          <input type="text" id="guideNameInput" class="guide-input" value="Mr. Shin" oninput="saveGuideName()">
+      </div>
+      <div class="guide-input-group">
+          <label style="font-weight:bold; font-size:12px; color:#0277bd;">버스 번호 (Bus)</label>
+          <input type="text" id="busNumberInput" class="guide-input" value="4044" oninput="saveGuideName()">
+      </div>
+  </div>
+  
+  <div class="time-setting-panel">
+    <div class="time-input-group"><label>홍대(8번)</label><input type="text" id="timeHongdae" value="06:40" onchange="saveTimeInput()"></div>
+    <div class="time-input-group"><label>명동(3번)</label><input type="text" id="timeMyeongdong" value="07:10" onchange="saveTimeInput()"></div>
+    <div class="time-input-group"><label>동대문(11번)</label><input type="text" id="timeDongdaemun" value="07:20" onchange="saveTimeInput()"></div>
+  </div>
+  <div style="font-size:11px; color:#888; text-align:center;">* 이 시간은 메시지에 자동으로 들어갑니다.</div>
+</div>
+
+<div class="input-box">
+  <div class="info-text">2. 데이터 입력 (카톡/엑셀 복사)</div>
+  <textarea id="rawData" placeholder="여기에 명단 데이터를 붙여넣으세요... (스키/산천어/일반 자동 감지)" oninput="saveTextInput()"></textarea>
+  <div class="size-selector">
+    <label><input type="radio" name="busSize" value="44" checked onchange="saveTextInput()"> 44인승</label>
+    <label><input type="radio" name="busSize" value="45" onchange="saveTextInput()"> 45인승</label>
+    <label><input type="radio" name="busSize" value="FIT" onchange="saveTextInput()"> FIT(자동)</label>
+  </div>
+</div>
+
+<div class="action-box">
+  <div class="info-text center">3. 실행 및 연락처 저장 (핵심 기능)</div>
+  <div class="action-row">
+      <input type="text" id="vcardDate" class="vcard-input" placeholder="YYMMDD" onchange="checkDateChange()">
+      <button class="btn-vcard" onclick="downloadVCard()">📞 연락처 저장(.vcf)</button>
+  </div>
+  <div class="action-row">
+      <button class="btn-clear" onclick="clearData()">🗑 초기화</button>
+      <button class="btn-run" onclick="runAI()">🤖 자동 배치 실행 (Run)</button>
+  </div>
+  <div class="status" id="paxInfo" style="text-align:center;">준비됨</div>
+</div>
+
+<div class="input-box">
+  <div class="info-text">4. 정렬 및 수정 (옵션)</div>
+  <div class="control-panel" style="margin-top:0; border-top:none; padding-top:0;">
+    <div class="priority-display" id="priorityView">우선순위: 없음</div>
+    <div class="control-group">
+      <label class="chk-label"><input type="checkbox" class="criteria" value="solo" onchange="updatePriority(this)"> 혼자(1인)</label>
+      <label class="chk-label"><input type="checkbox" class="criteria" value="CN" onchange="updatePriority(this)"> 중국어권</label>
+      <label class="chk-label"><input type="checkbox" class="criteria" value="EN" onchange="updatePriority(this)"> 영어권</label>
+      <label class="chk-label"><input type="checkbox" class="criteria" value="G4" onchange="updatePriority(this)"> 4인 이상</label>
+      <label class="chk-label"><input type="checkbox" class="criteria" value="HD" onchange="updatePriority(this)"> 홍대</label>
+      <label class="chk-label"><input type="checkbox" class="criteria" value="MY" onchange="updatePriority(this)"> 명동</label>
+      <label class="chk-label"><input type="checkbox" class="criteria" value="DDM" onchange="updatePriority(this)"> 동대문</label>
+    </div>
+    <div class="size-selector" style="background:#eef;">
+      <label><input type="radio" name="direction" value="front" checked> 조건 앞쪽</label>
+      <label><input type="radio" name="direction" value="back"> 조건 뒤쪽</label>
+    </div>
+  </div>
+  
+  <div class="manual-control-panel" style="margin-bottom:0; margin-top:10px;">
+          <input type="text" id="manualGroupNum" class="manual-input" placeholder="No. or Name">
+
+      <button class="btn-manual btn-add" onclick="manualAddGroup()">+</button>
+      <button class="btn-manual btn-del" onclick="manualDelGroup()">-</button>
+  </div>
+  <div style="font-size:11px; color:#888; text-align:center; margin-top:5px;">* 현장 손님 추가나 제외할 때 쓰세요.</div>
+</div>
+
+<div class="input-box" style="background:transparent; box-shadow:none; padding:0;">
+  <div class="info-text center" style="margin-bottom:10px;">5. 좌석 배치 확인 & 저장 (Maps)</div>
+</div>
+<div class="capture-wrapper">
+  <div id="captureArea1">
+    <div class="bus-header">
+      <div class="bus-title-label">☀️ Map 1 (Seoul → Dest)</div>
+      <div class="pickup-summary" id="pickupSummary1">
+          준비중...
+          <div class="header-controls" data-html2canvas-ignore="true">
+             <button class="btn-save-mini" onclick="downloadImage(1)">📸 저장</button>
+          </div>
+      </div>
+      <div class="bus-date" id="dateDisplay1">2026-00-00</div>
+    </div>
+    <div class="bus-grid" id="busGrid1"></div>
+  </div>
+</div>
+
+<div class="capture-wrapper">
+  <div id="captureArea2">
+    <div class="bus-header">
+      <div class="bus-title-label">🌙 Map 2 (Dest → Seoul)</div>
+      <div class="pickup-summary" id="pickupSummary2">
+          준비중...
+          <div class="header-controls" data-html2canvas-ignore="true">
+            <button class="btn-save-mini night" onclick="downloadImage(2)">📸 저장</button>
+          </div>
+      </div>
+      <div class="bus-date" id="dateDisplay2">2026-00-00</div>
+    </div>
+    <div class="bus-grid" id="busGrid2"></div>
+  </div>
+</div>
+
+<div class="input-box" style="background: #fff9c4; border: 2px solid #fbc02d;">
+  <div class="info-text" style="text-align:left; color:#f9a825;">6. 특수 공지 (오늘만 나가는 메시지)</div>
+  <textarea id="specialNotice" style="height: 100px; margin-top:5px; border-color:#fbc02d;" placeholder="예: 비가 오니 우산을 챙기세요. (이 내용은 전송 메시지 중간에 삽입됩니다)" oninput="saveSpecialNotice()"></textarea>
+</div>
+
+<div class="msg-section" id="msgSection" style="display:none;">
+    <h3 style="text-align:center; margin:0 0 10px 0;">7. 💬 메시지 발송 & 체크</h3>
+    <div class="info-text" style="margin-bottom:15px; text-align:center;">Send 버튼을 누르면 WhatsApp이 열립니다.</div>
+    <div id="msgList"></div>
+</div>
+<textarea id="clipboardHelper" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; opacity:0; pointer-events:none;"></textarea>
+<div class="badge-legend">
+    🏷️ <b>예약처 구분:</b> 
+    <span class="origin-badge badge-klook">K</span>클룩 
+    <span class="origin-badge badge-kkday">K</span>케이케이 
+    <span class="origin-badge badge-trip">T</span>트립 
+    <span class="origin-badge badge-gyg">G</span>겟 
+    <span class="origin-badge badge-qike">Q</span>치커 
+    <span class="origin-badge badge-trazy">Z</span>트레이지 
+    <span class="origin-badge badge-etc">미</span>기타/현장
+</div>
+
+<div class="manual-section">
+    <div class="manual-title">📘 투어마스터 10.8 사용 설명서</div>
+    <ul class="manual-list">
+        <li><span>1단계 (준비):</span> 맨 위 <b>가이드명, 버스 번호, 출발 시간</b>을 먼저 확인하세요.</li>
+        <li><span>2단계 (입력):</span> 카카오톡이나 엑셀의 명단을 복사해서 <b>데이터 입력창</b>에 붙여넣으세요. 버스 인승(44/45)도 체크하세요.</li>
+        <li><span>3단계 (저장):</span> <b>[연락처 저장]</b> 버튼을 눌러 핸드폰에 손님 번호를 저장하세요. (필수!)</li>
+        <li><span>4단계 (실행):</span> <b>[자동 배치 실행]</b>을 누르면 AI가 자리를 배정합니다.</li>
+        <li><span>5단계 (조정):</span> 자리를 바꾸고 싶으면 <b>좌석을 클릭</b>해서 서로 맞바꾸세요. (같은 맵끼리만 가능)</li>
+        <li><span>6단계 (이미지):</span> 각 맵 상단의 <b>[📸 저장]</b> 버튼을 눌러 이미지를 저장하고 기사님께 보내세요.</li>
+        <li><span>7단계 (전송):</span> 맨 아래 메시지 목록에서 <b>[Send WA]</b>를 눌러 손님에게 메시지를 보내고, 체크박스로 완료 표시를 하세요.</li>
+    </ul>
+</div>
+<script>
+/**
+ * [전역 상수 및 설정] - 버전 10.8 (Gender Free + FIT)
+ */
+const CONFIG = {
+    BOOTS_YOUTUBE: "https://youtu.be/J9S0q1QKoOY?si=V57nHSmY0NGhhHcY",
+    COLORS: {
+        hongdae: '#C8E6C9',    // 홍대 (초록)
+        myeongdong: '#BBDEFB', // 명동 (파랑)
+        dongdaemun: '#E1BEE7', // 동대문 (보라)
+        resort: '#FFF9C4',     // 스키장/D2/D3 (노랑)
+        etc: '#E0E0E0'         // 기타/현장 (회색)
+    },
+    PHONE_CODES: { 
+        "1": "US", "7": "RU", "20": "EG", "27": "ZA", "30": "GR", "31": "NL", "32": "BE", "33": "FR", "34": "ES", 
+        "36": "HU", "39": "IT", "40": "RO", "41": "CH", "43": "AT", "44": "UK", "45": "DK", "46": "SE", "47": "NO", 
+        "48": "PL", "49": "DE", "51": "PE", "52": "MX", "53": "CU", "54": "AR", "55": "BR", "56": "CL", "57": "CO", 
+        "58": "VE", "60": "MY", "61": "AU", "62": "ID", "63": "PH", "64": "NZ", "65": "SG", "66": "TH", "81": "JP", 
+        "82": "KR", "84": "VN", "86": "CN", "90": "TR", "91": "IN", "92": "PK", "93": "AF", "94": "LK", "95": "MM", 
+        "98": "IR", "852": "HK", "886": "TW" 
+    },
+    COUNTRY_MAP: { 
+        'KR':'한국','CN':'중국','TW':'대만','HK':'홍콩','SG':'싱가','MY':'말레','TH':'태국','PH':'필리',
+        'VN':'베트','ID':'인니','US':'미국','UK':'영국','AU':'호주','JP':'일본' 
+    },
+    SCHEMES: {
+        'kakao': 'kakaotalk://',
+        'line': 'line://',
+        'wechat': 'weixin://', 
+        'viber': 'viber://',
+        'mail': 'mailto:'
+    }
+};
+
+let currentSeatMap1 = [];
+let currentSeatMap2 = [];
+let selectedSeat = { busNum: 0, idx: -1 };
+let msgListGroups = []; 
+let priorityQueue = [];
+let audioCtx = null;
+
+// =========================================
+// [기원 판별 로직]
+// =========================================
+function detectOrigin(rawId) {
+    if (!rawId) return "(미)";
+    let temp = rawId.split('-')[0];
+    temp = temp.replace(/\(.*\)/g, '').replace(/\s+/g, '').toUpperCase();
+    if (temp.includes('QIKE')) return "(치)";
+    if (temp.includes('GYG')) return "(겟)";
+    if (/^\d{8}[A-Z]{2}\d{5}$/.test(temp)) return "(지)";
+    if (/^[A-Z]{3}\d{6}$/.test(temp)) return "(클)";
+    if (/^(24|25|26)KK/.test(temp)) return "(케)";
+    if (/^\d{8,}$/.test(temp)) return "(트)";
+    return "(미)";
+}
+
+function getOriginBadgeHtml(tag) {
+    if (!tag) return "";
+    if (tag.includes('클')) return `<span class="origin-badge badge-klook">K</span>`;
+    if (tag.includes('케')) return `<span class="origin-badge badge-kkday">K</span>`;
+    if (tag.includes('트')) return `<span class="origin-badge badge-trip">T</span>`;
+    if (tag.includes('겟')) return `<span class="origin-badge badge-gyg">G</span>`;
+    if (tag.includes('치')) return `<span class="origin-badge badge-qike">Q</span>`;
+    if (tag.includes('지')) return `<span class="origin-badge badge-trazy">Z</span>`;
+    return `<span class="origin-badge badge-etc">미</span>`;
+}
+
+// =========================================
+// [1] 유틸리티 및 헬퍼 함수 (기존 유지)
+// =========================================
+
+function initAudio() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+  }
+  if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+}
+
+function playPopSound() {
+  initAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  osc.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+  gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+  osc.start(audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime + 0.1);
+}
+
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'BUTTON' || (e.target.tagName === 'INPUT' && (e.target.type === 'checkbox' || e.target.type === 'radio')) || e.target.closest('.seat') || e.target.classList.contains('btn-action')) {
+        playPopSound();
+    }
+});
+
+function combinePhoneAndMessenger(phoneCol, messengerCol) {
+    let cleanPhoneCol = (phoneCol || "").trim();
+    let splitPhone = cleanPhoneCol.split(/[,\/]/);
+    let firstPhone = splitPhone[0] ? splitPhone[0].trim() : "";
+    let cleanMsgCol = (messengerCol || "").trim();
+    let lowerMsg = cleanMsgCol.toLowerCase();
+    
+    let rawPhoneDigits = firstPhone.replace(/[^0-9]/g, '');
+    let f_CountryCode = "82"; 
+    let f_Country = "ETC";
+    
+    for (let len = 4; len >= 1; len--) {
+        let prefix = rawPhoneDigits.substring(0, len);
+        if (CONFIG.PHONE_CODES[prefix]) { 
+            f_CountryCode = prefix; 
+            f_Country = CONFIG.PHONE_CODES[prefix]; 
+            break; 
+        }
+    }
+    
+    let targetBody = "";
+    let isMessengerValid = false;
+    
+    if (lowerMsg.includes('whatsapp') || lowerMsg.includes('viber')) {
+        targetBody = cleanMsgCol.replace(/[^0-9]/g, '');
+        isMessengerValid = true;
+    } 
+    
+    if (!isMessengerValid) {
+        targetBody = rawPhoneDigits;
+    }
+    
+    if (targetBody.startsWith('0')) targetBody = targetBody.substring(1);
+    
+    let fullNumber = "";
+    if (targetBody.startsWith(f_CountryCode)) {
+        fullNumber = targetBody;
+    } else {
+        fullNumber = f_CountryCode + targetBody;
+    }
+    
+    return { code: f_CountryCode, country: f_Country, fullNumber: fullNumber };
+}
+
+function getMessengerApp(text) { 
+    if(!text) return '무'; 
+
+    const raw = String(text || "");
+    const t = raw.toLowerCase();
+
+    if(t.includes('whatsapp')) return '와'; 
+    if(t.includes('line')) return '라'; 
+    if(t.includes('kakao')) return '카'; 
+
+    if (
+        t.includes("wechat") ||
+        t.includes("weixin") ||
+        raw.includes("微信")
+    ) return "웨";
+
+    if(t.includes('viber')) return '바'; 
+    if(t.includes('zalo')) return '잘'; 
+    return '무'; 
+}
+
+function copyToClipboard(text, el) {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => { feedback(el); }).catch(() => { fallbackCopy(text, el); });
+    } else { fallbackCopy(text, el); }
+}
+
+function fallbackCopy(text, el) {
+    const scrollY = window.scrollY;
+    const helper = document.getElementById('clipboardHelper');
+    helper.value = text;
+    helper.focus({ preventScroll: true });
+    helper.select();
+    document.execCommand('copy');
+    helper.blur();
+    window.scrollTo(0, scrollY);
+    feedback(el);
+}
+
+function copyAndOpen(el, text, schemeKey) {
+    copyToClipboard(text, el);
+    let scheme = CONFIG.SCHEMES[schemeKey];
+    if (schemeKey === 'viber') { const cleanNum = text.replace(/[^0-9]/g, ''); scheme = `viber://chat?number=${cleanNum}`; }
+    if (scheme) { setTimeout(() => { try { window.location.href = scheme; } catch(e) {} }, 300); }
+}
+
+function feedback(el) { if(!el) return; let original = el.innerHTML; el.innerHTML = 'OK!'; setTimeout(() => el.innerHTML = original, 800); }
+function copyMessageBody(btn) { const card = btn.closest('.msg-card'); const hiddenDiv = card.querySelector('.hidden-msg'); copyToClipboard(hiddenDiv.textContent, btn); }
+function copyOnly(el, text) { copyToClipboard(text, el); }
+
+// =========================================
+// [2] 데이터 파싱 및 전처리 (기존 로직 유지)
+// =========================================
+function findCount(parts) {
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (parts[i].includes('중국어') || parts[i].includes('영어')) {
+      let n = parseInt(parts[i+1]);
+      if (!isNaN(n)) return n;
+    }
+  }
+  return 1;
+}
+
+function findLocation(parts) {
+  for (let p of parts) {
+    if (p.includes('홍대') || p.includes('명동') || p.includes('동대문')) return p.trim();
+  }
+  return "";
+}
+
+function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
+    let parts = line.split('\t').map(p => p.trim());
+    if (headerMap && parts.length < 2) { parts = line.split(/\s{2,}/).map(p => p.trim()); }
+    if (headerMap && !parts[headerMap.name]) return null;
+    if(parts.length < 4 && !headerMap) return null;
+
+    let firstCol = parts[0] || "";
+    if (firstCol === 'No.' || firstCol.includes('예약번호') || firstCol.toLowerCase().startsWith('total') || firstCol.includes('엑셀')) return null;
+
+    const lineLower = line.toLowerCase();
+    const isSkiTour = isGlobalSki || lineLower.includes('ski') || lineLower.includes('snowboard');
+
+    let customId, productName, name, rawPhone, messengerCol, count, location, rawLang, note;
+    let resNoForOrigin = ""; 
+
+    if (headerMap) {
+        customId = parts[headerMap.no] || originalOrder.toString();
+        productName = (headerMap.product !== -1 && parts[headerMap.product]) ? parts[headerMap.product] : "Ski Tour";
+        name = parts[headerMap.name] || "Guest";
+        rawPhone = (headerMap.phone !== -1 && parts[headerMap.phone]) ? parts[headerMap.phone] : "";
+        messengerCol = (headerMap.messenger !== -1 && parts[headerMap.messenger]) ? parts[headerMap.messenger] : "";
+        resNoForOrigin = (headerMap.resNo !== -1 && parts[headerMap.resNo]) ? parts[headerMap.resNo] : "";
+        rawLang = ""; 
+        count = findCount(parts); 
+        location = findLocation(parts);
+        note = ""; 
+        if(!customId) customId = originalOrder.toString();
+    } else {
+        customId = parts[0] || originalOrder.toString();
+        if (isSkiTour) {
+             productName = parts[1] || "";
+             resNoForOrigin = parts[2] || ""; 
+             name = parts[3] || "Guest";
+             rawPhone = parts[4] || "";
+             messengerCol = parts[5] || "";
+             rawLang = parts[7] || "";
+             count = findCount(parts);
+             location = findLocation(parts);
+             note = parts[10] || "";
+        } else {
+             productName = parts[2] || "";
+             name = parts[4] || "Guest";
+             rawPhone = parts[5] || "";
+             messengerCol = parts[6] || "";
+             rawLang = parts[8] || "";
+             count = findCount(parts);
+             location = findLocation(parts);
+             note = parts[12] || "";
+             resNoForOrigin = customId; 
+        }
+    }
+
+    let originTag = detectOrigin(resNoForOrigin);
+    let optLift = false, optGear = false, optClothes = false, optLesson = false;
+    if (!headerMap && isSkiTour) {
+        if (parts[11] && parseInt(parts[11]) > 0) optLift = true;
+        if (parts[12] && parseInt(parts[12]) > 0) optGear = true;
+        if (parts[13] && parseInt(parts[13]) > 0) optClothes = true;
+        if (parts[14] && parseInt(parts[14]) > 0) optLesson = true;
+    }
+
+    let paxType = 'General'; let isStay = false; 
+    let isBoard = (productName.toLowerCase().includes('board') || productName.includes('보드'));
+    let isHot = (productName.toLowerCase().includes('hot')); 
+
+    let lowerP = productName.toLowerCase();
+    if (lowerP.includes('day1') || lowerP.includes('day 1')) { paxType = 'D1'; }
+    else if (lowerP.includes('day2') || lowerP.includes('day 2')) { paxType = 'D2'; }
+    else if (lowerP.includes('day3') || lowerP.includes('day 3')) { paxType = 'D3'; }
+    else if (lowerP.includes('편도') || lowerP.includes('one way')) { paxType = 'D1'; }
+    
+    if (paxType === 'General' && (location.includes('스키장') || location.includes('Resort'))) { paxType = 'D2'; }
+
+    let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
+    let langContext = (rawLang && rawLang.includes('중국어')) ? 'CN' : 'EN';
+    let gender = 'N'; 
+    let appType = getMessengerApp(messengerCol);
+    if (note && note.toLowerCase().includes('whatsapp')) { appType = '와'; }
+
+    let emailAddr = "";
+    for(let p of parts) { if(p && p.includes('@')) { emailAddr = p; break; } }
+
+    return {
+      id: customId, originalId: originalOrder, name: name, 
+      phone: parsedInfo.fullNumber, 
+      count: count, location: location, note: note,
+      country: parsedInfo.country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false,
+      paxType: paxType, isStay: isStay, isBoard: isBoard, 
+      isSancheoneo: !isSkiTour, isHot: isHot, email: emailAddr,
+      originTag: originTag, 
+      options: { lift: optLift, gear: optGear, clothes: optClothes, lesson: optLesson }
+    };
+}
+
+function createGroupsFromEntries(entries) {
+    let finalGroups = [];
+    entries.forEach((entry) => {
+        if(entry.isGrouped) return;
+        let currentGroupMembers = [entry]; entry.isGrouped = true;
+        
+        if (entry.phone && entry.phone.length > 5) {
+            let queue = [entry];
+            while(queue.length > 0) {
+                let curr = queue.shift();
+                entries.forEach((target) => {
+                    if(target.isGrouped) return;
+                    if(target.phone && target.phone.length > 5 && curr.phone === target.phone) {
+                        target.isGrouped = true; currentGroupMembers.push(target); queue.push(target); 
+                    }
+                });
+            }
+        }
+
+        let rep = currentGroupMembers[0];
+        let cleanIds = currentGroupMembers.map(m => m.id.replace(/\D/g, '')); 
+        if (cleanIds.some(id => id === "")) cleanIds = currentGroupMembers.map(m => m.id);
+        cleanIds.sort((a,b) => parseInt(a) - parseInt(b));
+        let displayNum = cleanIds.join('.'); 
+        let totalC = currentGroupMembers.reduce((sum, m) => sum + m.count, 0);
+        let uniqueTags = [...new Set(currentGroupMembers.map(m => m.originTag))];
+        let combinedOrigin = uniqueTags.join('');
+
+        let groupType = 'General';
+        if(currentGroupMembers.some(m => m.paxType === 'D3')) groupType = 'D3';
+        else if(currentGroupMembers.some(m => m.paxType === 'D2')) groupType = 'D2';
+        else if(currentGroupMembers.some(m => m.paxType === 'D1')) groupType = 'D1';
+        if (groupType === 'D1' && currentGroupMembers.some(m => m.paxType === 'General')) groupType = 'D1';
+
+        let gLift = currentGroupMembers.some(m => m.options.lift);
+        let gGear = currentGroupMembers.some(m => m.options.gear);
+        let gClothes = currentGroupMembers.some(m => m.options.clothes);
+        let gLesson = currentGroupMembers.some(m => m.options.lesson);
+
+        finalGroups.push({
+            mainNum: displayNum, 
+            msgNum: rep.id + (currentGroupMembers.length > 1 ? ".." : ""), 
+            repNum: rep.id, 
+            count: totalC, name: rep.name, country: rep.country, gender: rep.gender,
+            langContext: rep.langContext, appType: rep.appType, location: rep.location, 
+            phone: rep.phone, messenger: rep.messenger, paxType: groupType, 
+            isStay: currentGroupMembers.some(m => m.isStay), 
+            isBoard: currentGroupMembers.some(m => m.isBoard), 
+            isSancheoneo: rep.isSancheoneo, isHot: currentGroupMembers.some(m => m.isHot), email: rep.email,
+            originTag: combinedOrigin, 
+            options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson }
+        });
+    });
+    return finalGroups;
+}
+
+function calculateScore(grp) {
+    let score = 0;
+    priorityQueue.forEach((criteria, idx) => {
+        let weight = Math.pow(10, 6 - idx); let match = false;
+        if (criteria === 'solo' && grp.count === 1) match = true;
+        if (criteria === 'CN' && grp.langContext === 'CN') match = true;
+        if (criteria === 'EN' && grp.langContext === 'EN') match = true;
+        if (criteria === 'G4' && grp.count >= 4) match = true;
+        if (criteria === 'HD' && grp.location.includes('홍대')) match = true;
+        if (criteria === 'MY' && grp.location.includes('명동')) match = true;
+        if (criteria === 'DDM' && grp.location.includes('동대문')) match = true;
+        if(match) score += weight;
+    });
+    return score;
+}
+
+function getPickColor(grp) {
+    let loc = grp.location || '';
+    if (grp.paxType === 'D2' || grp.paxType === 'D3') return CONFIG.COLORS.resort;
+    if (loc.includes('홍대')) return CONFIG.COLORS.hongdae;
+    if (loc.includes('명동')) return CONFIG.COLORS.myeongdong;
+    if (loc.includes('동대문')) return CONFIG.COLORS.dongdaemun;
+    return CONFIG.COLORS.etc;
+}
+
+function setGroupMeta(grp) {
+    let nation = grp.country;
+    if (CONFIG.COUNTRY_MAP[grp.country]) nation = CONFIG.COUNTRY_MAP[grp.country];
+    grp.textClass = 'neutral-text'; 
+    grp.subInfo = `${nation}${grp.originTag}`; 
+}
+
+// =========================================
+// [4] 메인 컨트롤러 (runAI - FIT 수정됨)
+// =========================================
+function runAI() {
+    saveTextInput(); saveTimeInput(); saveGuideName();
+    localStorage.removeItem('bus_seatMap');
+    
+    let raw = document.getElementById('rawData').value;
+    raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n]+/g, ' '));
+
+    // [수정] FIT 모드 분기 처리
+    let rawSizeVal = document.querySelector('input[name="busSize"]:checked').value;
+    const isFit = (rawSizeVal === 'FIT');
+    
+    // FIT인 경우 초기값 0, 아니면 parseInt
+    let busSize = isFit ? 0 : parseInt(rawSizeVal);
+
+    const direction = document.querySelector('input[name="direction"]:checked').value;
+    const lines = raw.trim().split('\n');
+    const rawLower = raw.toLowerCase();
+    const isGlobalSki = rawLower.includes('ski') || rawLower.includes('snowboard') || rawLower.includes('스키') || rawLower.includes('스노우');
+
+    let headerMap = null;
+    let startLineIdx = 0;
+
+    for (let k = 0; k < Math.min(lines.length, 5); k++) {
+        let checkLine = lines[k].trim();
+        if(!checkLine) continue;
+        let headerParts = checkLine.split(/\t+/).map(h => h.trim());
+        if (headerParts.length < 2) headerParts = checkLine.split(/\s{2,}/).map(h => h.trim());
+        const idxNo = headerParts.findIndex(p => p === 'No.' || p === 'NO.');
+        const idxRes = headerParts.findIndex(p => p.includes('예약번호') || p.includes('Order'));
+
+        if (idxNo !== -1 && idxRes !== -1) {
+            headerMap = {
+                no: idxNo,
+                resNo: idxRes,
+                product: headerParts.findIndex(p => p.includes('행사명') || p.includes('상품') || p.includes('Product')),
+                name: headerParts.findIndex(p => p.includes('예약자') || p.includes('이름') || p.includes('Name')),
+                phone: headerParts.findIndex(p => p.includes('핸드폰') || p.includes('전화') || p.includes('연락처') || p.includes('Phone')),
+                messenger: headerParts.findIndex(p => p.includes('메신저') || p.includes('카톡') || p.includes('Messenger') || p.includes('연락가능APP') || p.includes('앱'))
+            };
+            startLineIdx = k + 1; 
+            break; 
+        }
+    }
+
+    let entries = []; let originalOrder = 1;
+    for (let i = startLineIdx; i < lines.length; i++) {
+        let line = lines[i];
+        if (!line.trim()) continue;
+        const parsed = parseRawDataLine(line, originalOrder, isGlobalSki, headerMap);
+        if(parsed) { entries.push(parsed); originalOrder++; }
+    }
+
+    msgListGroups = createGroupsFromEntries(entries);
+
+    // [추가] FIT 모드일 경우: 배정 대상 인원수만큼 busSize 자동 설정
+    if (isFit) {
+        let totalGoing = msgListGroups
+            .filter(g => g.paxType === 'General' || g.paxType === 'D1')
+            .reduce((sum, g) => sum + g.count, 0);
+        
+        busSize = totalGoing > 0 ? totalGoing : 1; 
+    }
+
+    let listGoing = msgListGroups.filter(g => g.paxType === 'General' || g.paxType === 'D1');
+    if (direction === 'front') listGoing.sort((a,b) => calculateScore(b) - calculateScore(a));
+    else listGoing.sort((a,b) => calculateScore(a) - calculateScore(b));
+
+    currentSeatMap1 = new Array(busSize + 1).fill(null);
+    
+    // [수정] 시퀀스 생성 시 isFit 플래그 전달
+    let seatSequence = generateSeatSequence(999, busSize, isFit);
+    let currentSeqIdx = 0;
+
+    listGoing.forEach((grp) => {
+        grp.color = getPickColor(grp); setGroupMeta(grp);
+        for(let i=0; i<grp.count; i++) {
+            if(currentSeqIdx < seatSequence.length) {
+                let seatNum = seatSequence[currentSeqIdx];
+                currentSeatMap1[seatNum] = { ...grp }; currentSeqIdx++;
+            }
+        }
+    });
+
+    currentSeatMap2 = new Array(busSize + 1).fill(null);
+    for(let i=1; i<=busSize; i++) {
+        if(currentSeatMap1[i]) {
+            if (currentSeatMap1[i].paxType === 'General') {
+                let cloned = { ...currentSeatMap1[i] }; cloned.color = '#e0e0e0'; cloned.isSynced = true; currentSeatMap2[i] = cloned;
+            }
+        }
+    }
+
+    let listReturnOnly = msgListGroups.filter(g => g.paxType === 'D2' || g.paxType === 'D3');
+    toggleMap2(listReturnOnly.length > 0); 
+    if (direction === 'front') listReturnOnly.sort((a,b) => calculateScore(b) - calculateScore(a));
+    else listReturnOnly.sort((a,b) => calculateScore(a) - calculateScore(b));
+
+    let emptySeatsMap2 = [];
+    seatSequence.forEach(seatNum => { if(!currentSeatMap2[seatNum]) emptySeatsMap2.push(seatNum); });
+    
+    let d23Passengers = [];
+    listReturnOnly.forEach((grp) => {
+        grp.color = getPickColor(grp); setGroupMeta(grp);
+        if (!grp.isStay) { for(let k=0; k<grp.count; k++) { d23Passengers.push({ ...grp, count: 1 }); } }
+    });
+    
+    let pIdx = 0;
+    for(let k=0; k<emptySeatsMap2.length; k++) {
+        if(pIdx >= d23Passengers.length) break;
+        let seatNum = emptySeatsMap2[k]; currentSeatMap2[seatNum] = d23Passengers[pIdx]; pIdx++;
+    }
+
+    saveSeatMap(); redrawAll(busSize, isFit); // [수정] isFit 전달
+    renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2, isFit); // [수정] isFit 전달
+}
+
+// [수정] isFit 매개변수 추가 및 단순 시퀀스 처리
+function generateSeatSequence(totalPax, busSize, isFit) {
+  // 1. FIT 모드: 단순 1, 2, 3... 순서
+  if (isFit) {
+      let seq = [];
+      for(let i=1; i<=busSize; i++) seq.push(i);
+      return seq;
+  }
+  // 2. 기존 14인승 (코드상 남겨둠, 필요시 호환)
+  if (busSize === 14) {
+    let seq = [];
+    for (let i = 1; i <= 14; i++) seq.push(i);
+    return seq;
+  }
+
+  // 3. 기존 44/45인승 로직 (유지)
+  let sequence = [];
+  for(let i = 5; i <= busSize; i++) sequence.push(i);
+  sequence.push(4); sequence.push(3); sequence.push(2); sequence.push(1); 
+  return sequence;
+}
+// =========================================
+// [5] UI 렌더링 및 인터랙션 (FIT 수정됨)
+// =========================================
+
+function redrawAll(busSize, isFit) {
+    // [수정] isFit 플래그를 renderBus에 전달
+    renderBus(currentSeatMap1, busSize, 'busGrid1', 1, isFit); 
+    renderBus(currentSeatMap2, busSize, 'busGrid2', 2, isFit);
+    updateHeader1(currentSeatMap1); 
+    updateHeader2(currentSeatMap2);
+}
+
+function renderFitBus(seatMap, gridId, busNum) {
+    const grid = document.getElementById(gridId);
+    grid.innerHTML = "";
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(4, 1fr)";
+    grid.style.gap = "4px";
+
+    // 가족(repNum) 기준으로 묶기
+    let grouped = {};
+    for (let i = 1; i < seatMap.length; i++) {
+        const s = seatMap[i];
+        if (!s) continue;
+        const key = s.repNum || ("solo_" + i);
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(i);
+    }
+
+    // 가족 단위로 출력
+    Object.values(grouped).forEach(seats => {
+        // 좌석 출력
+        for (let i = 0; i < seats.length; i++) {
+            createSeatElement(grid, seats[i], seatMap, seatMap.length - 1, busNum);
+        }
+
+        // 4칸 맞추기용 더미
+        const mod = seats.length % 4;
+        if (mod !== 0) {
+            for (let k = 0; k < 4 - mod; k++) {
+                const dummy = document.createElement("div");
+dummy.style.visibility = "hidden";
+dummy.style.height = "0px";
+dummy.style.margin = "0";
+grid.appendChild(dummy);
+            }
+        }
+
+        // 가족 구분선
+        const line = document.createElement("div");
+        line.style.gridColumn = "1 / -1";
+        line.style.height = "3px";
+        line.style.background = "#000";
+        line.style.margin = "3px 0";
+        grid.appendChild(line);
+    });
+}
+
+// [수정] 기존 renderBus를 감싸서 FIT 분기 처리
+function renderBus(seatMap, maxSeats, gridId, busNum, isFit) {
+  // 1. FIT 모드일 경우 전용 함수로 납치
+  if (isFit) {
+      renderFitBus(seatMap, gridId, busNum);
+      return;
+  }
+
+  // 2. 이하 기존 코드 절대 건드리지 않음
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = '';
+  // 기존 스타일 복구 (FIT에서 변경되었을 수 있으므로)
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = "1fr 1fr 0.2fr 1fr 1fr";
+  grid.style.gap = "4px";
+
+  if (maxSeats === 14) {
+    grid.style.gridTemplateColumns = "repeat(4, 1fr)";
+    for (let i = 1; i <= 14; i++) {
+      createSeatElement(grid, i, seatMap, maxSeats, busNum);
+    }
+    return;
+  }
+
+  for(let row=0; row<11; row++) {
+    if(maxSeats === 45 && row === 10) {
+      let lastRowDiv = document.createElement('div');
+      lastRowDiv.className = 'last-row-45';
+      for(let k=41; k<=45; k++) createSeatElement(lastRowDiv, k, seatMap, maxSeats, busNum);
+      grid.appendChild(lastRowDiv);
+      continue;
+    }
+    for(let col=0; col<5; col++) {
+      if(col === 2) { grid.appendChild(document.createElement('div')); continue; }
+      let seatNum = (row < 10)
+        ? (row * 4) + (col < 2 ? col + 1 : col)
+        : (col < 2 ? 40 + col + 1 : 40 + col);
+      createSeatElement(grid, seatNum, seatMap, maxSeats, busNum);
+    }
+  }
+}
+
+function createSeatElement(parent, seatNum, seatMap, maxSeats, busNum) {
+  let seatDiv = document.createElement('div'); seatDiv.className = 'seat'; seatDiv.dataset.idx = seatNum;
+  if(selectedSeat.busNum === busNum && selectedSeat.idx === seatNum) seatDiv.classList.add('selected');
+  if (busNum === 2 && seatMap[seatNum] && seatMap[seatNum].paxType === 'General') { seatDiv.classList.add('synced-general'); }
+  
+  // FIT 모드나 44/45인승의 앞자리 처리 (FIT는 모든 자리가 일반 자리처럼 보이게 처리)
+  if(seatNum <= 4 && maxSeats > 14) {
+    if (seatMap[seatNum]) renderSeatContent(seatDiv, seatMap[seatNum], seatNum, busNum);
+    else { seatDiv.classList.add('emergency'); renderSeatContent(seatDiv, null, seatNum, busNum); }
+  } else {
+    renderSeatContent(seatDiv, seatMap[seatNum], seatNum, busNum);
+  }
+  
+  seatDiv.onclick = function() { handleSeatClick(this, busNum, seatNum, maxSeats); };
+  parent.appendChild(seatDiv);
+}
+
+function renderSeatContent(el, data, num, busNum) {
+  el.innerHTML = `<span class="seat-num">${num}</span>`;
+  if(data) {
+    if (busNum === 2 && data.paxType === 'General') { 
+        el.style.backgroundColor = data.color; 
+        el.innerHTML += `<div style="font-size:30px; color:#757575; font-weight:bold; margin-top:10px;">❌</div>`; 
+        return; 
+    }
+    el.style.backgroundColor = data.color;
+    
+    let dispNum = data.mainNum;
+    let len = String(dispNum).length; 
+    let fSize = "24px"; 
+
+    if (len > 12) fSize = "12px";       
+    else if (len > 8) fSize = "15px";   
+    else if (len > 5) fSize = "19px";   
+    else if (len > 3) fSize = "22px";   
+
+    let originBadgeHtml = getOriginBadgeHtml(data.originTag);
+    let cleanNation = data.subInfo ? data.subInfo.replace(/\(.\)/g, '') : "";
+    
+    let tagsHtml = "";
+    if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
+    if (data.paxType === 'D1') tagsHtml += `<span class="day-tag tag-d1">D1</span>`;
+    if (data.paxType === 'D2') tagsHtml += `<span class="day-tag tag-d2">D2</span>`;
+    if (data.paxType === 'D3') tagsHtml += `<span class="day-tag tag-d3">D3</span>`;
+
+    el.innerHTML += `<div class="grp-id" style="font-size:${fSize};">${dispNum}</div><div class="info-badge ${data.textClass}">${tagsHtml}${cleanNation}${originBadgeHtml}</div>`;
+  } else el.className += " empty";
+}
+
+function handleSeatClick(el, busNum, seatIdx, busSize) {
+    if(selectedSeat.idx === -1) { 
+        selectedSeat = { busNum: busNum, idx: seatIdx }; el.classList.add('selected'); 
+    } else {
+        let sourceBus = selectedSeat.busNum; let sourceIdx = selectedSeat.idx; let targetBus = busNum; let targetIdx = seatIdx;
+        if (sourceBus !== targetBus) { alert("같은 버스끼리만 이동 가능!"); resetSelection(); return; }
+        
+        let mapMain = (sourceBus === 1) ? currentSeatMap1 : currentSeatMap2;
+        let paxS = mapMain[sourceIdx]; let paxT = mapMain[targetIdx];
+        
+        mapMain[sourceIdx] = paxT; mapMain[targetIdx] = paxS;
+        
+        if (sourceBus === 1) {
+            if (paxS && paxS.paxType === 'General') syncMoveToMap2(sourceIdx, targetIdx, busSize);
+            if (paxT && paxT.paxType === 'General') syncMoveToMap2(targetIdx, sourceIdx, busSize);
+        }
+        resetSelection(); refreshDisplay();
+    }
+}
+
+function syncMoveToMap2(fromIdx, toIdx, busSize) {
+    let mover = currentSeatMap2[fromIdx]; if (!mover || mover.paxType !== 'General') return;
+    let obstacle = currentSeatMap2[toIdx]; 
+    if (!obstacle || obstacle.paxType === 'General') { 
+        currentSeatMap2[fromIdx] = obstacle; currentSeatMap2[toIdx] = mover; 
+    } else if (obstacle.paxType === 'D2' || obstacle.paxType === 'D3') {
+        currentSeatMap2[toIdx] = mover; currentSeatMap2[fromIdx] = null; 
+        let newSeat = findEmptySeatMap2(busSize);
+        if (newSeat !== -1) { currentSeatMap2[newSeat] = obstacle; }
+    }
+}
+
+function findEmptySeatMap2(busSize) {
+    // FIT 모드에서는 시퀀스가 단순 1~N이므로 호환됨
+    let isFit = (document.querySelector('input[name="busSize"]:checked').value === 'FIT');
+    let sequence = generateSeatSequence(999, busSize, isFit); 
+    for (let idx of sequence) { if (currentSeatMap2[idx] === null) return idx; } 
+    return -1;
+}
+
+function resetSelection() { 
+    document.querySelectorAll('.seat.selected').forEach(e => e.classList.remove('selected')); 
+    selectedSeat = { busNum: 0, idx: -1 }; 
+}
+
+function refreshDisplay() {
+    const scrollY = window.scrollY; 
+    let rawSize = localStorage.getItem('bus_size') || "44";
+    const isFit = (rawSize === 'FIT');
+    // FIT면 맵 크기가 busSize, 아니면 44/45
+    let busSize = isFit ? (currentSeatMap1.length - 1) : parseInt(rawSize);
+
+    saveSeatMap(); 
+    redrawAll(busSize, isFit); 
+    renderMessages(msgListGroups, currentSeatMap1, currentSeatMap2, isFit);
+    window.scrollTo(0, scrollY);
+}
+
+// =========================================
+// [6] 메시지 생성 로직 (FIT 수정됨)
+// =========================================
+function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
+    const msgList = document.getElementById('msgList');
+    const section = document.getElementById('msgSection');
+    msgList.innerHTML = ''; section.style.display = 'block';
+    
+    const statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
+    const guideName = document.getElementById('guideNameInput').value || "Mr. Shin";
+    const busNo = document.getElementById('busNumberInput').value || "";
+    
+    const tH = document.getElementById('timeHongdae').value;
+    const tM = document.getElementById('timeMyeongdong').value;
+    const tD = document.getElementById('timeDongdaemun').value;
+    const specialMsg = document.getElementById('specialNotice').value;
+    const finalSpecial = specialMsg ? `\n\n${specialMsg}\n` : "";
+
+    allGroups.sort((a, b) => {
+        let numA = parseInt(a.repNum.replace(/\D/g, '')) || 0; let numB = parseInt(b.repNum.replace(/\D/g, '')) || 0;
+        return numA - numB;
+    });
+
+    allGroups.forEach((g, idx) => {
+        let seatStr = ""; let targetMap = (g.paxType === 'D2' || g.paxType === 'D3') ? seatMap2 : seatMap1;
+        if (g.isStay) seatStr = "STAY (No Seat)";
+        else {
+            let seats = [];
+            for(let i=1; i<targetMap.length; i++) { if(targetMap[i] && targetMap[i].repNum === g.repNum) seats.push(i); }
+            seatStr = seats.sort((a,b)=>a-b).join('-');
+        }
+
+        let gid = g.repNum; let msgText = ""; let langTag = "";
+        
+        const priceList_CN = `[Price List]\n\nS. 积极心态（包含）\n\nA. 缆车 + 装备\n   周末 70,000 / 平日 60,000\nB. 头盔 20,000\nC. 护具 15,000\nD. 滑雪服 20,000\nE. 雪橇 30,000\nF. 观光缆车 20,000\n\n*(刷卡 Card +10%)`;
+        const priceList_EN = `[Price List]\n\nS. Positive mindset (Included)\n\nA. Lift + Gear\n   Weekend 70,000 / Weekday 60,000\nB. Helmet 20,000\nC. Guard 15,000\nD. Ski Clothes 20,000\nE. Sled 30,000\nF. Sightseeing Lift 20,000\n\n*(Card payment +10%)`;
+
+        // [수정] FIT 모드일 때 메시지 내용 변경 (버스번호/그룹/좌석 제거)
+        let groupLine = isFit ? "" : `Group: ${g.msgNum}\n`;
+        let seatLine = isFit ? "" : `Seat: ${seatStr}\n`;
+        let busLine = isFit ? "" : `\nbus no : ${busNo}`;
+
+        if (g.paxType === 'D2' || g.paxType === 'D3') {
+            let isReturnGuest = (g.paxType === 'D2' || g.paxType === 'D3');
+            let dayLabel = isReturnGuest ? (g.paxType === 'D3' ? "Day 3" : "Day 2") : "Day 1";
+            let step3_EN = "3. Gathering (15:40)\n📍 Lobby (With luggage)";
+            let step3_CN = "3. 集合 Gathering (15:40)\n📍 酒店大厅 (带上所有行李)";
+            
+            if (g.isStay) { 
+                step3_EN = "3. Stay Guest\n📍 No Bus (Enjoy Skiing!)"; 
+                step3_CN = "3. 续住 (Stay)\n📍 No Bus (Enjoy Skiing!)"; 
+            }
+
+            if(g.langContext === 'CN') {
+                langTag = `<span class="lang-tag lang-CN">中文(${dayLabel})</span>`;
+                msgText = `[${dayLabel}/Return Guide - ${guideName}]\n${groupLine}${seatLine}\n1. 退房 Check-out (11:00 前)\n*行李寄放一楼大厅 (Lobby)\n⚠️ 迟交罚款 (Late): 10,000 / 30分\n\n2. Klook 休息室 (10:00)\n👉 付款 & 领取缆车票 (Payment/Ticket)\n\n${step3_CN}\n\n${priceList_CN}`;
+            } else {
+                langTag = `<span class="lang-tag lang-EN">ENG(${dayLabel})</span>`;
+                msgText = `[${dayLabel}/Return Guide - ${guideName}]\n${groupLine}${seatLine}\n1. Check-out (Until 11:00)\n*Leave bags at Lobby\n⚠️ Late Penalty: 10,000 KRW / 30min\n\n2. Klook Lounge (10:00)\n👉 Payment & Get Lift Card\n\n${step3_EN}\n\n${priceList_EN}`;
+            }
+        } 
+        else {
+             let pickupInfo = ""; let loc = g.location ? g.location.trim() : "";
+             
+             if(g.langContext === 'CN') {
+                langTag = `<span class="lang-tag lang-CN">TOUR(CN)</span>`;
+                if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
+                else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口 (Myeongdong Exit 3)`; } 
+                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口`; } 
+                else { pickupInfo = `❗️${tH} 弘대 8번 / ❗️${tM} 명동 3번 / ❗️${tD} 동대문 11번`; }
+                
+                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 請回覆 "您的出發時間" 以確認收到。${busLine}\n${groupLine}${seatLine}`;
+            } else {
+                langTag = `<span class="lang-tag lang-EN">TOUR(EN)</span>`;
+                if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ. Exit 8`; } 
+                else if (loc.includes('명동') || loc.includes('Myeongdong')) { pickupInfo = `❗️${tM} Myeongdong Exit 3`; } 
+                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
+                else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
+                
+                msgText = `[Tour Guide ${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm${busLine}\n${groupLine}${seatLine}`;
+            }
+        }
+
+        if (g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
+            msgText += `\n\n📺 How to wear boots:\n${CONFIG.BOOTS_YOUTUBE}`;
+        }
+
+        let waNumber = g.phone; 
+        let hasPhone = (waNumber && waNumber.length > 5);
+        let encodedText = encodeURIComponent(msgText);
+        let waLink = hasPhone ? `https://wa.me/${waNumber}?text=${encodedText}` : '#';
+        let waBtnClass = hasPhone ? 'btn-action btn-wa-send' : 'btn-action btn-wa-send disabled';
+        let isContacted = statusData[gid]?.contacted || false; let isConnected = statusData[gid]?.connected || false; let memoText = statusData[gid]?.memo || "";
+        
+        let appIconHtml = getAppIconHtml(g.messenger, g.appType);
+        
+        let extraTags = "";
+        if (g.isHot) extraTags += `<span class="day-tag tag-hot" style="margin-left:5px;">H</span>`;
+        if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin-left:5px;">[D1]</span>`;
+        if (g.paxType === 'D2') extraTags += `<span class="day-tag tag-d2" style="margin-left:5px;">[D2]</span>`;
+        if (g.paxType === 'D3') extraTags += `<span class="day-tag tag-d3" style="margin-left:5px;">[D3]</span>`;
+        
+        let emailBtnHtml = g.email ? `<div class="btn-action btn-copy-mail" onclick="copyAndOpen(this, '${g.email}', 'mail')">Mail<br>Copy</div>` : "";
+
+        let uiGroupNum = g.msgNum.replace(/[a-zA-Z]/g, '');
+
+        let card = document.createElement('div'); card.className = 'msg-card';
+        card.innerHTML = `
+            <div class="msg-check-area">
+                <div class="check-box-wrapper"><label class="msg-check-label label-sent">연락함</label><input type="checkbox" class="msg-check-input chk-sent" onchange="updateMsgStatus('${gid}', 'contacted', this.checked, null)" ${isContacted ? 'checked' : ''}></div>
+                <div class="check-box-wrapper"><label class="msg-check-label label-connected">연락됨</label><input type="checkbox" class="msg-check-input chk-conn" onchange="updateMsgStatus('${gid}', 'connected', this.checked, null)" ${isConnected ? 'checked' : ''}></div>
+            </div>
+            <div class="msg-info">
+                <div class="msg-group-row"><span class="msg-group">${uiGroupNum}</span>${langTag}${extraTags}</div>
+                <div class="msg-seats">Seat: ${seatStr}</div>
+                <input type="text" class="msg-memo-input" placeholder="비고" value="${memoText}" oninput="updateMsgStatus('${gid}', null, null, this.value)">
+                <div class="hidden-msg">${msgText}</div>
+            </div>
+            <div class="msg-actions">
+                <a href="${waLink}" target="_blank" class="${waBtnClass}">Send<br>WA</a>
+                <div class="btn-action btn-copy-body" onclick="copyMessageBody(this)">본문<br>Copy</div>
+                ${emailBtnHtml}
+                ${appIconHtml}
+            </div>
+        `;
+        msgList.appendChild(card);
+    });
+}
+
+function getAppIconHtml(rawMsg, appType) {
+    if (!rawMsg) return `<div class="btn-action logo-none">X</div>`;
+    let appClass = 'logo-none'; let copyValue = ""; let appName = "X"; let schemeKey = null;
+    let lower = rawMsg.toLowerCase();
+    
+    if (appType === '무') {
+        if(rawMsg.length > 2) { appClass = 'logo-none'; appName = 'ETC'; copyValue = rawMsg; }
+    } else {
+        if (lower.includes('whatsapp')) { 
+            appClass = 'logo-wa'; appName = 'WA'; copyValue = rawMsg.replace(/[^0-9]/g, ''); 
+        }
+        else if (lower.includes('line')) { 
+            appClass = 'logo-line'; appName = 'Line'; copyValue = rawMsg.replace(/line[:\s]*/gi, '').trim(); 
+            schemeKey = 'line';
+        }
+        else if (lower.includes('kakao') || lower.includes('talk')) { 
+            appClass = 'logo-kakao'; appName = 'Ka'; copyValue = rawMsg.replace(/^(kakao|talk|kakao\s*talk)[:\s]*/i, '').trim(); 
+            schemeKey = 'kakao';
+        }
+        else if (lower.includes('viber')) { 
+            appClass = 'logo-viber'; appName = 'Vi'; 
+            copyValue = rawMsg.replace(/[^0-9]/g, ''); 
+            schemeKey = 'viber';
+        }
+        else if (lower.includes('wechat') || lower.includes('weixin')) { 
+            appClass = 'logo-wechat'; appName = 'We'; copyValue = rawMsg.replace(/^(wechat|weixin)[:\s]*/i, '').trim(); 
+            schemeKey = 'wechat';
+        }
+        else if (lower.includes('zalo')) { 
+            appClass = 'logo-zalo'; appName = 'Za'; copyValue = rawMsg.replace(/^zalo[:\s]*/i, '').trim(); 
+        }
+    }
+    
+    if (copyValue && appName !== 'X') {
+        if (schemeKey) {
+            return `<div class="btn-action ${appClass}" onclick="copyAndOpen(this, '${copyValue}', '${schemeKey}')">${appName}<br>Copy</div>`;
+        } else {
+            return `<div class="btn-action ${appClass}" onclick="copyOnly(this, '${copyValue}')">${appName}<br>Copy</div>`;
+        }
+    } else {
+        return `<div class="btn-action logo-none">X</div>`;
+    }
+}
+
+function updateMsgStatus(gid, type, checked, memo) {
+    let statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
+    if(!statusData[gid]) statusData[gid] = { contacted: false, connected: false, memo: "" };
+    if(type === 'contacted') statusData[gid].contacted = checked;
+    if(type === 'connected') statusData[gid].connected = checked;
+    if(memo !== null) statusData[gid].memo = memo;
+    localStorage.setItem('bus_msgStatus', JSON.stringify(statusData));
+}
+
+// =========================================
+// [7] 수동 제어 및 저장/로드
+// =========================================
+
+function manualAddGroup() {
+    const rawInput = (document.getElementById('manualGroupNum').value || "").trim();
+    if(!rawInput) { alert("오빠, 번호를 입력해야지?"); return; }
+    
+    let targetGroup = msgListGroups.find(g => String(g.mainNum) === rawInput || String(g.msgNum) === rawInput);
+
+    if (!targetGroup) {
+        if(!confirm(`[${rawInput}번]은 명단에 없어. 현장 손님(Walk-in)으로 추가할까?`)) return;
+        const isSancheoneoMode = msgListGroups.some(g => g.isSancheoneo);
+        targetGroup = {
+            mainNum: rawInput, msgNum: rawInput, repNum: rawInput, isLong: false, count: 0, 
+            name: "Manual Guest", country: "ETC", gender: "N", langContext: "EN",
+            appType: "무", location: "현장", phone: "", messenger: "", note: "Manual", members: [], 
+            paxType: 'General', isStay: false, isBoard: false, 
+            color: '#e0e0e0', textClass: 'neutral-text', subInfo: '현장',
+            isSancheoneo: isSancheoneoMode, isHot: false, email: "",
+            originTag: "(현)", 
+            options: { lift: false, gear: false, clothes: false, lesson: false }
+        };
+        msgListGroups.push(targetGroup);
+    }
+
+    targetGroup.count++;
+    
+    // [수정] 수동 추가 시에도 FIT 시퀀스 사용 (일반 1,2,3... 또는 버스시퀀스)
+    let isFit = (document.querySelector('input[name="busSize"]:checked').value === 'FIT');
+    // FIT 모드면 좌석이 부족할 수 있으므로 맵을 확장해야 하지만, 
+    // 여기서는 간단히 기존 맵의 빈자리만 찾음 (FIT는 보통 자동실행으로 리셋하므로)
+    let sequence = generateSeatSequence(1, currentSeatMap1.length - 1, isFit);
+    let seatedIdx = -1;
+    
+    for(let i of sequence) {
+        if(currentSeatMap1[i] === null) { currentSeatMap1[i] = {...targetGroup}; seatedIdx = i; break; } 
+    }
+
+    if(targetGroup.paxType === 'General') {
+        if (seatedIdx !== -1 && currentSeatMap2[seatedIdx] === null) {
+             let cloned = {...targetGroup}; cloned.color = '#e0e0e0'; cloned.isSynced = true;
+             currentSeatMap2[seatedIdx] = cloned;
+        } else {
+            for(let i of sequence) {
+                if(currentSeatMap2[i] === null) { 
+                    let cloned = {...targetGroup}; cloned.color = '#e0e0e0'; cloned.isSynced = true;
+                    currentSeatMap2[i] = cloned; break; 
+                } 
+            }
+        }
+    }
+    refreshDisplay();
+}
+
+function manualDelGroup() {
+    const rawInput = (document.getElementById('manualGroupNum').value || "").trim();
+    if(!rawInput) { alert("지울 번호를 입력해줘."); return; }
+    
+    let idx = msgListGroups.findIndex(g => String(g.mainNum) === rawInput || String(g.msgNum) === rawInput);
+    if(idx === -1) { alert("그 번호는 명단에 없는데?"); return; }
+    
+    let group = msgListGroups[idx];
+    let targetRepNum = group.repNum;
+
+    if (group.count > 0) {
+        group.count--; 
+        for(let i = currentSeatMap1.length - 1; i >= 1; i--) {
+            if(currentSeatMap1[i] && (String(currentSeatMap1[i].mainNum) === rawInput || currentSeatMap1[i].repNum === targetRepNum)) {
+                currentSeatMap1[i] = null; break;
+            }
+        }
+        for(let i = currentSeatMap2.length - 1; i >= 1; i--) {
+            if(currentSeatMap2[i] && (String(currentSeatMap2[i].mainNum) === rawInput || currentSeatMap2[i].repNum === targetRepNum)) {
+                currentSeatMap2[i] = null; break;
+            }
+        }
+    }
+
+    if (group.count <= 0) {
+        if(confirm(`[${rawInput}번] 인원이 0명이야. 명단에서 완전히 삭제할까?`)) {
+            msgListGroups.splice(idx, 1);
+            for(let i = 1; i < currentSeatMap1.length; i++) {
+                if(currentSeatMap1[i] && (String(currentSeatMap1[i].mainNum) === rawInput || currentSeatMap1[i].repNum === targetRepNum)) currentSeatMap1[i] = null;
+            }
+            for(let i = 1; i < currentSeatMap2.length; i++) {
+                if(currentSeatMap2[i] && (String(currentSeatMap2[i].mainNum) === rawInput || currentSeatMap2[i].repNum === targetRepNum)) currentSeatMap2[i] = null;
+            }
+        }
+    }
+    refreshDisplay();
+}
+
+function saveSeatMap() { localStorage.setItem('bus_seatMap', JSON.stringify({ map1: currentSeatMap1, map2: currentSeatMap2, groups: msgListGroups })); }
+function checkDateChange() { localStorage.setItem('bus_lastDate', document.getElementById('vcardDate').value); }
+function saveTextInput() { localStorage.setItem('bus_rawData', document.getElementById('rawData').value); localStorage.setItem('bus_size', document.querySelector('input[name="busSize"]:checked').value); }
+function saveTimeInput() { const times = { h: document.getElementById('timeHongdae').value, m: document.getElementById('timeMyeongdong').value, d: document.getElementById('timeDongdaemun').value }; localStorage.setItem('bus_times', JSON.stringify(times)); }
+function saveGuideName() { 
+    localStorage.setItem('bus_guideName', document.getElementById('guideNameInput').value);
+    localStorage.setItem('bus_number', document.getElementById('busNumberInput').value);
+    if(msgListGroups.length > 0) refreshDisplay(); // 변경 시 메시지 업데이트
+}
+function saveSpecialNotice() { localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value); if(msgListGroups.length > 0) refreshDisplay(); }
+
+function loadSeatMap() {
+    const saved = localStorage.getItem('bus_seatMap');
+    if (saved) { 
+        try { 
+            const data = JSON.parse(saved); 
+            if(data.map1 && data.map2) { 
+                currentSeatMap1 = data.map1; currentSeatMap2 = data.map2; msgListGroups = data.groups || []; 
+                const hasReturn = msgListGroups.some(g => g.paxType === 'D2' || g.paxType === 'D3');
+                toggleMap2(hasReturn);
+                refreshDisplay(); // 통합 리프레시 호출
+            } 
+        } catch(e) {} 
+    }
+}
+function loadTextInput() { const savedData = localStorage.getItem('bus_rawData'); if(savedData) document.getElementById('rawData').value = savedData; const savedSize = localStorage.getItem('bus_size'); if(savedSize) { const radios = document.getElementsByName('busSize'); for(let r of radios) { if(r.value === savedSize) r.checked = true; } } }
+function loadGuideName() { const savedGuide = localStorage.getItem('bus_guideName'); if(savedGuide) document.getElementById('guideNameInput').value = savedGuide; const savedBus = localStorage.getItem('bus_number'); if(savedBus) document.getElementById('busNumberInput').value = savedBus; }
+function clearData() { if(confirm('초기화하시겠습니까?')) { document.getElementById('rawData').value = ''; localStorage.removeItem('bus_rawData'); localStorage.removeItem('bus_seatMap'); localStorage.removeItem('bus_msgStatus'); location.reload(); } }
+
+function updateHeader1(seatMap) {
+    let counts = { '홍대':0, '명동':0, '동대문':0, '현장':0, '기타':0 }; let total = 0;
+    for(let i=1; i<seatMap.length; i++) {
+        let seat = seatMap[i];
+        if(seat) {
+            total++; let loc = seat.location || '';
+            if(loc.includes('홍대')) counts['홍대']++;
+            else if(loc.includes('명동')) counts['명동']++;
+            else if(loc.includes('동대문')) counts['동대문']++;
+            else if(loc.includes('현장')) counts['현장']++;
+            else counts['기타']++;
+        }
+    }
+    const textHtml = `<div>TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 홍대 ${counts['홍대']} / 명동 ${counts['명동']} / 동대문 ${counts['동대문']} / 현장 ${counts['현장']} ]</span></div>`;
+    const btnHtml = `<div class="header-controls" data-html2canvas-ignore="true"><button class="btn-save-mini" onclick="downloadImage(1)">📸 저장</button></div>`;
+    document.getElementById('pickupSummary1').innerHTML = textHtml + btnHtml;
+}
+
+function updateHeader2(seatMap) {
+    let counts = { 'Hotel':0, 'Challenge':0 }; let total = 0;
+    for(let i=1; i<seatMap.length; i++) {
+        let seat = seatMap[i];
+        if(seat) {
+            total++; 
+            if(seat.paxType === 'D2' || seat.paxType === 'D3') counts['Hotel']++; else counts['Challenge']++; 
+        }
+    }
+    const textHtml = `<div>TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 복귀편 ${counts['Challenge']} / 숙박손님 ${counts['Hotel']} ]</span></div>`;
+    const btnHtml = `<div class="header-controls" data-html2canvas-ignore="true"><button class="btn-save-mini night" onclick="downloadImage(2)">📸 저장</button></div>`;
+    document.getElementById('pickupSummary2').innerHTML = textHtml + btnHtml;
+}
+
+function updatePriority(checkbox) {
+  const val = checkbox.value;
+  if(checkbox.checked) { if(!priorityQueue.includes(val)) priorityQueue.push(val); } 
+  else { priorityQueue = priorityQueue.filter(v => v !== val); }
+  updatePriorityDisplay();
+}
+
+function updatePriorityDisplay() {
+  const map = { 'solo':'혼자', 'CN':'중국어', 'EN':'영어', 'G4':'4인이상', 'HD':'홍대', 'MY':'명동', 'DDM':'동대문' };
+  const txt = priorityQueue.map(v => map[v]).join(' > ');
+  document.getElementById('priorityView').innerText = "우선순위: " + (txt || "없음");
+}
+
+function toggleMap2(hasReturnGuests) {
+    const map2Area = document.getElementById('captureArea2');
+    if (hasReturnGuests) { map2Area.style.display = 'block'; } 
+    else { map2Area.style.display = 'none'; }
+}
+
+function downloadImage(num) {
+  const capture = document.getElementById('captureArea' + num);
+  html2canvas(capture, { scrollY: -window.scrollY }).then(canvas => {
+    let link = document.createElement('a'); link.download = `Bus_Map${num}_${document.getElementById('dateDisplay1').innerText}.png`;
+    link.href = canvas.toDataURL(); link.click();
+  });
+}
+
+function downloadVCard() {
+    if (!msgListGroups || msgListGroups.length === 0) { alert("데이터가 없습니다. 배치 실행을 먼저 해주세요."); return; }
+    
+    let vcardContent = ""; 
+    const dateCode = document.getElementById('vcardDate').value; 
+    let count = 0;
+    let processedPhones = new Set();
+
+    msgListGroups.forEach(g => {
+        let phoneStr = g.phone;
+        if (!phoneStr || phoneStr.length < 5) return;
+        if (processedPhones.has(phoneStr)) return; 
+        
+        processedPhones.add(phoneStr);
+        
+        let locChar = '기'; 
+        if (g.location.includes('홍대')) locChar = '홍';
+        else if (g.location.includes('명동')) locChar = '명';
+        else if (g.location.includes('동대문')) locChar = '동';
+        
+        let finalName = `${dateCode}(${g.mainNum}${locChar})`;
+        
+        vcardContent += "BEGIN:VCARD\nVERSION:3.0\n";
+        vcardContent += `FN:${finalName}\n`;
+        vcardContent += `TEL;TYPE=CELL:+${phoneStr}\n`;
+        vcardContent += `NOTE:Orig:${g.name} / ${g.count}pax\n`;
+        vcardContent += "END:VCARD\n";
+        count++;
+    });
+    
+    if(count === 0) { alert("저장할 유효한 전화번호가 없습니다."); return; }
+    
+    const blob = new Blob([vcardContent], { type: "text/vcard" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = `Contacts_${dateCode}.vcf`;
+    link.href = url; link.click(); URL.revokeObjectURL(url);
+}
+
+function forceSaveAllData() {
+    try {
+        saveTextInput(); saveGuideName(); saveTimeInput(); checkDateChange();
+        localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value);
+    } catch (e) { console.log("Safe Save:", e); }
+}
+
+function unlock() {
+    const input = document.getElementById('lockInput');
+    if (input.value === '840506') {
+        localStorage.setItem('tm_auth_10_8', 'true');
+        document.getElementById('lockScreen').style.display = 'none';
+    } else {
+        alert('Wrong Password!');
+        input.value = '';
+        input.focus();
+    }
+}
+
+window.onload = function() {
+    if (localStorage.getItem('tm_auth_10_8') !== 'true') {
+        document.getElementById('lockScreen').style.display = 'flex';
+    }
+
+    loadTextInput(); loadGuideName(); 
+    document.getElementById('specialNotice').value = localStorage.getItem('bus_specialNotice') || "";
+
+    const today = new Date(); today.setDate(today.getDate() + 1);
+    const days = ['일','월','화','수','목','금','토'];
+    const dateStr = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')} (${days[today.getDay()]})`;
+    document.getElementById('dateDisplay1').innerText = dateStr;
+    document.getElementById('dateDisplay2').innerText = dateStr;
+    const yymmdd = String(today.getFullYear()).slice(2) + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+    document.getElementById('vcardDate').value = yymmdd;
+    const savedTimes = JSON.parse(localStorage.getItem('bus_times') || '{}');
+    if(savedTimes.h) document.getElementById('timeHongdae').value = savedTimes.h;
+    if(savedTimes.m) document.getElementById('timeMyeongdong').value = savedTimes.m;
+    if(savedTimes.d) document.getElementById('timeDongdaemun').value = savedTimes.d;
+    
+    loadSeatMap();
+};
+
+document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'hidden') forceSaveAllData(); });
+window.addEventListener('pagehide', function() { forceSaveAllData(); });
+document.querySelectorAll('input, textarea').forEach(el => { el.addEventListener('blur', forceSaveAllData); });
+</script>
+</body>
 </html>

@@ -670,11 +670,25 @@ function createGroupsFromEntries(entries) {
         if(entry.isGrouped) return;
         let currentGroupMembers = [entry]; entry.isGrouped = true;
         
-      function isSameGroup(a, b) {
-  if (a.phone && b.phone && a.phone === b.phone) return true;
-  if (a.name && b.name && a.name === b.name) return true;
-  if (a.id && b.id && a.id === b.id) return true;           // 주문번호
-  if (a.email && b.email && a.email === b.email) return true;
+      function norm(v) {
+  if (!v) return "";
+  return String(v).trim().toLowerCase();
+}
+
+function isSameGroup(a, b) {
+  const aPhone = norm(a.phone);
+  const bPhone = norm(b.phone);
+  const aName  = norm(a.name);
+  const bName  = norm(b.name);
+  const aId    = norm(a.id);
+  const bId    = norm(b.id);
+  const aMail  = norm(a.email);
+  const bMail  = norm(b.email);
+
+  if (aPhone && bPhone && aPhone === bPhone) return true;
+  if (aName  && bName  && aName  === bName)  return true;
+  if (aId    && bId    && aId    === bId)    return true;
+  if (aMail  && bMail  && aMail  === bMail)  return true;
   return false;
 }
 

@@ -368,10 +368,17 @@ const CONFIG = {
         "82": "KR", "84": "VN", "86": "CN", "90": "TR", "91": "IN", "92": "PK", "93": "AF", "94": "LK", "95": "MM", 
         "98": "IR", "852": "HK", "886": "TW" 
     },
-    COUNTRY_MAP: { 
-        'KR':'한국','CN':'중국','TW':'대만','HK':'홍콩','SG':'싱가','MY':'말레','TH':'태국','PH':'필리',
-        'VN':'베트','ID':'인니','US':'미국','UK':'영국','AU':'호주','JP':'일본' 
-    },
+    COUNTRY_MAP: {
+  'KR':'한국','CN':'중국','TW':'대만','HK':'홍콩','SG':'싱가포르','MY':'말레이시아','TH':'태국','PH':'필리핀',
+  'VN':'베트남','ID':'인도네시아','US':'미국','UK':'영국','AU':'호주','JP':'일본',
+
+  'RU':'러시아','EG':'이집트','ZA':'남아공','GR':'그리스','NL':'네덜란드','BE':'벨기에',
+  'FR':'프랑스','ES':'스페인','HU':'헝가리','IT':'이탈리아','RO':'루마니아','CH':'스위스',
+  'AT':'오스트리아','DK':'덴마크','SE':'스웨덴','NO':'노르웨이','PL':'폴란드','DE':'독일',
+  'PE':'페루','MX':'멕시코','CU':'쿠바','AR':'아르헨티나','BR':'브라질','CL':'칠레',
+  'CO':'콜롬비아','VE':'베네수엘라','NZ':'뉴질랜드','TR':'터키','IN':'인도',
+  'PK':'파키스탄','AF':'아프가니스탄','LK':'스리랑카','MM':'미얀마','IR':'이란'
+}
     SCHEMES: {
         'kakao': 'kakaotalk://',
         'line': 'line://',
@@ -663,18 +670,28 @@ function createGroupsFromEntries(entries) {
         if(entry.isGrouped) return;
         let currentGroupMembers = [entry]; entry.isGrouped = true;
         
-        if (entry.phone && entry.phone.length > 5) {
-            let queue = [entry];
-            while(queue.length > 0) {
-                let curr = queue.shift();
-                entries.forEach((target) => {
-                    if(target.isGrouped) return;
-                    if(target.phone && target.phone.length > 5 && curr.phone === target.phone) {
-                        target.isGrouped = true; currentGroupMembers.push(target); queue.push(target); 
-                    }
-                });
-            }
-        }
+      function isSameGroup(a, b) {
+  if (a.phone && b.phone && a.phone === b.phone) return true;
+  if (a.name && b.name && a.name === b.name) return true;
+  if (a.id && b.id && a.id === b.id) return true;           // 주문번호
+  if (a.email && b.email && a.email === b.email) return true;
+  return false;
+}
+
+if (true) {
+  let queue = [entry];
+  while(queue.length > 0) {
+    let curr = queue.shift();
+    entries.forEach((target) => {
+      if(target.isGrouped) return;
+      if (isSameGroup(curr, target)) {
+        target.isGrouped = true;
+        currentGroupMembers.push(target);
+        queue.push(target);
+      }
+    });
+  }
+}
 
         let rep = currentGroupMembers[0];
         let cleanIds = currentGroupMembers.map(m => m.id.replace(/\D/g, '')); 

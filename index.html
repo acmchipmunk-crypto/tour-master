@@ -1279,7 +1279,18 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
     let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
 
-    let langContext = (rawLang && rawLang.includes('중국어')) ? 'CN' : 'EN';
+    // parseRawDataLine 내부
+let langContext = 'EN';
+
+if (rawLang && rawLang.includes('중국어')) {
+    langContext = 'CN';
+} else if (
+    parsedInfo.country === 'CN' ||
+    parsedInfo.country === 'TW' ||
+    parsedInfo.country === 'HK'
+) {
+    langContext = 'CN';
+}
 
     let gender = 'N'; 
 

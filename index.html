@@ -236,7 +236,8 @@
 
   .tag-d1 { background-color: #1976d2; } .tag-d2 { background-color: #d32f2f; } .tag-d3 { background-color: #7b1fa2; } .tag-stay { background-color: #ff9800; }
 
-  .tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; }
+.tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; color: black; }
+
 
 
 
@@ -1359,19 +1360,15 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
 
     let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
+    // 오직 텍스트(rawLang)에 포함된 단어만 기준으로 판별합니다.
+    let langContext = 'EN'; // 기본값은 영어
 
-    // parseRawDataLine 내부
-let langContext = 'EN';
+    if (rawLang && rawLang.includes('중국어')) {
+        langContext = 'CN';
+    } else if (rawLang && rawLang.includes('영어')) {
+        langContext = 'EN';
+    }
 
-if (rawLang && rawLang.includes('중국어')) {
-    langContext = 'CN';
-} else if (
-    parsedInfo.country === 'CN' ||
-    parsedInfo.country === 'TW' ||
-    parsedInfo.country === 'HK'
-) {
-    langContext = 'CN';
-}
 
     let gender = 'N'; 
 
@@ -1500,31 +1497,24 @@ if (true) {
 
 
 
-        finalGroups.push({
-
+                finalGroups.push({
             mainNum: displayNum, 
-
             msgNum: rep.id + (currentGroupMembers.length > 1 ? ".." : ""), 
-
             repNum: rep.id, 
-
             count: totalC, name: rep.name, country: rep.country, gender: rep.gender,
-
             langContext: rep.langContext, appType: rep.appType, location: rep.location, 
-
             phone: rep.phone, messenger: rep.messenger, paxType: groupType, 
-
             isStay: currentGroupMembers.some(m => m.isStay), 
-
             isBoard: currentGroupMembers.some(m => m.isBoard), 
-
-            isSancheoneo: rep.isSancheoneo, isHot: currentGroupMembers.some(m => m.isHot), email: rep.email,
-
+            isSancheoneo: rep.isSancheoneo, 
+            // 그룹 전체 HOT 여부는 유지하되, 개별 멤버의 HOT 여부를 순서대로 저장함
+            isHot: currentGroupMembers.some(m => m.isHot),
+            memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
+            email: rep.email,
             originTag: combinedOrigin, 
-
             options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson }
-
         });
+
 
     });
 
@@ -1752,23 +1742,19 @@ raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
 
 
 
-    listGoing.forEach((grp) => {
-
+        listGoing.forEach((grp) => {
         grp.color = getPickColor(grp); setGroupMeta(grp);
-
         for(let i=0; i<grp.count; i++) {
-
             if(currentSeqIdx < seatSequence.length) {
-
                 let seatNum = seatSequence[currentSeqIdx];
-
-                currentSeatMap1[seatNum] = { ...grp }; currentSeqIdx++;
-
+                // 그룹 정보는 복사하되, HOT 마크는 개별 멤버의 순서에 맞춰서 덮어씌움
+                let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
+                currentSeatMap1[seatNum] = { ...grp, isHot: individualHot }; 
+                currentSeqIdx++;
             }
-
         }
-
     });
+
 
 
 
@@ -2488,7 +2474,8 @@ function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
 
         let extraTags = "";
 
-        if (g.isHot) extraTags += `<span class="day-tag tag-hot" style="margin-left:5px;">H</span>`;
+        if (g.isHot) extraTags += `<span class="day-tag tag-hot" style="margin-left:5px; color: black;">H</span>`;
+
 
         if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin-left:5px;">[D1]</span>`;
 

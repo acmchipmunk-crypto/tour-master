@@ -1434,12 +1434,19 @@ function isSameGroup(a, b) {
   const bId    = norm(b.id);
   const aMail  = norm(a.email);
   const bMail  = norm(b.email);
+  // [추가] 메신저 ID(연락 가능 앱 컬럼)를 정규화하여 가져옴
+  const aMsg   = norm(a.messenger);
+  const bMsg   = norm(b.messenger);
 
   if (aPhone && bPhone && aPhone === bPhone) return true;
   if (aName  && bName  && aName  === bName)  return true;
   if (aId    && bId    && aId    === bId)    return true;
+  // [추가] 메신저 정보가 존재하고 서로 일치하면 같은 일행으로 판단
+  if (aMsg && bMsg && aMsg === bMsg) return true;
+
   return false;
 }
+
 
 if (true) {
   let queue = [entry];

@@ -1409,104 +1409,76 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
 
 function createGroupsFromEntries(entries) {
-
     let finalGroups = [];
-
     entries.forEach((entry) => {
-
         if(entry.isGrouped) return;
-
         let currentGroupMembers = [entry]; entry.isGrouped = true;
-
         
+        function norm(v) {
+            if (!v) return "";
+            return String(v).trim().toLowerCase();
+        }
 
-      function norm(v) {
-  if (!v) return "";
-  return String(v).trim().toLowerCase();
-}
+        function isSameGroup(a, b) {
+            const aPhone = norm(a.phone);
+            const bPhone = norm(b.phone);
+            const aName  = norm(a.name);
+            const bName  = norm(b.name);
+            const aId    = norm(a.id);
+            const bId    = norm(b.id);
+            const aMail  = norm(a.email);
+            const bMail  = norm(b.email);
+            const aMsg   = norm(a.messenger);
+            const bMsg   = norm(b.messenger);
 
-function isSameGroup(a, b) {
-  const aPhone = norm(a.phone);
-  const bPhone = norm(b.phone);
-  const aName  = norm(a.name);
-  const bName  = norm(b.name);
-  const aId    = norm(a.id);
-  const bId    = norm(b.id);
-  const aMail  = norm(a.email);
-  const bMail  = norm(b.email);
-  // [추가] 메신저 ID(연락 가능 앱 컬럼)를 정규화하여 가져옴
-  const aMsg   = norm(a.messenger);
-  const bMsg   = norm(b.messenger);
+            if (aPhone && bPhone && aPhone === bPhone) return true;
+            if (aName  && bName  && aName  === bName)  return true;
+            if (aId    && bId    && aId    === bId)    return true;
+            if (aMsg && bMsg && aMsg === bMsg) return true;
 
-  if (aPhone && bPhone && aPhone === bPhone) return true;
-  if (aName  && bName  && aName  === bName)  return true;
-  if (aId    && bId    && aId    === bId)    return true;
-  // [추가] 메신저 정보가 존재하고 서로 일치하면 같은 일행으로 판단
-  if (aMsg && bMsg && aMsg === bMsg) return true;
+            return false;
+        }
 
-  return false;
-}
-
-
-if (true) {
-  let queue = [entry];
-  while(queue.length > 0) {
-    let curr = queue.shift();
-    entries.forEach((target) => {
-      if(target.isGrouped) return;
-      if (isSameGroup(curr, target)) {
-        target.isGrouped = true;
-        currentGroupMembers.push(target);
-        queue.push(target);
-      }
-    });
-  }
-}
-
+        let queue = [entry];
+        while(queue.length > 0) {
+            let curr = queue.shift();
+            entries.forEach((target) => {
+                if(target.isGrouped) return;
+                if (isSameGroup(curr, target)) {
+                    target.isGrouped = true;
+                    currentGroupMembers.push(target);
+                    queue.push(target);
+                }
+            });
+        }
 
         let rep = currentGroupMembers[0];
-
+        
+        // [수정된 부분] 숫자를 추출하고 중복 제거 후 3.4 형태로 결합합니다.
         let cleanIds = currentGroupMembers.map(m => m.id.replace(/\D/g, '')); 
-
         if (cleanIds.some(id => id === "")) cleanIds = currentGroupMembers.map(m => m.id);
-
-        cleanIds.sort((a,b) => parseInt(a) - parseInt(b));
-
-        let displayNum = cleanIds.join('.'); 
+        
+        let uniqueIds = [...new Set(cleanIds)].sort((a,b) => parseInt(a) - parseInt(b));
+        let displayNum = uniqueIds.join('.'); 
 
         let totalC = currentGroupMembers.reduce((sum, m) => sum + m.count, 0);
-
         let uniqueTags = [...new Set(currentGroupMembers.map(m => m.originTag))];
-
         let combinedOrigin = uniqueTags.join('');
 
-
-
         let groupType = 'General';
-
         if(currentGroupMembers.some(m => m.paxType === 'D3')) groupType = 'D3';
-
         else if(currentGroupMembers.some(m => m.paxType === 'D2')) groupType = 'D2';
-
         else if(currentGroupMembers.some(m => m.paxType === 'D1')) groupType = 'D1';
-
         if (groupType === 'D1' && currentGroupMembers.some(m => m.paxType === 'General')) groupType = 'D1';
 
-
-
         let gLift = currentGroupMembers.some(m => m.options.lift);
-
         let gGear = currentGroupMembers.some(m => m.options.gear);
-
         let gClothes = currentGroupMembers.some(m => m.options.clothes);
-
         let gLesson = currentGroupMembers.some(m => m.options.lesson);
 
-
-
-                finalGroups.push({
+        finalGroups.push({
             mainNum: displayNum, 
-            msgNum: rep.id + (currentGroupMembers.length > 1 ? ".." : ""), 
+            msgNum: displayNum, // 3.. 대신 3.4가 나오도록 수정되었습니다.
             repNum: rep.id, 
             count: totalC, name: rep.name, country: rep.country, gender: rep.gender,
             langContext: rep.langContext, appType: rep.appType, location: rep.location, 
@@ -1514,20 +1486,16 @@ if (true) {
             isStay: currentGroupMembers.some(m => m.isStay), 
             isBoard: currentGroupMembers.some(m => m.isBoard), 
             isSancheoneo: rep.isSancheoneo, 
-            // 그룹 전체 HOT 여부는 유지하되, 개별 멤버의 HOT 여부를 순서대로 저장함
             isHot: currentGroupMembers.some(m => m.isHot),
             memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
             email: rep.email,
             originTag: combinedOrigin, 
             options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson }
         });
-
-
     });
-
     return finalGroups;
-
 }
+
 
 
 

@@ -2076,66 +2076,42 @@ function createSeatElement(parent, seatNum, seatMap, maxSeats, busNum) {
 
 
 function renderSeatContent(el, data, num, busNum) {
-
   el.innerHTML = `<span class="seat-num">${num}</span>`;
-
   if(data) {
-
     if (busNum === 2 && data.paxType === 'General') { 
-
         el.style.backgroundColor = data.color; 
-
         el.innerHTML += `<div style="font-size:30px; color:#757575; font-weight:bold; margin-top:10px;">❌</div>`; 
-
         return; 
-
     }
-
     el.style.backgroundColor = data.color;
-
     
-
     let dispNum = data.mainNum;
-
     let len = String(dispNum).length; 
-
     let fSize = "24px"; 
 
-
-
     if (len > 12) fSize = "12px";       
-
     else if (len > 8) fSize = "15px";   
-
     else if (len > 5) fSize = "19px";   
-
     else if (len > 3) fSize = "22px";   
 
-
+    // --- [수정된 부분] 영어 손님일 경우 글자색을 진한 파랑으로 설정 ---
+    let textColor = (data.langContext === 'EN') ? '#1a237e' : '#333';
+    // ---------------------------------------------------------
 
     let originBadgeHtml = getOriginBadgeHtml(data.originTag);
-
     let cleanNation = data.subInfo ? data.subInfo.replace(/\(.\)/g, '') : "";
-
     
-
     let tagsHtml = "";
-
     if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
-
     if (data.paxType === 'D1') tagsHtml += `<span class="day-tag tag-d1">D1</span>`;
-
     if (data.paxType === 'D2') tagsHtml += `<span class="day-tag tag-d2">D2</span>`;
-
     if (data.paxType === 'D3') tagsHtml += `<span class="day-tag tag-d3">D3</span>`;
 
-
-
-    el.innerHTML += `<div class="grp-id" style="font-size:${fSize};">${dispNum}</div><div class="info-badge ${data.textClass}">${tagsHtml}${cleanNation}${originBadgeHtml}</div>`;
-
+    // style 속성에 color:${textColor}를 추가했습니다.
+    el.innerHTML += `<div class="grp-id" style="font-size:${fSize}; color:${textColor};">${dispNum}</div><div class="info-badge ${data.textClass}">${tagsHtml}${cleanNation}${originBadgeHtml}</div>`;
   } else el.className += " empty";
-
 }
+
 
 
 

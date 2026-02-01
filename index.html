@@ -2305,13 +2305,12 @@ function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
 
 
 
-        // [수정] FIT 모드일 때 메시지 내용 변경 (버스번호/그룹/좌석 제거)
 
-        let groupLine = isFit ? "" : `Group: ${g.msgNum}\n`;
+        // FIT 모드에서도 그룹 번호(Group)는 표시되도록 수정합니다.
+let groupLine = `Group: ${g.msgNum}\n`; 
+let seatLine = isFit ? "" : `Seat: ${seatStr}\n`; // 좌석 번호는 FIT 모드에서 의미가 없으므로 제외 유지
+let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
-        let seatLine = isFit ? "" : `Seat: ${seatStr}\n`;
-
-        let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
 
 
@@ -2373,24 +2372,24 @@ function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
 
                 
 
-                msgText = `[${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲도恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 如果收到信息，麻煩回覆 “您所了解的出發時間”, 讓我們知道噢,謝謝😊。\n大巴号 : ${busNo}\n家庭號: ${g.msgNum}\n坐位号: ${seatStr}`;
+                msgText = `[${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲도恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 如果收到信息，麻煩回覆 “您所了解的出發時間”, 讓我們知道噢,謝謝😊。\n大巴号 : ${busNo}\n家庭號: ${g.repNum}\n坐位号: ${seatStr}`;
 
 
             } else {
 
                 langTag = `<span class="lang-tag lang-EN">TOUR(EN)</span>`;
 
-                if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ. Exit 8`; } 
+                if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ.s.t Exit 8`; } 
 
-                else if (loc.includes('명동') || loc.includes('Myeongdong')) { pickupInfo = `❗️${tM} Myeongdong Exit 3`; } 
+                else if (loc.includes('명동') || loc.includes('Myeongdong')) { pickupInfo = `❗️${tM} Myeongdong s.t Exit 3`; } 
 
-                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture Exit 11`; } 
+                else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} Dongdaemun History Culture park s.t Exit 11`; } 
 
                 else { pickupInfo = `❗️${tH} Hongik Univ. Exit 8 / ❗️${tM} Myeongdong Exit 3 / ❗️${tD} Dongdaemun History & Culture Park Station Exit 11`; }
 
                 
 
-                msgText = `[${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm${busLine}\n${groupLine}${seatLine}`;
+                msgText = `[${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n👉 Reply "Your departure time" to confirm\nbus no : ${busNo}\nGroup: ${g.repNum}\nSeat: ${seatStr}`;
 
             }
 

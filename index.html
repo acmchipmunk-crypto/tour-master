@@ -265,7 +265,15 @@
 
   .msg-group-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
 
-  .msg-group { font-size: 18px; font-weight: 900; color: #333; }
+    .msg-group { 
+      font-size: 18px; 
+      font-weight: 900; 
+      padding: 2px 8px; 
+      border-radius: 6px; 
+      display: inline-block; 
+      margin-right: 5px;
+  }
+
 
   .msg-seats { font-size: 14px; font-weight: bold; color: #d32f2f; margin-top: 4px; }
 
@@ -2278,6 +2286,10 @@ function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
 
 
     allGroups.forEach((g, idx) => {
+    
+            let groupBgColor = getPickColor(g);
+        let groupTextColor = (g.langContext === 'EN') ? '#1a237e' : '#333';
+
 
         let seatStr = ""; let targetMap = (g.paxType === 'D2' || g.paxType === 'D3') ? seatMap2 : seatMap1;
 
@@ -2360,7 +2372,7 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
              if(g.langContext === 'CN') {
 
-                langTag = `<span class="lang-tag lang-CN">TOUR(CN)</span>`;
+                langTag = "";
 
                 if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
 
@@ -2377,7 +2389,7 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
             } else {
 
-                langTag = `<span class="lang-tag lang-EN">TOUR(EN)</span>`;
+                langTag = "";
 
                 if (loc.includes('홍대') || loc.includes('Hongik')) { pickupInfo = `❗️${tH} Hongik Univ.s.t Exit 8`; } 
 
@@ -2458,7 +2470,8 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
             <div class="msg-info">
 
-                <div class="msg-group-row"><span class="msg-group">${uiGroupNum}</span>${langTag}${extraTags}</div>
+                <div class="msg-group-row"><span class="msg-group" style="background-color: ${groupBgColor}; color: ${groupTextColor};">${uiGroupNum}</span>${langTag}${extraTags}</div>
+
 
                 <div class="msg-seats">Seat: ${seatStr}</div>
 

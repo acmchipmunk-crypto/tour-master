@@ -2414,7 +2414,9 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
             msgText += `\n\n📺 How to wear boots:\n${CONFIG.BOOTS_YOUTUBE}`;
 
         }
-
+else if (!g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
+    msgText += `\n\n📏 Size Chart鞋碼表 (Ski):\nhttps://bit.ly/3NRRC7t`;
+}
 
 
         let waNumber = g.phone; 

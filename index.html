@@ -236,7 +236,10 @@
 
   .tag-d1 { background-color: #1976d2; } .tag-d2 { background-color: #d32f2f; } .tag-d3 { background-color: #7b1fa2; } .tag-stay { background-color: #ff9800; }
 
+/* 수정 코드 */
 .tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; color: black; }
+.tag-moving { background-color: #fbc02d; border: 1px solid white; font-weight:900; color: black; }
+
 
 
 
@@ -1347,11 +1350,11 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
     let isBoard = (productName.toLowerCase().includes('board') || productName.includes('보드'));
 
-    let isHot = (productName.toLowerCase().includes('hot')); 
-
-
-
+     let isHot = (productName.toLowerCase().includes('hot')); 
+// 상품명뿐만 아니라 줄 전체(line)에서 '무빙'을 찾되, '리프트'가 없는 경우만 true로 확실히 잡습니다.
+let isMoving = (line.includes('무빙') && !line.includes('리프트') && !line.includes('리프트업'));
     let lowerP = productName.toLowerCase();
+
 
     if (lowerP.includes('day1') || lowerP.includes('day 1')) { paxType = 'D1'; }
 
@@ -1392,25 +1395,17 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
 
 
-    return {
-
+        return {
       id: customId, originalId: originalOrder, name: name, 
-
       phone: parsedInfo.fullNumber, 
-
       count: count, location: location, note: note,
-
       country: parsedInfo.country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false,
-
       paxType: paxType, isStay: isStay, isBoard: isBoard, 
-
-      isSancheoneo: !isSkiTour, isHot: isHot, email: emailAddr,
-
+      isSancheoneo: !isSkiTour, isHot: isHot, isMoving: isMoving, email: emailAddr,
       originTag: originTag, 
-
       options: { lift: optLift, gear: optGear, clothes: optClothes, lesson: optLesson }
-
     };
+
 
 }
 
@@ -1484,7 +1479,7 @@ function createGroupsFromEntries(entries) {
         let gClothes = currentGroupMembers.some(m => m.options.clothes);
         let gLesson = currentGroupMembers.some(m => m.options.lesson);
 
-        finalGroups.push({
+                finalGroups.push({
             mainNum: displayNum, 
             msgNum: displayNum, // 3.. 대신 3.4가 나오도록 수정되었습니다.
             repNum: rep.id, 
@@ -1495,11 +1490,16 @@ function createGroupsFromEntries(entries) {
             isBoard: currentGroupMembers.some(m => m.isBoard), 
             isSancheoneo: rep.isSancheoneo, 
             isHot: currentGroupMembers.some(m => m.isHot),
-            memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
-            email: rep.email,
+memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
+// 이 줄 아래 추가
+isMoving: currentGroupMembers.some(m => m.isMoving),
+memberMovingList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isMoving)),
+email: rep.email,
+
             originTag: combinedOrigin, 
             options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson }
         });
+
     });
     return finalGroups;
 }
@@ -1725,18 +1725,23 @@ raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
 
 
 
-        listGoing.forEach((grp) => {
+                listGoing.forEach((grp) => {
         grp.color = getPickColor(grp); setGroupMeta(grp);
         for(let i=0; i<grp.count; i++) {
             if(currentSeqIdx < seatSequence.length) {
                 let seatNum = seatSequence[currentSeqIdx];
-                // 그룹 정보는 복사하되, HOT 마크는 개별 멤버의 순서에 맞춰서 덮어씌움
-                let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
-                currentSeatMap1[seatNum] = { ...grp, isHot: individualHot }; 
+            // 그룹 정보는 복사하되, HOT 마크는 개별 멤버의 순서에 맞춰서 덮어씌움
+let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
+// 이 줄 아래 수정 (기존 주석 및 오타 수정)
+let individualMoving = (grp.memberMovingList && grp.memberMovingList[i]) ? true : false;
+
+currentSeatMap1[seatNum] = { ...grp, isHot: individualHot, isMoving: individualMoving }; 
+
                 currentSeqIdx++;
             }
         }
     });
+
 
 
 
@@ -2109,11 +2114,14 @@ function renderSeatContent(el, data, num, busNum) {
     let originBadgeHtml = getOriginBadgeHtml(data.originTag);
     let cleanNation = data.subInfo ? data.subInfo.replace(/\(.\)/g, '') : "";
     
-    let tagsHtml = "";
+        let tagsHtml = "";
     if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
+if (data.isMoving) tagsHtml += `<span class="day-tag tag-moving">무</span>`;
     if (data.paxType === 'D1') tagsHtml += `<span class="day-tag tag-d1">D1</span>`;
+
     if (data.paxType === 'D2') tagsHtml += `<span class="day-tag tag-d2">D2</span>`;
     if (data.paxType === 'D3') tagsHtml += `<span class="day-tag tag-d3">D3</span>`;
+
 
     // style 속성에 color:${textColor}를 추가했습니다.
     el.innerHTML += `<div class="grp-id" style="font-size:${fSize}; color:${textColor};">${dispNum}</div><div class="info-badge ${data.textClass}">${tagsHtml}${cleanNation}${originBadgeHtml}</div>`;
@@ -2437,12 +2445,14 @@ else if (!g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
 
         
 
-        let extraTags = "";
+                let extraTags = "";
+if (g.isHot) extraTags += `<span class="day-tag tag-hot" style="margin-left:5px; color: black;">H</span>`;
+// 이 줄 아래 추가
+if (g.isMoving) extraTags += `<span class="day-tag tag-moving" style="margin-left:5px; color: black;">무</span>`;
 
-        if (g.isHot) extraTags += `<span class="day-tag tag-hot" style="margin-left:5px; color: black;">H</span>`;
+if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin-left:5px;">[D1]</span>`;
 
 
-        if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin-left:5px;">[D1]</span>`;
 
         if (g.paxType === 'D2') extraTags += `<span class="day-tag tag-d2" style="margin-left:5px;">[D2]</span>`;
 

@@ -239,7 +239,7 @@
 /* 수정 코드 */
 .tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; color: black; }
 .tag-moving { background-color: #fbc02d; border: 1px solid white; font-weight:900; color: black; }
-
+.tag-shuttle { background-color: #8e8ebf; border: 1px solid white; font-weight:900; color: black; }
 
 
 
@@ -1353,6 +1353,8 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
      let isHot = (productName.toLowerCase().includes('hot')); 
 // 상품명뿐만 아니라 줄 전체(line)에서 '무빙'을 찾되, '리프트'가 없는 경우만 true로 확실히 잡습니다.
 let isMoving = (line.includes('무빙') && !line.includes('리프트') && !line.includes('리프트업'));
+let isShuttle = (line.includes('셔틀'));
+  
     let lowerP = productName.toLowerCase();
 
 
@@ -1362,7 +1364,7 @@ let isMoving = (line.includes('무빙') && !line.includes('리프트') && !line.
 
     else if (lowerP.includes('day3') || lowerP.includes('day 3')) { paxType = 'D3'; }
 
-    else if (lowerP.includes('편도') || lowerP.includes('one way')) { paxType = 'D1'; }
+ 
 
     
 
@@ -1395,16 +1397,18 @@ let isMoving = (line.includes('무빙') && !line.includes('리프트') && !line.
 
 
 
-        return {
+                return {
       id: customId, originalId: originalOrder, name: name, 
       phone: parsedInfo.fullNumber, 
       count: count, location: location, note: note,
       country: parsedInfo.country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false,
       paxType: paxType, isStay: isStay, isBoard: isBoard, 
-      isSancheoneo: !isSkiTour, isHot: isHot, isMoving: isMoving, email: emailAddr,
+      isSancheoneo: !isSkiTour, isHot: isHot, isMoving: isMoving, isShuttle: isShuttle, email: emailAddr,
       originTag: originTag, 
       options: { lift: optLift, gear: optGear, clothes: optClothes, lesson: optLesson }
     };
+
+
 
 
 }
@@ -1479,9 +1483,9 @@ function createGroupsFromEntries(entries) {
         let gClothes = currentGroupMembers.some(m => m.options.clothes);
         let gLesson = currentGroupMembers.some(m => m.options.lesson);
 
-                finalGroups.push({
+                                finalGroups.push({
             mainNum: displayNum, 
-            msgNum: displayNum, // 3.. 대신 3.4가 나오도록 수정되었습니다.
+            msgNum: displayNum, 
             repNum: rep.id, 
             count: totalC, name: rep.name, country: rep.country, gender: rep.gender,
             langContext: rep.langContext, appType: rep.appType, location: rep.location, 
@@ -1490,11 +1494,15 @@ function createGroupsFromEntries(entries) {
             isBoard: currentGroupMembers.some(m => m.isBoard), 
             isSancheoneo: rep.isSancheoneo, 
             isHot: currentGroupMembers.some(m => m.isHot),
-memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
-// 이 줄 아래 추가
-isMoving: currentGroupMembers.some(m => m.isMoving),
-memberMovingList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isMoving)),
-email: rep.email,
+            memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
+            isMoving: currentGroupMembers.some(m => m.isMoving),
+            memberMovingList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isMoving)),
+            isShuttle: currentGroupMembers.some(m => m.isShuttle),
+            // 개별 셔틀 여부를 리스트로 만들어 i번째 좌석에 매칭할 준비를 합니다.
+            memberShuttleList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isShuttle)),
+            email: rep.email,
+
+
 
             originTag: combinedOrigin, 
             options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson }
@@ -1725,22 +1733,30 @@ raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
 
 
 
-                listGoing.forEach((grp) => {
+                                listGoing.forEach((grp) => {
         grp.color = getPickColor(grp); setGroupMeta(grp);
         for(let i=0; i<grp.count; i++) {
             if(currentSeqIdx < seatSequence.length) {
                 let seatNum = seatSequence[currentSeqIdx];
-            // 그룹 정보는 복사하되, HOT 마크는 개별 멤버의 순서에 맞춰서 덮어씌움
-let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
-// 이 줄 아래 수정 (기존 주석 및 오타 수정)
-let individualMoving = (grp.memberMovingList && grp.memberMovingList[i]) ? true : false;
+                
+                // 리스트에서 i번째 사람의 HOT, 무빙, 셔틀 여부를 각각 추출합니다.
+                let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
+                let individualMoving = (grp.memberMovingList && grp.memberMovingList[i]) ? true : false;
+                let individualShuttle = (grp.memberShuttleList && grp.memberShuttleList[i]) ? true : false;
 
-currentSeatMap1[seatNum] = { ...grp, isHot: individualHot, isMoving: individualMoving }; 
+                // 해당 좌석(seatNum)에 개별 속성을 정확히 부여합니다.
+                currentSeatMap1[seatNum] = { 
+                    ...grp, 
+                    isHot: individualHot, 
+                    isMoving: individualMoving, 
+                    isShuttle: individualShuttle 
+                }; 
 
                 currentSeqIdx++;
             }
         }
     });
+
 
 
 
@@ -2117,6 +2133,7 @@ function renderSeatContent(el, data, num, busNum) {
         let tagsHtml = "";
     if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
 if (data.isMoving) tagsHtml += `<span class="day-tag tag-moving">무</span>`;
+if (data.isShuttle) tagsHtml += `<span class="day-tag tag-shuttle">셔</span>`; 
     if (data.paxType === 'D1') tagsHtml += `<span class="day-tag tag-d1">D1</span>`;
 
     if (data.paxType === 'D2') tagsHtml += `<span class="day-tag tag-d2">D2</span>`;
@@ -2445,16 +2462,14 @@ else if (!g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
 
         
 
-                let extraTags = "";
+                        let extraTags = "";
 if (g.isHot) extraTags += `<span class="day-tag tag-hot" style="margin-left:5px; color: black;">H</span>`;
-// 이 줄 아래 추가
 if (g.isMoving) extraTags += `<span class="day-tag tag-moving" style="margin-left:5px; color: black;">무</span>`;
-
+if (g.isShuttle) extraTags += `<span class="day-tag tag-shuttle" style="margin-left:5px; color: black;">셔</span>`;
 if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin-left:5px;">[D1]</span>`;
 
-
-
         if (g.paxType === 'D2') extraTags += `<span class="day-tag tag-d2" style="margin-left:5px;">[D2]</span>`;
+
 
         if (g.paxType === 'D3') extraTags += `<span class="day-tag tag-d3" style="margin-left:5px;">[D3]</span>`;
 

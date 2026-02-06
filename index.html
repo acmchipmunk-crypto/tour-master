@@ -282,7 +282,53 @@
 
   .msg-memo-input { width: 100%; margin-top: 5px; border: none; border-bottom: 1px solid #ccc; font-size: 12px; padding: 5px 2px; background: #fafafa; }
 
+  .option-card-wrapper {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+    width: 100%;
+    grid-column: 1 / -1;
+  }
+  .opt-card {
+    flex: 1;
+    padding: 6px 2px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 900;
+    text-align: center;
+    color: #333;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .opt-boarded {
+    flex: 2;
+    font-weight: 900;
+    color: #333;
+  }
+
+  .msg-card {
+    flex-wrap: wrap;
+  }
+
+  .opt-card.off {
+    background-color: #eeeeee !important;
+    color: #bdbdbd !important;
+    border-color: #e0e0e0 !important;
+    box-shadow: none;
+  }
+  .opt-chair { background-color: #ffcdd2; border-bottom: 3px solid #ef9a9a; }
+  .opt-moving { background-color: #fff9c4; border-bottom: 3px solid #fff176; }
+  .opt-sight { background-color: #c8e6c9; border-bottom: 3px solid #a5d6a7; }
+  .opt-sled { background-color: #bbdefb; border-bottom: 3px solid #90caf9; }
+
+
   .lang-tag { font-size: 10px; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
+
 
   .lang-CN { background: #fce4ec; color: #c2185b; }
 
@@ -985,14 +1031,15 @@ function playPopSound() {
 
 
 document.addEventListener('click', function(e) {
-
-    if (e.target.tagName === 'BUTTON' || (e.target.tagName === 'INPUT' && (e.target.type === 'checkbox' || e.target.type === 'radio')) || e.target.closest('.seat') || e.target.classList.contains('btn-action')) {
-
+    if (e.target.tagName === 'BUTTON' || 
+        (e.target.tagName === 'INPUT' && (e.target.type === 'checkbox' || e.target.type === 'radio')) || 
+        e.target.closest('.seat') || 
+        e.target.closest('.opt-card') || 
+        e.target.closest('.btn-action')) {
         playPopSound();
-
     }
-
 });
+
 
 
 
@@ -1348,14 +1395,16 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
     let paxType = 'General'; let isStay = false; 
 
-    let isBoard = (productName.toLowerCase().includes('board') || productName.includes('보드'));
-
-     let isHot = (productName.toLowerCase().includes('hot')); 
-// 상품명뿐만 아니라 줄 전체(line)에서 '무빙'을 찾되, '리프트'가 없는 경우만 true로 확실히 잡습니다.
-let isMoving = (line.includes('무빙') && !line.includes('리프트') && !line.includes('리프트업'));
-let isShuttle = (line.includes('셔틀'));
+        let isBoard = (productName.toLowerCase().includes('board') || productName.includes('보드'));
+    let isHot = (productName.toLowerCase().includes('hot')); 
+    let isMoving = (line.includes('무빙') && !line.includes('리프트') && !line.includes('리프트업'));
+    let isChair = (line.includes('무빙') && line.includes('리프트'));
+    let isSightseeing = (line.includes('관광'));
+    let isSled = (line.includes('스노우힐'));
+    let isShuttle = (line.includes('셔틀'));
   
     let lowerP = productName.toLowerCase();
+
 
 
     if (lowerP.includes('day1') || lowerP.includes('day 1')) { paxType = 'D1'; }
@@ -1397,16 +1446,17 @@ let isShuttle = (line.includes('셔틀'));
 
 
 
-                return {
+                                return {
       id: customId, originalId: originalOrder, name: name, 
       phone: parsedInfo.fullNumber, 
       count: count, location: location, note: note,
       country: parsedInfo.country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false,
       paxType: paxType, isStay: isStay, isBoard: isBoard, 
-      isSancheoneo: !isSkiTour, isHot: isHot, isMoving: isMoving, isShuttle: isShuttle, email: emailAddr,
+      isSancheoneo: !isSkiTour, isHot: isHot, isMoving: isMoving, isChair: isChair, isSightseeing: isSightseeing, isSled: isSled, isShuttle: isShuttle, email: emailAddr,
       originTag: originTag, 
       options: { lift: optLift, gear: optGear, clothes: optClothes, lesson: optLesson }
     };
+
 
 
 
@@ -1493,13 +1543,18 @@ function createGroupsFromEntries(entries) {
             isStay: currentGroupMembers.some(m => m.isStay), 
             isBoard: currentGroupMembers.some(m => m.isBoard), 
             isSancheoneo: rep.isSancheoneo, 
-            isHot: currentGroupMembers.some(m => m.isHot),
+                        isHot: currentGroupMembers.some(m => m.isHot),
             memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
             isMoving: currentGroupMembers.some(m => m.isMoving),
             memberMovingList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isMoving)),
+            isChair: currentGroupMembers.some(m => m.isChair),
+            memberChairCount: currentGroupMembers.reduce((sum, m) => sum + (m.isChair ? m.count : 0), 0),
+            isMovingCount: currentGroupMembers.reduce((sum, m) => sum + (m.isMoving ? m.count : 0), 0),
+            isSightseeingCount: currentGroupMembers.reduce((sum, m) => sum + (m.isSightseeing ? m.count : 0), 0),
+            isSledCount: currentGroupMembers.reduce((sum, m) => sum + (m.isSled ? m.count : 0), 0),
             isShuttle: currentGroupMembers.some(m => m.isShuttle),
-            // 개별 셔틀 여부를 리스트로 만들어 i번째 좌석에 매칭할 준비를 합니다.
             memberShuttleList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isShuttle)),
+            isSkiTour: currentGroupMembers.some(m => !m.isSancheoneo),
             email: rep.email,
 
 
@@ -2483,44 +2538,44 @@ if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin
 
 
 
-        let card = document.createElement('div'); card.className = 'msg-card';
+                let card = document.createElement('div'); card.className = 'msg-card';
+
+        let optionHtml = "";
+               if (g.isSkiTour) {
+            let pickupColor = groupBgColor;
+            optionHtml = `
+                <div class="option-card-wrapper">
+                    <div class="opt-card opt-boarded" style="background-color: ${pickupColor};" onclick="toggleBoarding(this)">탑승 완료</div>
+                    <div class="opt-card opt-chair ${g.memberChairCount === 0 ? 'off' : ''}" onclick="toggleOptCard(this)">체어${g.memberChairCount}</div>
+                    <div class="opt-card opt-moving ${g.isMovingCount === 0 ? 'off' : ''}" onclick="toggleOptCard(this)">무빙${g.isMovingCount}</div>
+                    <div class="opt-card opt-sight ${g.isSightseeingCount === 0 ? 'off' : ''}" onclick="toggleOptCard(this)">관광${g.isSightseeingCount}</div>
+                    <div class="opt-card opt-sled ${g.isSledCount === 0 ? 'off' : ''}" onclick="toggleOptCard(this)">썰매${g.isSledCount}</div>
+                </div>
+            `;
+        }
+
 
         card.innerHTML = `
+    <div class="msg-check-area">
+        <div class="check-box-wrapper"><label class="msg-check-label label-sent">연락함</label><input type="checkbox" class="msg-check-input chk-sent" onchange="updateMsgStatus('${gid}', 'contacted', this.checked, null)" ${isContacted ? 'checked' : ''}></div>
+        <div class="check-box-wrapper"><label class="msg-check-label label-connected">연락됨</label><input type="checkbox" class="msg-check-input chk-conn" onchange="updateMsgStatus('${gid}', 'connected', this.checked, null)" ${isConnected ? 'checked' : ''}></div>
+    </div>
+    <div class="msg-info">
+        <div class="msg-group-row"><span class="msg-group" style="background-color: ${groupBgColor}; color: ${groupTextColor};">${uiGroupNum}</span>${langTag}${extraTags}</div>
+        <div class="msg-seats">Seat: ${seatStr}</div>
+        <input type="text" class="msg-memo-input" placeholder="비고" value="${memoText}" oninput="updateMsgStatus('${gid}', null, null, this.value)">
+        <div class="hidden-msg">${msgText}</div>
+    </div>
+    <div class="msg-actions">
+        <a href="${waLink}" target="_blank" class="${waBtnClass}">Send<br>WA</a>
+        <div class="btn-action btn-copy-body" onclick="copyMessageBody(this)">본문<br>Copy</div>
+        ${emailBtnHtml}
+        ${appIconHtml}
+    </div>
+    ${optionHtml}
+`;
 
-            <div class="msg-check-area">
 
-                <div class="check-box-wrapper"><label class="msg-check-label label-sent">연락함</label><input type="checkbox" class="msg-check-input chk-sent" onchange="updateMsgStatus('${gid}', 'contacted', this.checked, null)" ${isContacted ? 'checked' : ''}></div>
-
-                <div class="check-box-wrapper"><label class="msg-check-label label-connected">연락됨</label><input type="checkbox" class="msg-check-input chk-conn" onchange="updateMsgStatus('${gid}', 'connected', this.checked, null)" ${isConnected ? 'checked' : ''}></div>
-
-            </div>
-
-            <div class="msg-info">
-
-                <div class="msg-group-row"><span class="msg-group" style="background-color: ${groupBgColor}; color: ${groupTextColor};">${uiGroupNum}</span>${langTag}${extraTags}</div>
-
-
-                <div class="msg-seats">Seat: ${seatStr}</div>
-
-                <input type="text" class="msg-memo-input" placeholder="비고" value="${memoText}" oninput="updateMsgStatus('${gid}', null, null, this.value)">
-
-                <div class="hidden-msg">${msgText}</div>
-
-            </div>
-
-            <div class="msg-actions">
-
-                <a href="${waLink}" target="_blank" class="${waBtnClass}">Send<br>WA</a>
-
-                <div class="btn-action btn-copy-body" onclick="copyMessageBody(this)">본문<br>Copy</div>
-
-                ${emailBtnHtml}
-
-                ${appIconHtml}
-
-            </div>
-
-        `;
 
         msgList.appendChild(card);
 
@@ -3173,6 +3228,28 @@ document.addEventListener('visibilitychange', function() { if (document.visibili
 window.addEventListener('pagehide', function() { forceSaveAllData(); });
 
 document.querySelectorAll('input, textarea').forEach(el => { el.addEventListener('blur', forceSaveAllData); });
+
+
+function toggleOptCard(el) {
+    if (navigator.vibrate) { navigator.vibrate(50); }
+    el.classList.toggle('off');
+}
+function toggleBoarding(el) {
+    if (navigator.vibrate) {
+        navigator.vibrate(50);
+    }
+    playPopSound();
+    
+    if (el.classList.contains('off')) {
+        el.classList.remove('off');
+        el.style.backgroundColor = el.dataset.originalColor;
+    } else {
+        el.dataset.originalColor = el.style.backgroundColor;
+        el.classList.add('off');
+        el.style.backgroundColor = '#eeeeee';
+    }
+}
+
 
 </script>
 

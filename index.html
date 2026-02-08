@@ -1533,7 +1533,7 @@ function createGroupsFromEntries(entries) {
         let gClothes = currentGroupMembers.some(m => m.options.clothes);
         let gLesson = currentGroupMembers.some(m => m.options.lesson);
 
-                                finalGroups.push({
+                                        finalGroups.push({
             mainNum: displayNum, 
             msgNum: displayNum, 
             repNum: rep.id, 
@@ -1543,7 +1543,7 @@ function createGroupsFromEntries(entries) {
             isStay: currentGroupMembers.some(m => m.isStay), 
             isBoard: currentGroupMembers.some(m => m.isBoard), 
             isSancheoneo: rep.isSancheoneo, 
-                        isHot: currentGroupMembers.some(m => m.isHot),
+            isHot: currentGroupMembers.some(m => m.isHot),
             memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
             isMoving: currentGroupMembers.some(m => m.isMoving),
             memberMovingList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isMoving)),
@@ -1556,12 +1556,12 @@ function createGroupsFromEntries(entries) {
             memberShuttleList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isShuttle)),
             isSkiTour: currentGroupMembers.some(m => !m.isSancheoneo),
             email: rep.email,
-
-
-
             originTag: combinedOrigin, 
-            options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson }
+            options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson },
+            isBoarded: false,
+            offOptions: []
         });
+
 
     });
     return finalGroups;
@@ -2540,19 +2540,30 @@ if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin
 
                 let card = document.createElement('div'); card.className = 'msg-card';
 
-        let optionHtml = "";
-               if (g.isSkiTour) {
+                let optionHtml = "";
+        if (g.isSkiTour) {
             let pickupColor = groupBgColor;
+            let gid = g.repNum;
+
+            let boardClass = g.isBoarded ? 'opt-card opt-boarded off' : 'opt-card opt-boarded';
+            let boardStyle = g.isBoarded ? 'background-color: #eeeeee;' : `background-color: ${pickupColor};`;
+            
+            let chairOff = (g.memberChairCount === 0 || (g.offOptions && g.offOptions.includes('chair'))) ? 'off' : '';
+            let movingOff = (g.isMovingCount === 0 || (g.offOptions && g.offOptions.includes('moving'))) ? 'off' : '';
+            let sightOff = (g.isSightseeingCount === 0 || (g.offOptions && g.offOptions.includes('sight'))) ? 'off' : '';
+            let sledOff = (g.isSledCount === 0 || (g.offOptions && g.offOptions.includes('sled'))) ? 'off' : '';
+
             optionHtml = `
                 <div class="option-card-wrapper">
-                    <div class="opt-card opt-boarded" style="background-color: ${pickupColor};" onclick="toggleBoarding(this)">탑승 완료</div>
-                    <div class="opt-card opt-chair ${g.memberChairCount === 0 ? 'off' : ''}" onclick="toggleOptCard(this)">체어${g.memberChairCount}</div>
-                    <div class="opt-card opt-moving ${g.isMovingCount === 0 ? 'off' : ''}" onclick="toggleOptCard(this)">무빙${g.isMovingCount}</div>
-                    <div class="opt-card opt-sight ${g.isSightseeingCount === 0 ? 'off' : ''}" onclick="toggleOptCard(this)">관광${g.isSightseeingCount}</div>
-                    <div class="opt-card opt-sled ${g.isSledCount === 0 ? 'off' : ''}" onclick="toggleOptCard(this)">썰매${g.isSledCount}</div>
+                    <div class="${boardClass}" style="${boardStyle}" data-original-color="${pickupColor}" onclick="toggleBoarding(this, '${gid}')">탑승 완료</div>
+                    <div class="opt-card opt-chair ${chairOff}" onclick="toggleOptCard(this, '${gid}', 'chair')">체어${g.memberChairCount}</div>
+                    <div class="opt-card opt-moving ${movingOff}" onclick="toggleOptCard(this, '${gid}', 'moving')">무빙${g.isMovingCount}</div>
+                    <div class="opt-card opt-sight ${sightOff}" onclick="toggleOptCard(this, '${gid}', 'sight')">관광${g.isSightseeingCount}</div>
+                    <div class="opt-card opt-sled ${sledOff}" onclick="toggleOptCard(this, '${gid}', 'sled')">썰매${g.isSledCount}</div>
                 </div>
             `;
         }
+
 
 
         card.innerHTML = `
@@ -3230,25 +3241,49 @@ window.addEventListener('pagehide', function() { forceSaveAllData(); });
 document.querySelectorAll('input, textarea').forEach(el => { el.addEventListener('blur', forceSaveAllData); });
 
 
-function toggleOptCard(el) {
+function toggleOptCard(el, gid, optName) {
     if (navigator.vibrate) { navigator.vibrate(50); }
-    el.classList.toggle('off');
+    
+    let group = msgListGroups.find(g => g.repNum === gid);
+    if (!group) return;
+
+    if (!group.offOptions) group.offOptions = [];
+
+    const idx = group.offOptions.indexOf(optName);
+    if (idx > -1) {
+        group.offOptions.splice(idx, 1);
+        el.classList.remove('off');
+    } else {
+        group.offOptions.push(optName);
+        el.classList.add('off');
+    }
+
+    saveSeatMap();
 }
-function toggleBoarding(el) {
+
+function toggleBoarding(el, gid) {
     if (navigator.vibrate) {
         navigator.vibrate(50);
     }
     playPopSound();
     
-    if (el.classList.contains('off')) {
-        el.classList.remove('off');
-        el.style.backgroundColor = el.dataset.originalColor;
-    } else {
+    let group = msgListGroups.find(g => g.repNum === gid);
+    if (!group) return;
+
+    group.isBoarded = !group.isBoarded;
+    
+    if (group.isBoarded) {
         el.dataset.originalColor = el.style.backgroundColor;
         el.classList.add('off');
         el.style.backgroundColor = '#eeeeee';
+    } else {
+        el.classList.remove('off');
+        el.style.backgroundColor = el.dataset.originalColor || '';
     }
+
+    saveSeatMap();
 }
+
 
 
 </script>

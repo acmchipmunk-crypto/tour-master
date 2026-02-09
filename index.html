@@ -2495,8 +2495,14 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
         }
 else if (!g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
-    msgText += `\n\n📏 Size Chart鞋碼表 (Ski):\nhttps://bit.ly/3NRRC7t`;
+    // 언어별로 "당신은 mm신발 사이즈를 확인 해야 합니다" 문구 추가
+    if (g.langContext === 'CN') {
+        msgText += `\n\n👟 请确认您的鞋子尺寸 (毫米):\nhttps://bit.ly/3NRRC7t`;
+    } else {
+        msgText += `\n\n👟 You must check your shoe size (millimeter):\nhttps://bit.ly/3NRRC7t`;
+    }
 }
+
 
 
         let waNumber = g.phone; 

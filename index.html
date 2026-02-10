@@ -2179,7 +2179,7 @@ function renderSeatContent(el, data, num, busNum) {
     else if (len > 3) fSize = "22px";   
 
     // --- [수정된 부분] 영어 손님일 경우 글자색을 진한 파랑으로 설정 ---
-    let textColor = (data.langContext === 'EN') ? '#1a237e' : '#333';
+    let textColor = (data.langContext === 'EN') ? '#000099' : '#333';
     // ---------------------------------------------------------
 
     let originBadgeHtml = getOriginBadgeHtml(data.originTag);
@@ -2368,7 +2368,7 @@ function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
     allGroups.forEach((g, idx) => {
     
             let groupBgColor = getPickColor(g);
-        let groupTextColor = (g.langContext === 'EN') ? '#1a237e' : '#333';
+        let groupTextColor = (g.langContext === 'EN') ? '#000099' : '#333';
 
 
         let seatStr = ""; let targetMap = (g.paxType === 'D2' || g.paxType === 'D3') ? seatMap2 : seatMap1;
@@ -3291,7 +3291,7 @@ function toggleBoarding(el, gid) {
 }
 
 
-
+ 
 </script>
 
 </body>

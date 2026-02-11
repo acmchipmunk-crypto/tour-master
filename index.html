@@ -2502,7 +2502,7 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
                 
 
-                msgText = `[${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲도恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 如果收到信息，麻煩回覆 “您所了解的出發時間”, 讓我們知道噢,謝謝😊。\n大巴号 : ${busNo}\n家庭號: ${g.repNum}\n坐位号: ${seatStr}`;
+                msgText = `[${guideName}]\n${pickupInfo}${finalSpecial}\n*為了避開交通堵塞，我們會準時出發。\n*遲到恕不退款。\n*車內只允許飲用白水。\n*不包含餐費。\n\n👉 如果收到信息，麻煩回覆 “您所了解的出發時間”, 讓我們知道噢,謝謝😊。\n大巴號: ${busNo}\n家庭號: ${g.repNum}\n座位號: ${seatStr}`;
 
 
             } else {
@@ -2535,7 +2535,7 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 else if (!g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
     // 언어별로 "당신은 mm신발 사이즈를 확인 해야 합니다" 문구 추가
     if (g.langContext === 'CN') {
-        msgText += `\n\n👟 请确认您的鞋子尺寸 (毫米):\nhttps://bit.ly/3NRRC7t`;
+        msgText += `\n\n👟 請確認您的鞋子尺寸 (毫米):\nhttps://bit.ly/3NRRC7t`;
     } else {
         msgText += `\n\n👟 You must check your shoe size (millimeter):\nhttps://bit.ly/3NRRC7t`;
     }

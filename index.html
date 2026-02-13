@@ -240,7 +240,8 @@
 .tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; color: black; }
 .tag-moving { background-color: #fbc02d; border: 1px solid white; font-weight:900; color: black; }
 .tag-shuttle { background-color: #8e8ebf; border: 1px solid white; font-weight:900; color: black; }
-
+.tag-sled { background-color: #81d4fa; border: 1px solid white; font-weight:900; color: black; }
+.tag-sight { background-color: #a5d6a7; border: 1px solid white; font-weight:900; color: black; }
 
 
 
@@ -1577,10 +1578,13 @@ function createGroupsFromEntries(entries) {
             isChair: currentGroupMembers.some(m => m.isChair),
             memberChairCount: currentGroupMembers.reduce((sum, m) => sum + (m.isChair ? m.count : 0), 0),
             isMovingCount: currentGroupMembers.reduce((sum, m) => sum + (m.isMoving ? m.count : 0), 0),
-            isSightseeingCount: currentGroupMembers.reduce((sum, m) => sum + (m.isSightseeing ? m.count : 0), 0),
+                        isSightseeingCount: currentGroupMembers.reduce((sum, m) => sum + (m.isSightseeing ? m.count : 0), 0),
             isSledCount: currentGroupMembers.reduce((sum, m) => sum + (m.isSled ? m.count : 0), 0),
+            memberSledList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isSled)),
+            memberSightseeingList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isSightseeing)),
             isShuttle: currentGroupMembers.some(m => m.isShuttle),
             memberShuttleList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isShuttle)),
+
             isSkiTour: currentGroupMembers.some(m => !m.isSancheoneo),
             email: rep.email,
             originTag: combinedOrigin, 
@@ -1825,8 +1829,10 @@ raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
                 // [핵심 수정] i번째 사람의 보드, HOT, 무빙, 셔틀 정보를 배열에서 정확히 가져옵니다.
                 let individualBoard = (grp.memberBoardList && grp.memberBoardList[i]) ? true : false;
                 let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
-                let individualMoving = (grp.memberMovingList && grp.memberMovingList[i]) ? true : false;
+                                let individualMoving = (grp.memberMovingList && grp.memberMovingList[i]) ? true : false;
                 let individualShuttle = (grp.memberShuttleList && grp.memberShuttleList[i]) ? true : false;
+                let individualSled = (grp.memberSledList && grp.memberSledList[i]) ? true : false;
+                let individualSight = (grp.memberSightseeingList && grp.memberSightseeingList[i]) ? true : false;
 
                 // 해당 좌석(seatNum)에 개별 속성을 부여하여 셔틀 손님에게 보드 마크가 붙지 않게 합니다.
                 currentSeatMap1[seatNum] = { 
@@ -1834,8 +1840,11 @@ raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
                     isBoard: individualBoard,
                     isHot: individualHot, 
                     isMoving: individualMoving, 
-                    isShuttle: individualShuttle 
+                    isShuttle: individualShuttle,
+                    isSled: individualSled,
+                    isSightseeing: individualSight
                 }; 
+
 
                 currentSeqIdx++;
             }
@@ -2226,6 +2235,9 @@ function renderSeatContent(el, data, num, busNum) {
     if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
 if (data.isMoving) tagsHtml += `<span class="day-tag tag-moving">무</span>`;
 if (data.isShuttle) tagsHtml += `<span class="day-tag tag-shuttle">셔</span>`; 
+if (data.isSled) tagsHtml += `<span class="day-tag tag-sled">썰</span>`;
+if (data.isSightseeing) tagsHtml += `<span class="day-tag tag-sight">관</span>`;
+
     if (data.paxType === 'D1') tagsHtml += `<span class="day-tag tag-d1">D1</span>`;
 
 
@@ -2492,9 +2504,9 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
                 langTag = "";
 
-                if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口 (Hongik Univ. Exit 8)`; } 
+                if (loc.includes('홍대')) { pickupInfo = `❗️${tH} 弘大入口站 8號出口`; } 
 
-                else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口 (Myeongdong Exit 3)`; } 
+                else if (loc.includes('명동')) { pickupInfo = `❗️${tM} 明洞站 3號出口`; } 
 
                 else if (loc.includes('동대문')) { pickupInfo = `❗️${tD} 東大門歷史文化公園站 11號出口`; } 
 
@@ -3569,7 +3581,8 @@ function toggleBoarding(el, gid) {
 .tag-hot { background-color: #ff3d00; border: 1px solid white; font-weight:900; color: black; }
 .tag-moving { background-color: #fbc02d; border: 1px solid white; font-weight:900; color: black; }
 .tag-shuttle { background-color: #8e8ebf; border: 1px solid white; font-weight:900; color: black; }
-
+.tag-sled { background-color: #81d4fa; border: 1px solid white; font-weight:900; color: black; }
+.tag-sight { background-color: #a5d6a7; border: 1px solid white; font-weight:900; color: black; }
 
 
 
@@ -4920,6 +4933,8 @@ function createGroupsFromEntries(entries) {
             isSledCount: currentGroupMembers.reduce((sum, m) => sum + (m.isSled ? m.count : 0), 0),
             isShuttle: currentGroupMembers.some(m => m.isShuttle),
             memberShuttleList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isShuttle)),
+            memberSledList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isSled)),
+            memberSightseeingList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isSightseeing)),
             isSkiTour: currentGroupMembers.some(m => !m.isSancheoneo),
             email: rep.email,
             originTag: combinedOrigin, 
@@ -5165,7 +5180,9 @@ raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
                 let individualBoard = (grp.memberBoardList && grp.memberBoardList[i]) ? true : false;
                 let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
                 let individualMoving = (grp.memberMovingList && grp.memberMovingList[i]) ? true : false;
-                let individualShuttle = (grp.memberShuttleList && grp.memberShuttleList[i]) ? true : false;
+                                let individualShuttle = (grp.memberShuttleList && grp.memberShuttleList[i]) ? true : false;
+                let individualSled = (grp.memberSledList && grp.memberSledList[i]) ? true : false;
+                let individualSight = (grp.memberSightseeingList && grp.memberSightseeingList[i]) ? true : false;
 
                 // 해당 좌석(seatNum)에 개별 속성을 부여하여 셔틀 손님에게 보드 마크가 붙지 않게 합니다.
                 currentSeatMap1[seatNum] = { 
@@ -5173,8 +5190,11 @@ raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
                     isBoard: individualBoard,
                     isHot: individualHot, 
                     isMoving: individualMoving, 
-                    isShuttle: individualShuttle 
+                    isShuttle: individualShuttle,
+                    isSled: individualSled,
+                    isSightseeing: individualSight
                 }; 
+
 
                 currentSeqIdx++;
             }
@@ -5565,6 +5585,9 @@ function renderSeatContent(el, data, num, busNum) {
     if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
 if (data.isMoving) tagsHtml += `<span class="day-tag tag-moving">무</span>`;
 if (data.isShuttle) tagsHtml += `<span class="day-tag tag-shuttle">셔</span>`; 
+if (data.isSled) tagsHtml += `<span class="day-tag tag-sled">썰</span>`;
+if (data.isSightseeing) tagsHtml += `<span class="day-tag tag-sight">관</span>`;
+
     if (data.paxType === 'D1') tagsHtml += `<span class="day-tag tag-d1">D1</span>`;
 
 

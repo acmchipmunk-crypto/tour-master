@@ -918,7 +918,7 @@ const CONFIG = {
 
         'kakao': 'kakaotalk://',
 
-        'line': 'line://',
+      'line': 'line://ti/p/~',
 
         'wechat': 'weixin://', 
 
@@ -1424,7 +1424,8 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
         let isBoard = (productName.toLowerCase().includes('board') || productName.includes('보드'));
     let isHot = (productName.toLowerCase().includes('hot')); 
     let isMoving = (line.includes('무빙') && !line.includes('리프트'));
-    let isChair = (line.includes('리프트') && !line.includes('관광'));
+    let isChair = (productName.includes('리프트') && !productName.includes('관광'));
+
     let isSightseeing = (line.includes('관광'));
     let isSled = (line.includes('스노우힐'));
     let isShuttle = (line.includes('셔틀'));

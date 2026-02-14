@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ski Boot Converter / 滑雪靴尺碼轉換</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Microsoft YaHei', 'Microsoft JhengHei', sans-serif; /* JhengHei(정헤이) 추가 */
+            margin: 0;
+            background-color: #f0f2f5;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: white;
+            padding: 20px 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        /* 상단 경고 박스 */
+        .warning-box {
+            background-color: #fff3e0;
+            color: #e65100;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px solid #ffe0b2;
+            line-height: 1.5;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin: 0 0 15px 0;
+            font-size: 20px;
+        }
+        .row {
+            display: flex;
+            gap: 5px; /* 간격 살짝 좁힘 */
+            margin-bottom: 12px;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+        }
+        .row-num {
+            font-weight: bold;
+            color: #4834d4;
+            width: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+        input {
+            width: 25%; /* 20%는 너무 좁아서 25%로 미세 조정 (글자 확보용) */
+            padding: 8px 2px; /* 내부 여백을 줄여서 글자 공간 확보 */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 13px; /* 글자 크기를 줄여서 'Size/尺碼'가 다 보이게 함 */
+            text-align: center;
+            font-family: inherit;
+        }
+        /* 플레이스홀더(안내문구) 색상 및 크기 조정 */
+        ::placeholder {
+            color: #999;
+            font-size: 12px; 
+            opacity: 1;
+        }
+        button {
+            width: 25%;
+            padding: 10px 5px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4834d4;
+            color: white;
+            font-weight: bold;
+            font-size: 13px; /* 버튼 글씨도 균형 맞춤 */
+            cursor: pointer;
+        }
+        button:active {
+            background-color: #301b9e;
+        }
+        .result-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 12px;
+            color: #333;
+            padding-left: 5px;
+        }
+        .range-text {
+            color: #555;
+            margin-bottom: 2px;
+        }
+        .rec-text {
+            color: #d63031;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        /* 하단 주의사항 박스 */
+        .footer-note {
+            margin-top: 20px;
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: center;
+            border: 1px solid #ffcdd2;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Ski Boot Converter<br>滑雪靴尺碼轉換</h2> <div class="warning-box">
+        ⚠️ UK Child sizes need to be checked separately.<br>
+        UK兒童尺碼請另行確認。<br> (Adult Only / 僅限成人) </div>
+    
+    <div id="converter-rows">
+        </div>
+
+    <div class="footer-note">
+        NOTE / 注意:<br>
+        Ski & Snowboard boots are different from running shoes.<br>
+        If it doesn't hurt, the tighter the better.<br><br>
+        滑雪/單板靴與跑步鞋不同。<br> 只要不痛，越緊越好。 </div>
+</div>
+
+<script>
+    // 1. Text to Number Dictionary (Including Traditional Chinese)
+    const textMap = {
+        "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, 
+        "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+        "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
+        "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, 
+        "六": 6, "七": 7, "八": 8, "九": 9, "十": 10,
+        "十一": 11, "十二": 12, "十三": 13, "十四": 14, "十五": 15
+    };
+
+    // 2. Generate 5 Rows
+    const container = document.getElementById('converter-rows');
+    for (let i = 1; i <= 5; i++) {
+        // Placeholder changed to Traditional: Size/尺碼
+        const rowHTML = `
+            <div class="row">
+                <div class="row-num">${i}</div>
+                <input type="text" id="input-${i}" placeholder="Size/尺碼" onkeypress="if(event.key==='Enter') convertRow(${i})">
+                <button onclick="convertRow(${i})">Convert<br>轉換</button> 
+                <div class="result-area" id="result-${i}">
+                    <span style="color:#aaa;">-</span>
+                </div>
+            </div>
+        `;
+        container.innerHTML += rowHTML;
+    }
+
+    // 3. Calculation Logic
+    function convertRow(index) {
+        let rawInput = document.getElementById(`input-${index}`).value.trim().toLowerCase();
+        const display = document.getElementById(`result-${index}`);
+        
+        let val;
+
+        // STEP 1: Check if it's a text number (e.g., "ten", "十一")
+        if (textMap[rawInput]) {
+            val = textMap[rawInput];
+        } else {
+            // STEP 2: Remove garbage text (Extract only numbers and dots)
+            let sanitized = rawInput.replace(/[^0-9.]/g, "");
+            val = parseFloat(sanitized);
+        }
+
+        // Error Handling (Traditional Chinese)
+        if (isNaN(val)) {
+            display.innerHTML = "<span style='color:red'>Invalid No.<br>無效數字</span>"; // 无 -> 無
+            return;
+        }
+
+        let exactMM = 0;
+        let type = "";
+
+        // --- CONVERSION LOGIC ---
+        // CASE A: UK Size (1 ~ 16) - Adult Logic
+        if (val >= 1 && val <= 16) {
+            type = "UK";
+            exactMM = 200 + (val - 1) * 8.46;
+        }
+        // CASE B: EU Size (24 ~ 52)
+        else if (val >= 24 && val <= 52) {
+            type = "EU";
+            exactMM = 200 + (val - 32) * 6.67;
+        }
+        else {
+            display.innerHTML = "<span style='color:red'>Range Error<br>UK 1-16 / EU 24-52</span>";
+            return;
+        }
+
+        // --- RESULT PROCESSING ---
+        let minRange = Math.floor(exactMM - 2);
+        let maxRange = Math.ceil(exactMM + 2);
+        let recSize = Math.ceil(maxRange / 5) * 5; // Round up to nearest 5
+
+        // Display HTML (Traditional Chinese)
+        display.innerHTML = `
+            <div class="range-text">
+                Range: <b>${minRange}~${maxRange}</b> 
+                <span style="font-size:10px">(${type} ${val})</span>
+            </div>
+            <div class="rec-text">
+                👉 Rec/推薦: ${recSize}mm
+            </div>
+        `;
+    }
+</script>
+
+</body>
+</html>

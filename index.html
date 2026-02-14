@@ -1421,7 +1421,7 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
     let paxType = 'General'; let isStay = false; 
 
-        let isBoard = (productName.toLowerCase().includes('board') || productName.includes('보드'));
+        let isBoard = (productName.toLowerCase().includes('board'));
     let isHot = (productName.toLowerCase().includes('hot')); 
     let isMoving = (line.includes('무빙') && !line.includes('리프트'));
     let isChair = (productName.includes('리프트') && !productName.includes('관광'));
@@ -2540,19 +2540,18 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
 
 
-        if (g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
-
+               if (g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
             msgText += `\n\n📺 How to wear boots:\n${CONFIG.BOOTS_YOUTUBE}`;
-
         }
-else if (!g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
-    // 언어별로 "당신은 mm신발 사이즈를 확인 해야 합니다" 문구 추가
+        
+        if (g.isSkiTour && g.paxType !== 'D2' && g.paxType !== 'D3') {
     if (g.langContext === 'CN') {
-        msgText += `\n\n👟 請確認您的鞋子尺寸 (毫米):\nhttps://bit.ly/3NRRC7t`;
+        msgText += `\n\n👟 請確認您的鞋子尺寸 (毫米):\nacmchipmunk-crypto.github.io/t/s.html`;
     } else {
-        msgText += `\n\n👟 You must check your shoe size (millimeter):\nhttps://bit.ly/3NRRC7t`;
+        msgText += `\n\n👟 You must check your shoe size (millimeter):\nacmchipmunk-crypto.github.io/t/s.html`;
     }
 }
+
 
 
 

@@ -647,13 +647,14 @@
 <div class="capture-wrapper">
   <div id="captureArea1">
     <div class="bus-header">
-      <div class="bus-title-label">☀️ Map 1 (Seoul → Dest)</div>
+      <div style="position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 5px;">
+          <div class="bus-title-label">☀️ Map 1 (Seoul → Dest)</div>
+          <button class="btn-save-mini" onclick="downloadImage(1)" data-html2canvas-ignore="true" style="position: absolute; right: 0; top: 0;">📸 저장</button>
+      </div>
+      
       <div class="pickup-summary" id="pickupSummary1">
           준비중...
-          <div class="header-controls" data-html2canvas-ignore="true">
-             <button class="btn-save-mini" onclick="downloadImage(1)">📸 저장</button>
           </div>
-      </div>
       <div class="bus-date" id="dateDisplay1">2026-00-00</div>
     </div>
     <div class="bus-grid" id="busGrid1"></div>
@@ -663,18 +664,20 @@
 <div class="capture-wrapper">
   <div id="captureArea2">
     <div class="bus-header">
-      <div class="bus-title-label">🌙 Map 2 (Dest → Seoul)</div>
+      <div style="position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 5px;">
+          <div class="bus-title-label">🌙 Map 2 (Dest → Seoul)</div>
+          <button class="btn-save-mini night" onclick="downloadImage(2)" data-html2canvas-ignore="true" style="position: absolute; right: 0; top: 0;">📸 저장</button>
+      </div>
+
       <div class="pickup-summary" id="pickupSummary2">
           준비중...
-          <div class="header-controls" data-html2canvas-ignore="true">
-            <button class="btn-save-mini night" onclick="downloadImage(2)">📸 저장</button>
           </div>
-      </div>
       <div class="bus-date" id="dateDisplay2">2026-00-00</div>
     </div>
     <div class="bus-grid" id="busGrid2"></div>
   </div>
 </div>
+
 
 <div class="v11-card" style="background: #fff9c4; border: 1px solid #fbc02d;">
   <span class="v11-section-label">10. 가이드 개인공지</span>
@@ -2541,8 +2544,15 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
 
                if (g.isBoard && g.paxType !== 'D2' && g.paxType !== 'D3') {
-            msgText += `\n\n📺 How to wear boots:\n${CONFIG.BOOTS_YOUTUBE}`;
-        }
+    if (g.langContext === 'CN') {
+        // 중국어: 단판설화(Snowboard boots) 안내
+        msgText += `\n\n📺 如何穿單板滑雪鞋:\n${CONFIG.BOOTS_YOUTUBE}`;
+    } else {
+        // 영어: Snowboard boots 명확히 표기
+        msgText += `\n\n📺 How to wear Snowboard boots:\n${CONFIG.BOOTS_YOUTUBE}`;
+    }
+}
+
         
         if (g.isSkiTour && g.paxType !== 'D2' && g.paxType !== 'D3') {
     if (g.langContext === 'CN') {
@@ -3011,38 +3021,71 @@ function clearData() { if(confirm('초기화하시겠습니까?')) { document.ge
 
 
 function updateHeader1(seatMap) {
-
-    let counts = { '홍대':0, '명동':0, '동대문':0, '현장':0, '기타':0 }; let total = 0;
+    let counts = { '홍대':0, '명동':0, '동대문':0, '현장':0, '기타':0 }; 
+    let total = 0;
+    let teamSet = new Set(); 
 
     for(let i=1; i<seatMap.length; i++) {
-
         let seat = seatMap[i];
-
         if(seat) {
-
-            total++; let loc = seat.location || '';
-
+            total++; 
+            let loc = seat.location || '';
+            
+            // 1. 픽업지 카운트
             if(loc.includes('홍대')) counts['홍대']++;
-
             else if(loc.includes('명동')) counts['명동']++;
-
             else if(loc.includes('동대문')) counts['동대문']++;
-
             else if(loc.includes('현장')) counts['현장']++;
-
             else counts['기타']++;
 
+            // 2. 팀 번호 파싱 (repNum의 첫 글자가 영어인지 확인)
+            // 데이터 예시: "B1", "C2" -> 첫글자 B, C 추출
+            if (seat.repNum) {
+                let firstChar = String(seat.repNum).trim().charAt(0).toUpperCase();
+                // 영문자(A-Z)인 경우에만 팀 번호로 추가
+                if (/[A-Z]/.test(firstChar)) {
+                    teamSet.add(firstChar);
+                }
+            }
         }
-
     }
 
-    const textHtml = `<div>TOTAL: ${total}명<br><span style="font-size:0.9rem; color:#ffd700;">[ 홍대 ${counts['홍대']} / 명동 ${counts['명동']} / 동대문 ${counts['동대문']} / 현장 ${counts['현장']} ]</span></div>`;
+    // 3. 데이터 준비
+    let guideName = document.getElementById('guideNameInput').value || "Mr. Shin";
+    let teamLabel = teamSet.size > 0 ? Array.from(teamSet).sort().join(', ') : ''; 
+    
+    // 팀이 있으면 "Mr. Shin (B)", 없으면 "Mr. Shin" 만 표시 ("GUIDE" 글자 삭제됨)
+    let topTitle = teamLabel ? `${guideName} <span style="color:#FF4081;">(${teamLabel})</span>` : guideName;
 
-    const btnHtml = `<div class="header-controls" data-html2canvas-ignore="true"><button class="btn-save-mini" onclick="downloadImage(1)">📸 저장</button></div>`;
+    let tH = document.getElementById('timeHongdae').value;
+    let tM = document.getElementById('timeMyeongdong').value;
+    let tD = document.getElementById('timeDongdaemun').value;
 
-    document.getElementById('pickupSummary1').innerHTML = textHtml + btnHtml;
+    // 4. 레이아웃 (글자 크기 대폭 확대)
+    // 줄 1: 이름 + (팀) -> 26px (노란색)
+    const line1 = `<div style="font-size:26px; font-weight:900; color:#FFD54F; margin-bottom:6px; line-height:1.2;">
+                      ${topTitle}
+                   </div>`;
+    
+    // 줄 2: 출발 시간 -> 20px (흰색)
+    const line2 = `<div style="font-size:20px; color:#fff; margin-bottom:8px; font-weight:bold;">
+                      🕒 ${tH} / ${tM} / ${tD}
+                   </div>`;
 
+    // 줄 3: 총 인원 및 픽업지 -> 22px / 18px
+    const line3 = `<div style="font-size:22px; font-weight:900; color:white;">
+                      TOTAL: ${total}명 
+                      <div style="font-size:18px; color:#B3E5FC; margin-top:4px; font-weight:bold;">
+                        [ 홍${counts['홍대']} / 명${counts['명동']} / 동${counts['동대문']} / 현${counts['현장']} ]
+                      </div>
+                   </div>`;
+
+    // [수정] 버튼 생성 코드(btnHtml)를 삭제하고, 텍스트만 출력하도록 변경
+    document.getElementById('pickupSummary1').innerHTML = 
+        `<div style="text-align:left; display:flex; flex-direction:column;">${line1}${line2}${line3}</div>`;
 }
+
+
 
 
 

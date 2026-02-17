@@ -464,13 +464,47 @@
       content: 'B';
       position: absolute;
       top: 1px;
-      right: -12px; /* 삼각형 크기에 맞춰 위치 조정 */
-      font-size: 8px; /* 글자 크기도 소폭 조정 */
+      right: -12px; 
+      font-size: 8px; 
       font-weight: 900;
       color: white;
       text-align: center;
   }
 
+  .seat .ski-mark {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 14px 14px 0;
+      border-color: transparent #880E4F transparent transparent;
+      z-index: 5;
+  }
+
+  .seat .ski-mark::after {
+      content: 'S';
+      position: absolute;
+      top: 1px;
+      right: -12px;
+      font-size: 8px;
+      font-weight: 900;
+      color: white;
+      text-align: center;
+  }
+
+.seat .no-lesson-mark {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 19px 19px 0; /* 14px보다 약 35% 크게 */
+      border-color: transparent #FFD700 transparent transparent;
+      z-index: 1; /* 보드/스키 마크(z-index:10)보다 뒤에 위치 */
+  }
 
 
 
@@ -1426,6 +1460,14 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
         let isBoard = (productName.toLowerCase().includes('board'));
     let isHot = (productName.toLowerCase().includes('hot')); 
+    let isSki = (line.includes('엘리시안 Ski'));
+    let hasElysianSki = lineLower.includes('엘리시안 ski');
+    let hasElysianBoard = lineLower.includes('엘리시안 snowboard');
+    let hasLesson = lineLower.includes('강습');
+    
+   let isNoLesson = (hasElysianSki || hasElysianBoard) && !hasLesson;
+    
+    
     let isMoving = (line.includes('무빙') && !line.includes('리프트'));
     let isChair = (productName.includes('리프트') && !productName.includes('관광'));
 
@@ -1481,9 +1523,11 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
       phone: parsedInfo.fullNumber, 
       count: count, location: location, note: note,
       country: parsedInfo.country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false,
-      paxType: paxType, isStay: isStay, isBoard: isBoard, 
+                  paxType: paxType, isStay: isStay, isBoard: isBoard, isSki: isSki, isNoLesson: isNoLesson,
       isSancheoneo: !isSkiTour, isHot: isHot, isMoving: isMoving, isChair: isChair, isSightseeing: isSightseeing, isSled: isSled, isShuttle: isShuttle, email: emailAddr,
+
       originTag: originTag, 
+
       options: { lift: optLift, gear: optGear, clothes: optClothes, lesson: optLesson }
     };
 
@@ -1570,11 +1614,17 @@ function createGroupsFromEntries(entries) {
             count: totalC, name: rep.name, country: rep.country, gender: rep.gender,
             langContext: rep.langContext, appType: rep.appType, location: rep.location, 
             phone: rep.phone, messenger: rep.messenger, paxType: groupType, 
-            isStay: currentGroupMembers.some(m => m.isStay), 
+                        isStay: currentGroupMembers.some(m => m.isStay), 
             isBoard: currentGroupMembers.some(m => m.isBoard), 
-            // [핵심 수정] 각 멤버의 보드 여부를 개별 리스트로 저장합니다.
             memberBoardList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isBoard)),
+                        isSki: currentGroupMembers.some(m => m.isSki),
+            memberSkiList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isSki)),
+            // [추가] 노강 리스트 처리
+            isNoLesson: currentGroupMembers.some(m => m.isNoLesson),
+            memberNoLessonList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isNoLesson)),
             isSancheoneo: rep.isSancheoneo, 
+
+
             isHot: currentGroupMembers.some(m => m.isHot),
             memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
             isMoving: currentGroupMembers.some(m => m.isMoving),
@@ -1831,19 +1881,27 @@ raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
                 let seatNum = seatSequence[currentSeqIdx];
                 
                 // [핵심 수정] i번째 사람의 보드, HOT, 무빙, 셔틀 정보를 배열에서 정확히 가져옵니다.
-                let individualBoard = (grp.memberBoardList && grp.memberBoardList[i]) ? true : false;
+                                                let individualBoard = (grp.memberBoardList && grp.memberBoardList[i]) ? true : false;
+                let individualSki = (grp.memberSkiList && grp.memberSkiList[i]) ? true : false;
+                let individualNoLesson = (grp.memberNoLessonList && grp.memberNoLessonList[i]) ? true : false;
                 let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
-                                let individualMoving = (grp.memberMovingList && grp.memberMovingList[i]) ? true : false;
+
+                let individualMoving = (grp.memberMovingList && grp.memberMovingList[i]) ? true : false;
+
                 let individualShuttle = (grp.memberShuttleList && grp.memberShuttleList[i]) ? true : false;
                 let individualSled = (grp.memberSledList && grp.memberSledList[i]) ? true : false;
                 let individualSight = (grp.memberSightseeingList && grp.memberSightseeingList[i]) ? true : false;
 
                 // 해당 좌석(seatNum)에 개별 속성을 부여하여 셔틀 손님에게 보드 마크가 붙지 않게 합니다.
-                currentSeatMap1[seatNum] = { 
+                                                currentSeatMap1[seatNum] = { 
                     ...grp, 
                     isBoard: individualBoard,
+                    isSki: individualSki,
+                    isNoLesson: individualNoLesson,
                     isHot: individualHot, 
+
                     isMoving: individualMoving, 
+
                     isShuttle: individualShuttle,
                     isSled: individualSled,
                     isSightseeing: individualSight
@@ -2230,10 +2288,20 @@ function renderSeatContent(el, data, num, busNum) {
     let cleanNation = data.subInfo ? data.subInfo.replace(/\(.\)/g, '') : "";
     
             let tagsHtml = "";
-    // --- 보드 마크(삼각형) 추가 로직 시작 ---
+        // --- 보드 마크(삼각형) 추가 로직 시작 ---
+    // [추가] 노강일 경우 검은색 큰 삼각형 먼저 그리기 (z-index가 낮아서 뒤로 감)
+    if (data.isNoLesson) {
+        tagsHtml += `<div class="no-lesson-mark"></div>`;
+    }
+    
     if (data.isBoard) {
         tagsHtml += `<div class="board-mark"></div>`;
     }
+    if (data.isSki) {
+        tagsHtml += `<div class="ski-mark"></div>`;
+    }
+
+
     // --- 보드 마크(삼각형) 추가 로직 끝 ---
     
     if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;

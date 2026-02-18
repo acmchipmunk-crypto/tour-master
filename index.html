@@ -1590,13 +1590,14 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
     let parsedInfo = combinePhoneAndMessenger(rawPhone, messengerCol);
     // 오직 텍스트(rawLang)에 포함된 단어만 기준으로 판별합니다.
-    let langContext = 'EN'; // 기본값은 영어
+        let langContext = 'EN'; 
 
-    if (rawLang && rawLang.includes('중국어')) {
+    if (line.includes('중국어')) {
         langContext = 'CN';
-    } else if (rawLang && rawLang.includes('영어')) {
+    } else if (line.includes('영어')) {
         langContext = 'EN';
     }
+
 
 
     let gender = 'N'; 

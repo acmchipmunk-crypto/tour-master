@@ -812,13 +812,14 @@
 <div id="longPressPopup" class="lp-popup" style="display:none;">
     <div class="lp-header">기능 선택</div>
     <div class="lp-body">
-        <button id="btnToggleBoarding" class="lp-btn" onclick="toggleGroupBoarding()">
-            탑승 완료 처리
-        </button>
-        <div class="lp-placeholder">
-            (추가 기능 예정)
-        </div>
-    </div>
+    <button id="btnToggleBoarding" class="lp-btn" onclick="toggleGroupBoarding()">
+        탑승 완료 처리
+    </button>
+    <button class="lp-btn" style="background: #D32F2F; margin-top: 4px; color: white;" onclick="handleNoShow()">
+        노쇼 안녕 (Delete)
+    </button>
+</div>
+
     <button class="lp-close" onclick="closeLongPopup()">닫기</button>
 </div>
 
@@ -3564,9 +3565,13 @@ function toggleBoarding(el, gid) {
 
     saveSeatMap();
 }
-// [추가] 롱프레스 팝업 열기
 function openLongPopup(el, data, busNum) {
-    lpTarget = { repNum: data.repNum, currentStatus: data.isBoarded || false };
+    lpTarget = { 
+        repNum: data.repNum, 
+        currentStatus: data.isBoarded || false,
+        busNum: busNum,
+        seatIdx: parseInt(el.dataset.idx)
+    };
     
     const popup = document.getElementById('longPressPopup');
     const btn = document.getElementById('btnToggleBoarding');
@@ -3589,12 +3594,14 @@ function openLongPopup(el, data, busNum) {
     popup.style.display = 'flex';
 }
 
+
 // [추가] 팝업 닫기
 function closeLongPopup() {
     document.getElementById('longPressPopup').style.display = 'none';
     lpTarget = null;
 }
 
+// [추가] 탑승 상태 토글 (가족 전체 적용)
 // [추가] 탑승 상태 토글 (가족 전체 적용)
 function toggleGroupBoarding() {
     if (!lpTarget) return;
@@ -3616,8 +3623,29 @@ function toggleGroupBoarding() {
     closeLongPopup(); // 팝업 닫기
 }
 
+function handleNoShow() {
+    if (!lpTarget) return;
+
+    if (confirm("정말 이 자리를 '노쇼' 처리하고 비우시겠습니까?")) {
+        const { busNum, seatIdx, repNum } = lpTarget;
+        
+        let targetMap = (busNum === 1) ? currentSeatMap1 : currentSeatMap2;
+
+        targetMap[seatIdx] = null;
+
+        let group = msgListGroups.find(g => g.repNum === repNum);
+        if (group && group.count > 0) {
+            group.count--; 
+        }
+
+        saveSeatMap(); 
+        refreshDisplay(); 
+        closeLongPopup(); 
+    }
+}
  
 </script>
+
 
 </body>
 

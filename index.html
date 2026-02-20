@@ -3200,7 +3200,35 @@ function loadTextInput() { const savedData = localStorage.getItem('bus_rawData')
 
 function loadGuideName() { const savedGuide = localStorage.getItem('bus_guideName'); if(savedGuide) document.getElementById('guideNameInput').value = savedGuide; const savedBus = localStorage.getItem('bus_number'); if(savedBus) document.getElementById('busNumberInput').value = savedBus; }
 
-function clearData() { if(confirm('초기화하시겠습니까?')) { document.getElementById('rawData').value = ''; localStorage.removeItem('bus_rawData'); localStorage.removeItem('bus_seatMap'); localStorage.removeItem('bus_msgStatus'); location.reload(); } }
+function clearData() {
+    if(confirm('초기화하시겠습니까?')) {
+        document.getElementById('rawData').value = '';
+        document.querySelector('input[name="busSize"][value="44"]').checked = true;
+        localStorage.removeItem('bus_rawData');
+        localStorage.removeItem('bus_size');
+        localStorage.removeItem('bus_seatMap');
+        localStorage.removeItem('bus_msgStatus');
+        currentSeatMap1 = [];
+        currentSeatMap2 = [];
+        msgListGroups = [];
+        priorityQueue = [];
+        selectedSeat = { busNum: 0, idx: -1 };
+        document.getElementById('busGrid1').innerHTML = '';
+        document.getElementById('busGrid2').innerHTML = '';
+        document.getElementById('pickupSummary1').innerHTML = '준비중...';
+        document.getElementById('pickupSummary2').innerHTML = '준비중...';
+        document.getElementById('captureArea2').style.display = 'none';
+        document.querySelectorAll('#msgList').forEach(el => el.innerHTML = '');
+        document.getElementById('msgSection').style.display = 'none';
+        document.querySelectorAll('.criteria').forEach(chk => chk.checked = false);
+        document.getElementById('priorityView').innerText = "우선순위: 없음";
+        document.getElementById('paxInfo').innerText = "준비됨";
+    }
+}
+
+
+
+
 
 
 

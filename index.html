@@ -601,20 +601,37 @@
     font-size: 15px;
     z-index: 10001;
     border: 1px solid white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     cursor: pointer;
 }
 
+#firebaseToast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 900;
+    font-size: 14px;
+    color: white;
+    z-index: 10002;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    display: none;
+}
+
+
 </style>
+
 
 
 </head>
 
 <body>
 
-
+<div id="firebaseToast"></div>
 
 <div id="lockScreen" style="display:none;">
+
 
     <h2 style="margin-bottom:20px;">🔒 ACCESS LOCKED</h2>
 
@@ -1033,6 +1050,28 @@ const db = firebase.database();
  * [전역 상수 및 설정] - 버전 10.8 (Gender Free + FIT)
 
  */
+let toastTimer = null;
+
+function showToast(msg, type) {
+    const toast = document.getElementById('firebaseToast');
+    toast.innerText = msg;
+    toast.style.display = 'block';
+    
+    if (type === 'loading') {
+        toast.style.background = '#FF9800';
+    } else if (type === 'success') {
+        toast.style.background = '#4CAF50';
+    } else {
+        toast.style.background = '#F44336';
+    }
+    
+    clearTimeout(toastTimer);
+    if (type !== 'loading') {
+        toastTimer = setTimeout(() => {
+            toast.style.display = 'none';
+        }, 1500);
+    }
+}
 
 let currentRoom = '';
 
@@ -1054,13 +1093,21 @@ localStorage.setItem = function(key, value) {
         if (currentRoom !== 'General') {
             const firebaseKeys = ['guideName', 'rawData', 'seatMap', 'msgStatus'];
             if (firebaseKeys.includes(originalKey)) {
-                db.ref(currentRoom + '/' + originalKey).set(value);
+                showToast('☁️ 저장 중...', 'loading');
+                db.ref(currentRoom + '/' + originalKey).set(value)
+                    .then(() => {
+                        showToast('✅ 저장 완료!', 'success');
+                    })
+                    .catch((error) => {
+                        showToast('❌ 저장 실패', 'error');
+                    });
                 return;
             }
         }
     }
     originalSetItem.call(this, key, value);
 };
+
 
 
 

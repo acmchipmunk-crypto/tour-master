@@ -11,11 +11,8 @@
 <title>미스터 신의 투어마스터 10.8 (Gender Free + FIT Mode)</title>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
 <style>
-
 
   /* --- [기존 스타일 유지] --- */
 
@@ -586,52 +583,15 @@
 }
 
 
-.btn-floating-back {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    width: 30px;
-    height: 30px;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    z-index: 10001;
-    border: 1px solid white;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    cursor: pointer;
-}
-
-#firebaseToast {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-weight: 900;
-    font-size: 14px;
-    color: white;
-    z-index: 10002;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    display: none;
-}
-
-
 </style>
-
-
 
 </head>
 
 <body>
 
-<div id="firebaseToast"></div>
+
 
 <div id="lockScreen" style="display:none;">
-
 
     <h2 style="margin-bottom:20px;">🔒 ACCESS LOCKED</h2>
 
@@ -647,14 +607,11 @@
   /* v11 Slim UI 미세 조정 스타일 */
   .v11-card { background: white; padding: 4px 12px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 4px; border: 1px solid #e0e4e8; }
   .v11-title { 
-      text-align: center; font-size: 30px; font-weight: 900; color: #333; 
+      text-align: center; font-size: 20px; font-weight: 900; color: #333; 
       background: linear-gradient(135deg, #ffd600, #ffab00); padding: 8px; 
-      border-radius: 10px; margin: 5px 0 5px 0; box-shadow: 0 2px 5px rgba(255,171,0,0.3);
+      border-radius: 10px; margin: 5px 0 8px 0; box-shadow: 0 2px 8px rgba(255,171,0,0.3);
       text-shadow: 1px 1px 1px rgba(255,255,255,0.8); border: 2px solid #fff;
-      display: flex; align-items: center; justify-content: center; min-height: 50px;
   }
-
-
   /* 제목 약 50% 확대 (12px -> 18px), 설명 약 30% 확대 (10px -> 13px) */
   .v11-section-label { font-size: 18px; font-weight: 800; color: #1a237e; display: block; margin-bottom: 0px; letter-spacing: -0.5px; }
   .v11-section-desc { font-size: 13px; color: #555; margin-bottom: 4px; line-height: 1.1; font-weight: 500; }
@@ -681,47 +638,9 @@
   .manual-input { background-color: #fcfcfc; }
   .chk-label { padding: 3px 6px !important; font-size: 11px !important; }
   .priority-display { padding: 2px 4px !important; margin: 2px 0 !important; }
-  
-  #entryMenu, #roomMenu { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px; background: #f0f2f5; }
-.menu-btn { width: 80%; padding: 25px; font-size: 26px; font-weight: 900; border-radius: 15px; border: none; cursor: pointer; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.1s; }
-.menu-btn:active { transform: scale(0.95); }
-.btn-general { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
-.btn-ski { background: linear-gradient(135deg, #2196F3, #1565C0); }
-.room-grid { display: grid; grid-template-columns: 1fr; gap: 15px; width: 90%; max-width: 400px; }
-
-.btn-room { background: linear-gradient(135deg, #FF9800, #E65100); padding: 30px 0; font-size: 28px; font-weight: 900; border-radius: 15px; border: none; color: white; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.1s; }
-.btn-room:active { transform: scale(0.95); }
-.btn-back { margin-top: 20px; padding: 15px 30px; background: #757575; color: white; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
 </style>
 
-<div id="entryMenu" style="display:none;">
-    <h1 style="color:#1a237e; margin-bottom: 20px; font-weight: 900;">🚌 투어 선택</h1>
-    <button class="menu-btn btn-general" onclick="startGeneralTour()">🚌 일반 투어</button>
-    <button class="menu-btn btn-ski" onclick="openSkiRooms()">⛷️ 스키 투어</button>
-</div>
-
-<div id="roomMenu" style="display:none;">
-    <div class="btn-floating-back" onclick="goBackToEntry()">🔙</div>
-    <h2 style="color:#e65100; margin-bottom: 20px; font-weight: 900;">⛷️ 스키 투어 방 선택</h2>
-    <div class="room-grid">
-        <button class="btn-room" onclick="startSkiTour('A')">A</button>
-        <button class="btn-room" onclick="startSkiTour('B')">B</button>
-        <button class="btn-room" onclick="startSkiTour('C')">C</button>
-        <button class="btn-room" onclick="startSkiTour('D')">D</button>
-        <button class="btn-room" onclick="startSkiTour('E')">E</button>
-        <button class="btn-room" onclick="startSkiTour('F')">F</button>
-    </div>
-    <button class="btn-back" onclick="goBackToEntry()">🔙 뒤로 가기</button>
-</div>
-
-
-
-<div id="mainApp" style="display:none;">
-<div class="btn-floating-back" onclick="exitToMenu()" data-html2canvas-ignore="true">🔙</div>
-
-
 <div class="v11-title">📱 미스터 신의 투어마스터 v11</div>
-
 
 <div class="v11-card">
   <span class="v11-section-label">1. 기본 정보</span>
@@ -880,12 +799,17 @@
       <span class="v11-section-label">11. 메시지 발송 & 체크</span>
       <p class="v11-section-desc">손님에게 메시지를 보내고 체크합니다.</p>
     </div>
-    <div class="info-text" style="margin-bottom:15px; text-align:center;">Send 버튼을 누르면 WhatsApp이 열립니다.</div>
     <div id="msgList"></div>
 </div>
 
-<div id="longPressPopup" class="lp-popup" style="display:none;">
 
+    <div class="info-text" style="margin-bottom:15px; text-align:center;">Send 버튼을 누르면 WhatsApp이 열립니다.</div>
+
+        <div id="msgList"></div>
+
+</div>
+
+<div id="longPressPopup" class="lp-popup" style="display:none;">
     <div class="lp-header">기능 선택</div>
     <div class="lp-body">
     <button id="btnToggleBoarding" class="lp-btn" onclick="toggleGroupBoarding()">
@@ -1027,210 +951,15 @@
 </div>
 
 
-</div>
-
 <script>
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDWCwFQhp5jts0xpO-vviTLnZC3a3IO1r0",
-  authDomain: "mrtu-41dd5.firebaseapp.com",
-  projectId: "mrtu-41dd5",
-  storageBucket: "mrtu-41dd5.firebasestorage.app",
-  messagingSenderId: "459957334281",
-  appId: "1:459957334281:web:26fd69626f70ec7da2a3d8",
-  measurementId: "G-8BSZDRDCFN"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
 
 /**
 
  * [전역 상수 및 설정] - 버전 10.8 (Gender Free + FIT)
 
  */
-let toastTimer = null;
-
-function showToast(msg, type) {
-    const toast = document.getElementById('firebaseToast');
-    toast.innerText = msg;
-    toast.style.display = 'block';
-    
-    if (type === 'loading') {
-        toast.style.background = '#FF9800';
-    } else if (type === 'success') {
-        toast.style.background = '#4CAF50';
-    } else {
-        toast.style.background = '#F44336';
-    }
-    
-    clearTimeout(toastTimer);
-    if (type !== 'loading') {
-        toastTimer = setTimeout(() => {
-            toast.style.display = 'none';
-        }, 1500);
-    }
-}
-
-let currentRoom = '';
-
-function getRoomPrefix() {
-
-    return currentRoom === 'General' ? 'bus_' : 'bus_ski_' + currentRoom + '_';
-}
-
-const originalSetItem = localStorage.setItem;
-const originalGetItem = localStorage.getItem;
-const originalRemoveItem = localStorage.removeItem;
-
-localStorage.setItem = function(key, value) {
-    if (key.startsWith('bus_') && key !== 'bus_currentRoom' && key !== 'bus_currentMenu') {
-        if (currentRoom === '') return;
-        const originalKey = key.substring(4);
-        key = getRoomPrefix() + originalKey;
-        
-        if (currentRoom !== 'General') {
-            const firebaseKeys = ['guideName', 'rawData', 'seatMap', 'msgStatus'];
-            if (firebaseKeys.includes(originalKey)) {
-                showToast('☁️ 저장 중...', 'loading');
-                db.ref(currentRoom + '/' + originalKey).set(value)
-                    .then(() => {
-                        showToast('✅ 저장 완료!', 'success');
-                    })
-                    .catch((error) => {
-                        showToast('❌ 저장 실패', 'error');
-                    });
-                return;
-            }
-        }
-    }
-    originalSetItem.call(this, key, value);
-};
-
-
-
-
-localStorage.getItem = function(key) {
-    if (key.startsWith('bus_') && key !== 'bus_currentRoom' && key !== 'bus_currentMenu' && currentRoom !== '') {
-        key = getRoomPrefix() + key.substring(4);
-    }
-    return originalGetItem.call(this, key);
-};
-
-localStorage.removeItem = function(key) {
-    if (key.startsWith('bus_') && key !== 'bus_currentRoom' && key !== 'bus_currentMenu' && currentRoom !== '') {
-        key = getRoomPrefix() + key.substring(4);
-    }
-    originalRemoveItem.call(this, key);
-};
-
-
-function startGeneralTour() {
-    currentRoom = 'General';
-    localStorage.setItem('bus_currentRoom', 'General');
-    localStorage.removeItem('bus_currentMenu');
-    document.getElementById('entryMenu').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    document.querySelector('.v11-title').innerText = "일반 투어";
-    initializeAppData();
-}
-
-
-
-
-function openSkiRooms() {
-    localStorage.setItem('bus_currentMenu', 'SkiRooms');
-    localStorage.removeItem('bus_currentRoom');
-    document.getElementById('entryMenu').style.display = 'none';
-    
-    if (localStorage.getItem('tm_auth_10_8') !== 'true') {
-        document.getElementById('lockScreen').style.display = 'flex';
-    } else {
-        document.getElementById('roomMenu').style.display = 'flex';
-    }
-}
-
-
-
-function exitToMenu() {
-    forceSaveAllData();
-    localStorage.removeItem('bus_currentRoom');
-    document.getElementById('mainApp').style.display = 'none';
-    
-    if(currentRoom === 'General') {
-        localStorage.setItem('bus_currentMenu', 'Entry');
-        document.getElementById('entryMenu').style.display = 'flex';
-    } else {
-        localStorage.setItem('bus_currentMenu', 'SkiRooms');
-        document.getElementById('roomMenu').style.display = 'flex';
-    }
-    currentRoom = '';
-}
-
-
-
-function goBackToEntry() {
-    localStorage.setItem('bus_currentMenu', 'Entry');
-    document.getElementById('roomMenu').style.display = 'none';
-    document.getElementById('entryMenu').style.display = 'flex';
-}
-
-
-
-
-function startSkiTour(room) {
-    currentRoom = room;
-    localStorage.setItem('bus_currentRoom', room);
-    localStorage.removeItem('bus_currentMenu');
-    document.getElementById('roomMenu').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    document.querySelector('.v11-title').innerText = room;
-    initializeAppData();
-}
-
-
-
-
-function initializeAppData() {
-    if (currentRoom !== 'General') {
-        loadFirebaseData(currentRoom);
-    }
-    loadTextInput(); 
-    loadGuideName(); 
-    document.getElementById('specialNotice').value = localStorage.getItem('bus_specialNotice') || "";
-
-
-    const today = new Date(); today.setDate(today.getDate() + 1);
-    const days = ['일','월','화','수','목','금','토'];
-    const dateStr = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')} (${days[today.getDay()]})`;
-    document.getElementById('dateDisplay1').innerText = dateStr;
-    document.getElementById('dateDisplay2').innerText = dateStr;
-    
-    const savedDate = localStorage.getItem('bus_lastDate');
-    if (savedDate) {
-        document.getElementById('vcardDate').value = savedDate;
-    } else {
-        const yymmdd = String(today.getFullYear()).slice(2) + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
-        document.getElementById('vcardDate').value = yymmdd;
-    }
-    
-    const savedTimes = JSON.parse(localStorage.getItem('bus_times') || '{}');
-    if(savedTimes.h) document.getElementById('timeHongdae').value = savedTimes.h;
-    if(savedTimes.m) document.getElementById('timeMyeongdong').value = savedTimes.m;
-    if(savedTimes.d) document.getElementById('timeDongdaemun').value = savedTimes.d;
-    
-    currentSeatMap1 = [];
-    currentSeatMap2 = [];
-    msgListGroups = [];
-    selectedSeat = { busNum: 0, idx: -1 };
-    
-    loadSeatMap();
-}
-
 
 const CONFIG = {
-
 
     BOOTS_YOUTUBE: "https://youtu.be/J9S0q1QKoOY?si=pfaS60b3IJOEBgAG",
 
@@ -3437,33 +3166,6 @@ function saveGuideName() {
 
 function saveSpecialNotice() { localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value); if(msgListGroups.length > 0) refreshDisplay(); }
 
-function loadFirebaseData(room) {
-    const firebaseKeys = ['guideName', 'rawData', 'seatMap', 'msgStatus'];
-    firebaseKeys.forEach(key => {
-        db.ref(room + '/' + key).once('value').then((snapshot) => {
-            const val = snapshot.val();
-            if (val) {
-                if (key === 'guideName') {
-                    document.getElementById('guideNameInput').value = val;
-                    originalSetItem.call(localStorage, getRoomPrefix() + 'guideName', val);
-                } else if (key === 'rawData') {
-                    document.getElementById('rawData').value = val;
-                    originalSetItem.call(localStorage, getRoomPrefix() + 'rawData', val);
-                } else if (key === 'seatMap') {
-                    const data = JSON.parse(val);
-                    currentSeatMap1 = data.map1;
-                    currentSeatMap2 = data.map2;
-                    msgListGroups = data.groups || [];
-                    originalSetItem.call(localStorage, getRoomPrefix() + 'seatMap', val);
-                    refreshDisplay();
-                } else if (key === 'msgStatus') {
-                    originalSetItem.call(localStorage, getRoomPrefix() + 'msgStatus', val);
-                    refreshDisplay();
-                }
-            }
-        });
-    });
-}
 
 
 function loadSeatMap() {
@@ -3498,38 +3200,7 @@ function loadTextInput() { const savedData = localStorage.getItem('bus_rawData')
 
 function loadGuideName() { const savedGuide = localStorage.getItem('bus_guideName'); if(savedGuide) document.getElementById('guideNameInput').value = savedGuide; const savedBus = localStorage.getItem('bus_number'); if(savedBus) document.getElementById('busNumberInput').value = savedBus; }
 
-function clearData() {
-    if(confirm('초기화하시겠습니까?')) {
-        document.getElementById('rawData').value = '';
-        document.getElementById('busNumberInput').value = '';
-        document.getElementById('vcardDate').value = '';
-        document.querySelector('input[name="busSize"][value="44"]').checked = true;
-        
-        localStorage.removeItem('bus_number');
-        localStorage.removeItem('bus_rawData');
-        localStorage.removeItem('bus_size');
-        localStorage.removeItem('bus_seatMap');
-        localStorage.removeItem('bus_lastDate');
-                localStorage.removeItem('bus_msgStatus');
-        
-        if (currentRoom !== 'General') {
-            db.ref(currentRoom).remove();
-        }
-        
-        currentSeatMap1 = [];
-
-        currentSeatMap2 = [];
-        msgListGroups = [];
-        selectedSeat = { busNum: 0, idx: -1 };
-        
-        toggleMap2(false);
-        document.getElementById('paxInfo').innerText = "준비됨";
-        
-        refreshDisplay();
-    }
-}
-
-
+function clearData() { if(confirm('초기화하시겠습니까?')) { document.getElementById('rawData').value = ''; localStorage.removeItem('bus_rawData'); localStorage.removeItem('bus_seatMap'); localStorage.removeItem('bus_msgStatus'); location.reload(); } }
 
 
 
@@ -3777,51 +3448,72 @@ function forceSaveAllData() {
 
 
 function unlock() {
-    const input = document.getElementById('lockInput');
-    if (input.value === '840506') {
-        localStorage.setItem('tm_auth_10_8', 'true');
-        localStorage.setItem('bus_currentMenu', 'SkiRooms');
-        document.getElementById('lockScreen').style.display = 'none';
-        document.getElementById('roomMenu').style.display = 'flex';
-    } else {
-        alert('Wrong Password!');
-        input.value = '';
-        input.focus();
-    }
-}
 
+    const input = document.getElementById('lockInput');
+
+    if (input.value === '840506') {
+
+        localStorage.setItem('tm_auth_10_8', 'true');
+
+        document.getElementById('lockScreen').style.display = 'none';
+
+    } else {
+
+        alert('Wrong Password!');
+
+        input.value = '';
+
+        input.focus();
+
+    }
+
+}
 
 
 
 window.onload = function() {
 
-    const savedRoom = localStorage.getItem('bus_currentRoom');
-    const savedMenu = localStorage.getItem('bus_currentMenu');
+    if (localStorage.getItem('tm_auth_10_8') !== 'true') {
 
-    if (savedRoom && savedRoom !== 'null') {
-        if (savedRoom === 'General') {
-            startGeneralTour();
-        } else {
-            startSkiTour(savedRoom);
-        }
-    } else if (savedMenu === 'SkiRooms') {
-        document.getElementById('entryMenu').style.display = 'none';
-        if (localStorage.getItem('tm_auth_10_8') !== 'true') {
-            document.getElementById('lockScreen').style.display = 'flex';
-        } else {
-            document.getElementById('roomMenu').style.display = 'flex';
-        }
-    } else {
-        document.getElementById('roomMenu').style.display = 'none';
-        document.getElementById('entryMenu').style.display = 'flex';
+        document.getElementById('lockScreen').style.display = 'flex';
+
     }
 
+
+
+    loadTextInput(); loadGuideName(); 
+
+    document.getElementById('specialNotice').value = localStorage.getItem('bus_specialNotice') || "";
+
+
+
+    const today = new Date(); today.setDate(today.getDate() + 1);
+
+    const days = ['일','월','화','수','목','금','토'];
+
+    const dateStr = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')} (${days[today.getDay()]})`;
+
+    document.getElementById('dateDisplay1').innerText = dateStr;
+
+    document.getElementById('dateDisplay2').innerText = dateStr;
+
+    const yymmdd = String(today.getFullYear()).slice(2) + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+
+    document.getElementById('vcardDate').value = yymmdd;
+
+    const savedTimes = JSON.parse(localStorage.getItem('bus_times') || '{}');
+
+    if(savedTimes.h) document.getElementById('timeHongdae').value = savedTimes.h;
+
+    if(savedTimes.m) document.getElementById('timeMyeongdong').value = savedTimes.m;
+
+    if(savedTimes.d) document.getElementById('timeDongdaemun').value = savedTimes.d;
+
+    
+
+    loadSeatMap();
+
 };
-
-
-
-
-
 
 
 

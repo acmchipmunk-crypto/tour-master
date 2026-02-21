@@ -639,17 +639,13 @@
     <button id="resetPwBtn" onclick="resetPassword()">비밀번호 초기화</button>
 </div>
 
-<div id="mainAppScreen" style="display:none;">
-
 <div id="lockScreen" style="display:none;">
-
     <h2 style="margin-bottom:20px;">🔒 비밀번호</h2>
-
     <input type="password" id="lockInput" placeholder="Password" maxlength="6" inputmode="numeric">
-
     <button id="lockBtn" onclick="unlock()">ENTER</button>
-
 </div>
+
+<div id="mainAppScreen" style="display:none;">
 
 
 
@@ -1018,7 +1014,7 @@
  */
 
 const CONFIG = {
-
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxBJvMKvIlVNXd3JYGOmq8CFVvCBR3CZt9Kua6MwuKqASKGwrZltbSEpsMsW7TOHu9E/exec";
     BOOTS_YOUTUBE: "https://youtu.be/J9S0q1QKoOY?si=pfaS60b3IJOEBgAG",
 
     COLORS: {
@@ -1208,20 +1204,22 @@ function enterRoom(roomName) {
     currentScreenMode = 'main';
     saveScreenState();
     document.getElementById('mainRoomTitle').innerText = roomName;
-    
     document.getElementById('entryScreen').style.display = 'none';
     document.getElementById('roomSelectScreen').style.display = 'none';
     document.getElementById('lockScreen').style.display = 'none';
     document.getElementById('mainAppScreen').style.display = 'block';
     document.getElementById('floatingBackBtn').style.display = 'flex';
-
     if (roomName === '일반투어') {
         loadAllDataForRoom();
     } else {
         document.getElementById('paxInfo').innerText = "서버 데이터 불러오는 중...";
-        google.script.run.withSuccessHandler(function(serverData) {
-            if (serverData) {
-                let parsedData = JSON.parse(serverData);
+        fetch(GAS_URL + "?room=" + encodeURIComponent(roomName))
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(result) {
+            if (result.status === 'success' && result.data) {
+                let parsedData = JSON.parse(result.data);
                 for (let key in parsedData) {
                     localStorage.setItem(currentActiveRoom + '_' + key, parsedData[key]);
                 }
@@ -1229,7 +1227,11 @@ function enterRoom(roomName) {
             loadAllDataForRoom();
             document.getElementById('paxInfo').innerText = "준비됨";
             startPolling();
-        }).loadSkiTourData(roomName);
+        })
+        .catch(function(error) {
+            loadAllDataForRoom();
+            document.getElementById('paxInfo').innerText = "통신 에러";
+        });
     }
 }
 
@@ -3365,16 +3367,28 @@ function syncToServer() {
             'bus_specialNotice': localStorage.getItem(currentActiveRoom + '_bus_specialNotice') || '',
             'bus_msgStatus': localStorage.getItem(currentActiveRoom + '_bus_msgStatus') || '{}'
         };
-        google.script.run.saveSkiTourData(currentActiveRoom, JSON.stringify(roomData));
+        fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                roomName: currentActiveRoom,
+                data: JSON.stringify(roomData)
+            })
+        });
     }, 1500);
 }
+
 
 function startPolling() {
     if (currentActiveRoom === '일반투어') return;
     clearInterval(pollTimer);
     pollTimer = setInterval(() => {
-        google.script.run.withSuccessHandler(function(serverData) {
-            if (serverData) {
+        fetch(GAS_URL + "?room=" + encodeURIComponent(currentActiveRoom))
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(result) {
+            if (result.status === 'success' && result.data) {
+                let serverData = result.data;
                 let parsedData = JSON.parse(serverData);
                 let localSeatMap = localStorage.getItem(currentActiveRoom + '_bus_seatMap');
                 if (localSeatMap !== parsedData['bus_seatMap']) {
@@ -3386,8 +3400,8 @@ function startPolling() {
                     window.scrollTo(0, scrollY);
                 }
             }
-        }).loadSkiTourData(currentActiveRoom);
-    }, 3000);
+        });
+    }, 1000);
 }
 
 

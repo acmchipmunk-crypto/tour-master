@@ -1018,7 +1018,6 @@
  */
 
 const CONFIG = {
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxBJvMKvIlVNXd3JYGOmq8CFVvCBR3CZt9Kua6MwuKqASKGwrZltbSEpsMsW7TOHu9E/exec";
 
     BOOTS_YOUTUBE: "https://youtu.be/J9S0q1QKoOY?si=pfaS60b3IJOEBgAG",
 
@@ -1209,22 +1208,20 @@ function enterRoom(roomName) {
     currentScreenMode = 'main';
     saveScreenState();
     document.getElementById('mainRoomTitle').innerText = roomName;
+    
     document.getElementById('entryScreen').style.display = 'none';
     document.getElementById('roomSelectScreen').style.display = 'none';
     document.getElementById('lockScreen').style.display = 'none';
     document.getElementById('mainAppScreen').style.display = 'block';
     document.getElementById('floatingBackBtn').style.display = 'flex';
+
     if (roomName === '일반투어') {
         loadAllDataForRoom();
     } else {
         document.getElementById('paxInfo').innerText = "서버 데이터 불러오는 중...";
-        fetch(GAS_URL + "?room=" + encodeURIComponent(roomName))
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(result) {
-            if (result.status === 'success' && result.data) {
-                let parsedData = JSON.parse(result.data);
+        google.script.run.withSuccessHandler(function(serverData) {
+            if (serverData) {
+                let parsedData = JSON.parse(serverData);
                 for (let key in parsedData) {
                     localStorage.setItem(currentActiveRoom + '_' + key, parsedData[key]);
                 }
@@ -1232,11 +1229,7 @@ function enterRoom(roomName) {
             loadAllDataForRoom();
             document.getElementById('paxInfo').innerText = "준비됨";
             startPolling();
-        })
-        .catch(function(error) {
-            loadAllDataForRoom();
-            document.getElementById('paxInfo').innerText = "통신 에러";
-        });
+        }).loadSkiTourData(roomName);
     }
 }
 
@@ -3372,28 +3365,16 @@ function syncToServer() {
             'bus_specialNotice': localStorage.getItem(currentActiveRoom + '_bus_specialNotice') || '',
             'bus_msgStatus': localStorage.getItem(currentActiveRoom + '_bus_msgStatus') || '{}'
         };
-        fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                roomName: currentActiveRoom,
-                data: JSON.stringify(roomData)
-            })
-        });
+        google.script.run.saveSkiTourData(currentActiveRoom, JSON.stringify(roomData));
     }, 1500);
 }
-
 
 function startPolling() {
     if (currentActiveRoom === '일반투어') return;
     clearInterval(pollTimer);
     pollTimer = setInterval(() => {
-        fetch(GAS_URL + "?room=" + encodeURIComponent(currentActiveRoom))
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(result) {
-            if (result.status === 'success' && result.data) {
-                let serverData = result.data;
+        google.script.run.withSuccessHandler(function(serverData) {
+            if (serverData) {
                 let parsedData = JSON.parse(serverData);
                 let localSeatMap = localStorage.getItem(currentActiveRoom + '_bus_seatMap');
                 if (localSeatMap !== parsedData['bus_seatMap']) {
@@ -3405,8 +3386,8 @@ function startPolling() {
                     window.scrollTo(0, scrollY);
                 }
             }
-        });
-    }, 1000);
+        }).loadSkiTourData(currentActiveRoom);
+    }, 3000);
 }
 
 

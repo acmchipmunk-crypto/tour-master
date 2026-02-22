@@ -335,7 +335,8 @@
 
   .lang-EN { background: #e3f2fd; color: #1565c0; }
 
-  .msg-actions { display: flex; gap: 5px; align-items: center; }
+  .msg-actions { display: grid; grid-template-columns: 45px 45px; gap: 5px; align-items: center; justify-content: center; }
+
 
   .btn-action { width: 45px; height: 45px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; font-size: 10px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; text-align: center; line-height: 1.2; transition: transform 0.1s; }
 
@@ -512,7 +513,7 @@
     z-index: 10000;
     background: white;
     width: 160px; /* 카드보다 큼 */
-    height: 180px; /* 카드 2배 정도 높이 */
+    height: 230px; /* 카드 2배 정도 높이 */
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     display: flex;
@@ -520,6 +521,7 @@
     overflow: hidden;
     border: 2px solid #3f51b5;
 }
+
 
 .lp-header {
     background: #3f51b5;
@@ -575,25 +577,73 @@
     cursor: pointer;
 }
 
-/* [추가] 탑승 완료된 좌석 스타일 (투명도만 적용, 체크 없음) */
 .seat.boarded {
     opacity: 0.7 !important; /* 투명하게 */
     border: 2px solid #333 !important; /* 테두리 강조 */
     /* 색상 유지, 그레이스케일 없음, 체크마크 없음 */
 }
 
+#entryScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 9998; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; overflow-y: auto; }
+#roomSelectScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 9998; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 20px; overflow-y: auto; padding-top: 80px; padding-bottom: 60px; box-sizing: border-box; }
+
+.big-btn { width: 80%; max-width: 300px; padding: 30px; font-size: 32px; font-weight: 900; border: none; border-radius: 15px; cursor: pointer; color: white; box-shadow: 0 8px 15px rgba(0,0,0,0.2); transition: transform 0.1s; }
+.big-btn:active { transform: scale(0.95); }
+.btn-general { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
+.btn-ski { background: linear-gradient(135deg, #2196F3, #1565C0); }
+
+.room-grid { display: flex; flex-direction: column; gap: 12px; width: 90%; max-width: 400px; margin-top: 20px;}
+.room-btn { width: 100%; padding: 20px; font-size: 32px; font-weight: 900; border: none; border-radius: 12px; color: #333; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s; border: 1px solid rgba(0,0,0,0.1); }
+.room-btn:active { transform: scale(0.95); }
+.room-btn:nth-child(1) { background-color: #ffcdd2; } /* A: 파스텔 레드 */
+.room-btn:nth-child(2) { background-color: #ffe0b2; } /* B: 파스텔 오렌지 */
+.room-btn:nth-child(3) { background-color: #fff9c4; } /* C: 파스텔 옐로우 */
+.room-btn:nth-child(4) { background-color: #c8e6c9; } /* D: 파스텔 그린 */
+.room-btn:nth-child(5) { background-color: #b2ebf2; } /* E: 파스텔 시안 */
+.room-btn:nth-child(6) { background-color: #bbdefb; } /* F: 파스텔 블루 */
+.room-btn:nth-child(7) { background-color: #c5cae9; } /* G: 파스텔 인디고 */
+.room-btn:nth-child(8) { background-color: #e1bee7; } /* H: 파스텔 퍼플 */
+
+
+#floatingBackBtn { position: fixed; top: 25px; left: 15px; width: 45px; height: 45px; background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: bold; z-index: 999999 !important; cursor: pointer; display: none; box-shadow: 0 2px 5px rgba(0,0,0,0.3); align-items: center; justify-content: center; flex-direction: column; line-height: 1.2; }
+
+#floatingBackBtn:active { transform: scale(0.95); }
+
+#resetPwBtn { margin-top: 30px; padding: 10px 20px; background: #757575; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
 </style>
+
 
 </head>
 
 <body>
 
+<button id="floatingBackBtn" onclick="goBack()">⬅️<br>뒤로</button>
 
+<div id="entryScreen">
+    <button class="big-btn btn-general" onclick="enterRoom('일반투어')">일반투어</button>
+    <button class="big-btn btn-ski" onclick="checkSkiAuth()">스키투어</button>
+</div>
+
+<div id="roomSelectScreen" style="display:none;">
+    <div style="font-size: 24px; font-weight: 900; color: #333; margin-bottom: 10px;">스키투어 그룹 선택</div>
+    <div class="room-grid">
+        <button class="room-btn" onclick="enterRoom('A')">A</button>
+        <button class="room-btn" onclick="enterRoom('B')">B</button>
+        <button class="room-btn" onclick="enterRoom('C')">C</button>
+        <button class="room-btn" onclick="enterRoom('D')">D</button>
+        <button class="room-btn" onclick="enterRoom('E')">E</button>
+        <button class="room-btn" onclick="enterRoom('F')">F</button>
+        <button class="room-btn" onclick="enterRoom('G')">G</button>
+        <button class="room-btn" onclick="enterRoom('H')">H</button>
+    </div>
+    <button id="resetPwBtn" onclick="resetPassword()">비밀번호 초기화</button>
+</div>
+
+<div id="mainAppScreen" style="display:none;">
 
 <div id="lockScreen" style="display:none;">
 
-    <h2 style="margin-bottom:20px;">🔒 ACCESS LOCKED</h2>
+    <h2 style="margin-bottom:20px;">🔒 비밀번호</h2>
 
     <input type="password" id="lockInput" placeholder="Password" maxlength="6" inputmode="numeric">
 
@@ -605,6 +655,7 @@
 
 <style>
   /* v11 Slim UI 미세 조정 스타일 */
+
   .v11-card { background: white; padding: 4px 12px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 4px; border: 1px solid #e0e4e8; }
   .v11-title { 
       text-align: center; font-size: 20px; font-weight: 900; color: #333; 
@@ -640,7 +691,8 @@
   .priority-display { padding: 2px 4px !important; margin: 2px 0 !important; }
 </style>
 
-<div class="v11-title">📱 미스터 신의 투어마스터 v11</div>
+<div class="v11-title" id="mainRoomTitle" style="font-size: 36px; padding: 15px; letter-spacing: 2px;">일반투어</div>
+
 
 <div class="v11-card">
   <span class="v11-section-label">1. 기본 정보</span>
@@ -811,14 +863,18 @@
 
 <div id="longPressPopup" class="lp-popup" style="display:none;">
     <div class="lp-header">기능 선택</div>
-    <div class="lp-body">
+        <div class="lp-body">
+    <button id="btnToggleTime" class="lp-btn" style="background: #2196F3; margin-bottom: 4px; color: white;" onclick="toggleTimeConfirmed()">
+        연락됨
+    </button>
     <button id="btnToggleBoarding" class="lp-btn" onclick="toggleGroupBoarding()">
         탑승 완료 처리
     </button>
     <button class="lp-btn" style="background: #D32F2F; margin-top: 4px; color: white;" onclick="handleNoShow()">
-        노쇼 안녕 (Delete)
+        노쇼 안녕
     </button>
 </div>
+
 
     <button class="lp-close" onclick="closeLongPopup()">닫기</button>
 </div>
@@ -950,8 +1006,10 @@
 
 </div>
 
+</div>
 
 <script>
+
 
 /**
 
@@ -1073,6 +1131,142 @@ let audioCtx = null;
 let lpTimer = null; // 롱프레스 타이머
 let lpTarget = null; // 롱프레스 대상 정보
 
+let currentActiveRoom = '';
+let currentScreenMode = 'entry'; 
+
+function saveScreenState() {
+    sessionStorage.setItem('currentScreenMode', currentScreenMode);
+    sessionStorage.setItem('currentActiveRoom', currentActiveRoom);
+}
+
+function goBack() {
+    if (currentScreenMode === 'main') {
+        forceSaveAllData();
+        if (currentActiveRoom === '일반투어') {
+            showEntryScreen();
+        } else {
+            showRoomSelectScreen();
+        }
+    } else if (currentScreenMode === 'roomSelect' || currentScreenMode === 'lock') {
+        showEntryScreen();
+    }
+}
+
+function showEntryScreen() {
+    currentScreenMode = 'entry';
+    saveScreenState();
+    document.getElementById('entryScreen').style.display = 'flex';
+    document.getElementById('roomSelectScreen').style.display = 'none';
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('mainAppScreen').style.display = 'none';
+    document.getElementById('floatingBackBtn').style.display = 'none';
+    if (typeof pollTimer !== 'undefined') clearInterval(pollTimer);
+}
+
+
+function checkSkiAuth() {
+    if (localStorage.getItem('tm_auth_10_8') === 'true') {
+        showRoomSelectScreen();
+    } else {
+        showLockScreen();
+    }
+}
+
+function showLockScreen() {
+    currentScreenMode = 'lock';
+    saveScreenState();
+    document.getElementById('entryScreen').style.display = 'none';
+    document.getElementById('roomSelectScreen').style.display = 'none';
+    document.getElementById('lockScreen').style.display = 'flex';
+    document.getElementById('mainAppScreen').style.display = 'none';
+    document.getElementById('floatingBackBtn').style.display = 'flex';
+    document.getElementById('lockInput').value = '';
+    document.getElementById('lockInput').focus();
+}
+
+function showRoomSelectScreen() {
+    currentScreenMode = 'roomSelect';
+    saveScreenState();
+    document.getElementById('entryScreen').style.display = 'none';
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('roomSelectScreen').style.display = 'flex';
+    document.getElementById('mainAppScreen').style.display = 'none';
+    document.getElementById('floatingBackBtn').style.display = 'flex';
+    if (typeof pollTimer !== 'undefined') clearInterval(pollTimer);
+}
+
+
+function resetPassword() {
+    if(confirm("비밀번호를 초기화하시겠습니까? (로컬 저장 정보 삭제)")) {
+        localStorage.removeItem('tm_auth_10_8');
+        showEntryScreen();
+    }
+}
+
+function enterRoom(roomName) {
+    currentActiveRoom = roomName;
+    currentScreenMode = 'main';
+    saveScreenState();
+    document.getElementById('mainRoomTitle').innerText = roomName;
+    
+    document.getElementById('entryScreen').style.display = 'none';
+    document.getElementById('roomSelectScreen').style.display = 'none';
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('mainAppScreen').style.display = 'block';
+    document.getElementById('floatingBackBtn').style.display = 'flex';
+
+    if (roomName === '일반투어') {
+        loadAllDataForRoom();
+    } else {
+        document.getElementById('paxInfo').innerText = "서버 데이터 불러오는 중...";
+        google.script.run.withSuccessHandler(function(serverData) {
+            if (serverData) {
+                let parsedData = JSON.parse(serverData);
+                for (let key in parsedData) {
+                    localStorage.setItem(currentActiveRoom + '_' + key, parsedData[key]);
+                }
+            }
+            loadAllDataForRoom();
+            document.getElementById('paxInfo').innerText = "준비됨";
+            startPolling();
+        }).loadSkiTourData(roomName);
+    }
+}
+
+
+function lsKey(key) {
+    return currentActiveRoom + '_' + key;
+}
+
+function loadAllDataForRoom() {
+    currentSeatMap1 = [];
+    currentSeatMap2 = [];
+    msgListGroups = [];
+    priorityQueue = [];
+    selectedSeat = { busNum: 0, idx: -1 };
+    document.getElementById('busGrid1').innerHTML = '';
+    document.getElementById('busGrid2').innerHTML = '';
+    document.getElementById('pickupSummary1').innerHTML = '준비중...';
+    document.getElementById('pickupSummary2').innerHTML = '준비중...';
+    document.getElementById('captureArea2').style.display = 'none';
+    document.querySelectorAll('#msgList').forEach(el => el.innerHTML = '');
+    document.getElementById('msgSection').style.display = 'none';
+    document.querySelectorAll('.criteria').forEach(chk => chk.checked = false);
+    document.getElementById('priorityView').innerText = "우선순위: 없음";
+    document.getElementById('paxInfo').innerText = "준비됨";
+
+    loadTextInput(); 
+    loadGuideName(); 
+    document.getElementById('specialNotice').value = localStorage.getItem(lsKey('bus_specialNotice')) || "";
+
+    const savedTimes = JSON.parse(localStorage.getItem(lsKey('bus_times')) || '{}');
+    if(savedTimes.h) document.getElementById('timeHongdae').value = savedTimes.h;
+    if(savedTimes.m) document.getElementById('timeMyeongdong').value = savedTimes.m;
+    if(savedTimes.d) document.getElementById('timeDongdaemun').value = savedTimes.d;
+    
+    loadSeatMap();
+}
+
 
 
 
@@ -1082,7 +1276,6 @@ let lpTarget = null; // 롱프레스 대상 정보
 
 // [기원 판별 로직]
 
-// =========================================
 
 function detectOrigin(rawId) {
 
@@ -1736,12 +1929,14 @@ function createGroupsFromEntries(entries) {
             memberShuttleList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isShuttle)),
 
                         isSkiTour: currentGroupMembers.some(m => !m.isSancheoneo),
-            email: rep.email,
+                        email: rep.email,
             originTag: combinedOrigin, 
             options: { lift: gLift, gear: gGear, clothes: gClothes, lesson: gLesson },
-            isBoarded: false, // [확인] 초기값 설정
-            offOptions: []
+            isBoarded: false,
+            offOptions: [],
+            memberNames: [...new Set(currentGroupMembers.map(m => m.name))]
         });
+
 
 
 
@@ -1828,11 +2023,12 @@ function runAI() {
 
     saveTextInput(); saveTimeInput(); saveGuideName();
 
-    localStorage.removeItem('bus_seatMap');
+    localStorage.removeItem(lsKey('bus_seatMap'));
 
     
 
     let raw = document.getElementById('rawData').value;
+
 
     // 따옴표 안에 있는 줄바꿈(\r\n) 뿐만 아니라 탭(\t)도 공백으로 바꿔서 칸 밀림 방지
 raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
@@ -2398,15 +2594,14 @@ function renderSeatContent(el, data, num, busNum) {
     else if (len > 3) fSize = "22px";   
 
     // --- [수정된 부분] 영어 손님일 경우 글자색을 진한 파랑으로 설정 ---
-    let textColor = (data.langContext === 'EN') ? '#000099' : '#333';
-    // ---------------------------------------------------------
+        let textColor = (data.langContext === 'EN') ? '#000099' : '#333';
+    let textDeco = data.isTimeConfirmed ? 'line-through' : 'none';
 
     let originBadgeHtml = getOriginBadgeHtml(data.originTag);
     let cleanNation = data.subInfo ? data.subInfo.replace(/\(.\)/g, '') : "";
     
             let tagsHtml = "";
-        // --- 보드 마크(삼각형) 추가 로직 시작 ---
-    // [추가] 노강일 경우 검은색 큰 삼각형 먼저 그리기 (z-index가 낮아서 뒤로 감)
+    
     if (data.isNoLesson) {
         tagsHtml += `<div class="no-lesson-mark"></div>`;
     }
@@ -2418,9 +2613,6 @@ function renderSeatContent(el, data, num, busNum) {
         tagsHtml += `<div class="ski-mark"></div>`;
     }
 
-
-    // --- 보드 마크(삼각형) 추가 로직 끝 ---
-    
     if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
 if (data.isMoving) tagsHtml += `<span class="day-tag tag-moving">무</span>`;
 if (data.isShuttle) tagsHtml += `<span class="day-tag tag-shuttle">셔</span>`; 
@@ -2433,9 +2625,8 @@ if (data.isSightseeing) tagsHtml += `<span class="day-tag tag-sight">관</span>`
     if (data.paxType === 'D2') tagsHtml += `<span class="day-tag tag-d2">D2</span>`;
     if (data.paxType === 'D3') tagsHtml += `<span class="day-tag tag-d3">D3</span>`;
 
+    el.innerHTML += `<div class="grp-id" style="font-size:${fSize}; color:${textColor}; text-decoration:${textDeco};">${dispNum}</div><div class="info-badge ${data.textClass}">${tagsHtml}${cleanNation}${originBadgeHtml}</div>`;
 
-    // style 속성에 color:${textColor}를 추가했습니다.
-    el.innerHTML += `<div class="grp-id" style="font-size:${fSize}; color:${textColor};">${dispNum}</div><div class="info-badge ${data.textClass}">${tagsHtml}${cleanNation}${originBadgeHtml}</div>`;
   } else el.className += " empty";
 }
 
@@ -2536,9 +2727,10 @@ function refreshDisplay() {
 
     const scrollY = window.scrollY; 
 
-    let rawSize = localStorage.getItem('bus_size') || "44";
+    let rawSize = localStorage.getItem(lsKey('bus_size')) || "44";
 
     const isFit = (rawSize === 'FIT');
+
 
     // FIT면 맵 크기가 busSize, 아니면 44/45
 
@@ -2574,9 +2766,10 @@ function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
 
     
 
-    const statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
+    const statusData = JSON.parse(localStorage.getItem(lsKey('bus_msgStatus')) || '{}');
 
     const guideName = document.getElementById('guideNameInput').value || "Mr. Shin";
+
 
     const busNo = document.getElementById('busNumberInput').value || "";
 
@@ -2667,19 +2860,20 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
 
 
-            if(g.langContext === 'CN') {
+                        if(g.langContext === 'CN') {
 
-                langTag = `<span class="lang-tag lang-CN">中文(${dayLabel})</span>`;
+                langTag = "";
 
                 msgText = `[${dayLabel}/- ${guideName}]\n${groupLine}${seatLine}\n1. 退房 (11:00 前)\n*行李寄放一楼大厅 \n⚠️ 迟交罚款 : 10,000 / 30分\n\n2. Klook 休息室 (10:00)\n👉 付款 & 领取缆车票 \n\n${step3_CN}\n\n${priceList_CN}`;
 
             } else {
 
-                langTag = `<span class="lang-tag lang-EN">ENG(${dayLabel})</span>`;
+                langTag = "";
 
                 msgText = `[${dayLabel}/Return Guide - ${guideName}]\n${groupLine}${seatLine}\n1. Check-out (Until 11:00)\n*Leave bags at Lobby\n⚠️ Late Penalty: 10,000 KRW / 30min\n\n2. Klook Lounge (10:00)\n👉 Payment & Get Lift Card\n\n${step3_EN}\n\n${priceList_EN}`;
 
             }
+
 
         } 
 
@@ -2768,10 +2962,7 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
         
 
-                        let extraTags = "";
-if (g.isHot) extraTags += `<span class="day-tag tag-hot" style="margin-left:5px; color: black;">H</span>`;
-if (g.isMoving) extraTags += `<span class="day-tag tag-moving" style="margin-left:5px; color: black;">무</span>`;
-if (g.isShuttle) extraTags += `<span class="day-tag tag-shuttle" style="margin-left:5px; color: black;">셔</span>`;
+                                            let extraTags = "";
 if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin-left:5px;">[D1]</span>`;
 
         if (g.paxType === 'D2') extraTags += `<span class="day-tag tag-d2" style="margin-left:5px;">[D2]</span>`;
@@ -2779,19 +2970,24 @@ if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin
 
         if (g.paxType === 'D3') extraTags += `<span class="day-tag tag-d3" style="margin-left:5px;">[D3]</span>`;
 
+
         
 
         let emailBtnHtml = g.email ? `<div class="btn-action btn-copy-mail" onclick="copyAndOpen(this, '${g.email}', 'mail')">Mail<br>Copy</div>` : "";
 
 
 
-        let uiGroupNum = g.msgNum.replace(/[a-zA-Z]/g, '');
+                let uiGroupNum = g.msgNum.replace(/[a-zA-Z]/g, '');
 
-
+        let namesHtml = "";
+        if (g.memberNames && g.memberNames.length > 0) {
+            namesHtml = g.memberNames.map(n => `<b>[${n}]</b>`).join('<br>');
+        }
 
                 let card = document.createElement('div'); card.className = 'msg-card';
 
                 let optionHtml = "";
+
         if (g.isSkiTour) {
             let pickupColor = groupBgColor;
             let gid = g.repNum;
@@ -2817,16 +3013,18 @@ if (g.paxType === 'D1') extraTags += `<span class="day-tag tag-d1" style="margin
 
 
         card.innerHTML = `
-    <div class="msg-check-area">
+     <div class="msg-check-area">
         <div class="check-box-wrapper"><label class="msg-check-label label-sent">연락함</label><input type="checkbox" class="msg-check-input chk-sent" onchange="updateMsgStatus('${gid}', 'contacted', this.checked, null)" ${isContacted ? 'checked' : ''}></div>
         <div class="check-box-wrapper"><label class="msg-check-label label-connected">연락됨</label><input type="checkbox" class="msg-check-input chk-conn" onchange="updateMsgStatus('${gid}', 'connected', this.checked, null)" ${isConnected ? 'checked' : ''}></div>
     </div>
-    <div class="msg-info">
-        <div class="msg-group-row"><span class="msg-group" style="background-color: ${groupBgColor}; color: ${groupTextColor};">${uiGroupNum}</span>${langTag}${extraTags}</div>
+        <div class="msg-info">
+        <div class="msg-group-row"><span class="msg-group" style="background-color: ${groupBgColor}; color: ${groupTextColor};">${uiGroupNum}</span>${getOriginBadgeHtml(g.originTag)}${langTag}${extraTags}</div>
         <div class="msg-seats">Seat: ${seatStr}</div>
-        <input type="text" class="msg-memo-input" placeholder="비고" value="${memoText}" oninput="updateMsgStatus('${gid}', null, null, this.value)">
+        <div style="font-size: 18px; margin-top: 5px; line-height: 1.4; color: #333;">${namesHtml}</div>
         <div class="hidden-msg">${msgText}</div>
     </div>
+
+
     <div class="msg-actions">
         <a href="${waLink}" target="_blank" class="${waBtnClass}">Send<br>WA</a>
         <div class="btn-action btn-copy-body" onclick="copyMessageBody(this)">본문<br>Copy</div>
@@ -2936,7 +3134,7 @@ function getAppIconHtml(rawMsg, appType) {
 
 function updateMsgStatus(gid, type, checked, memo) {
 
-    let statusData = JSON.parse(localStorage.getItem('bus_msgStatus') || '{}');
+    let statusData = JSON.parse(localStorage.getItem(lsKey('bus_msgStatus')) || '{}');
 
     if(!statusData[gid]) statusData[gid] = { contacted: false, connected: false, memo: "" };
 
@@ -2946,9 +3144,11 @@ function updateMsgStatus(gid, type, checked, memo) {
 
     if(memo !== null) statusData[gid].memo = memo;
 
-    localStorage.setItem('bus_msgStatus', JSON.stringify(statusData));
-
+    localStorage.setItem(lsKey('bus_msgStatus'), JSON.stringify(statusData));
+    syncToServer();
 }
+
+
 
 
 
@@ -2992,11 +3192,14 @@ function manualAddGroup() {
 
             isSancheoneo: isSancheoneoMode, isHot: false, email: "",
 
-            originTag: "(현)", 
+                        originTag: "(현)", 
 
-            options: { lift: false, gear: false, clothes: false, lesson: false }
+            options: { lift: false, gear: false, clothes: false, lesson: false },
+
+            memberNames: ["Manual Guest"]
 
         };
+
 
         msgListGroups.push(targetGroup);
 
@@ -3144,33 +3347,93 @@ function manualBatchAdd() {
     refreshDisplay();
 }
 
+let syncTimer = null;
+let pollTimer = null;
 
-
-function saveSeatMap() { localStorage.setItem('bus_seatMap', JSON.stringify({ map1: currentSeatMap1, map2: currentSeatMap2, groups: msgListGroups })); }
-
-function checkDateChange() { localStorage.setItem('bus_lastDate', document.getElementById('vcardDate').value); }
-
-function saveTextInput() { localStorage.setItem('bus_rawData', document.getElementById('rawData').value); localStorage.setItem('bus_size', document.querySelector('input[name="busSize"]:checked').value); }
-
-function saveTimeInput() { const times = { h: document.getElementById('timeHongdae').value, m: document.getElementById('timeMyeongdong').value, d: document.getElementById('timeDongdaemun').value }; localStorage.setItem('bus_times', JSON.stringify(times)); }
-
-function saveGuideName() { 
-
-    localStorage.setItem('bus_guideName', document.getElementById('guideNameInput').value);
-
-    localStorage.setItem('bus_number', document.getElementById('busNumberInput').value);
-
-    if(msgListGroups.length > 0) refreshDisplay(); // 변경 시 메시지 업데이트
-
+function syncToServer() {
+    if (currentActiveRoom === '일반투어') return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => {
+        let roomData = {
+            'bus_seatMap': localStorage.getItem(currentActiveRoom + '_bus_seatMap') || '',
+            'bus_lastDate': localStorage.getItem(currentActiveRoom + '_bus_lastDate') || '',
+            'bus_rawData': localStorage.getItem(currentActiveRoom + '_bus_rawData') || '',
+            'bus_size': localStorage.getItem(currentActiveRoom + '_bus_size') || '44',
+            'bus_times': localStorage.getItem(currentActiveRoom + '_bus_times') || '{}',
+            'bus_guideName': localStorage.getItem(currentActiveRoom + '_bus_guideName') || '',
+            'bus_number': localStorage.getItem(currentActiveRoom + '_bus_number') || '',
+            'bus_specialNotice': localStorage.getItem(currentActiveRoom + '_bus_specialNotice') || '',
+            'bus_msgStatus': localStorage.getItem(currentActiveRoom + '_bus_msgStatus') || '{}'
+        };
+        // 구글 스크립트의 saveSkiTourData 함수를 직접 호출합니다.
+        google.script.run.saveSkiTourData(currentActiveRoom, JSON.stringify(roomData));
+    }, 1500); // 1.5초 후 저장
 }
 
-function saveSpecialNotice() { localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value); if(msgListGroups.length > 0) refreshDisplay(); }
+
+function startPolling() {
+    if (currentActiveRoom === '일반투어') return;
+    clearInterval(pollTimer);
+    pollTimer = setInterval(() => {
+        google.script.run.withSuccessHandler(function(serverData) {
+            if (serverData) {
+                let parsedData = JSON.parse(serverData);
+                let localSeatMap = localStorage.getItem(currentActiveRoom + '_bus_seatMap');
+                if (localSeatMap !== parsedData['bus_seatMap']) {
+                    for (let key in parsedData) {
+                        localStorage.setItem(currentActiveRoom + '_' + key, parsedData[key]);
+                    }
+                    const scrollY = window.scrollY;
+                    loadAllDataForRoom();
+                    window.scrollTo(0, scrollY);
+                }
+            }
+        }).loadSkiTourData(currentActiveRoom);
+    }, 1000);
+}
+
+
+function saveSeatMap() { 
+    localStorage.setItem(lsKey('bus_seatMap'), JSON.stringify({ map1: currentSeatMap1, map2: currentSeatMap2, groups: msgListGroups })); 
+    syncToServer();
+}
+
+function checkDateChange() { 
+    localStorage.setItem(lsKey('bus_lastDate'), document.getElementById('vcardDate').value); 
+    syncToServer();
+}
+
+function saveTextInput() { 
+    localStorage.setItem(lsKey('bus_rawData'), document.getElementById('rawData').value); 
+    localStorage.setItem(lsKey('bus_size'), document.querySelector('input[name="busSize"]:checked').value); 
+    syncToServer();
+}
+
+function saveTimeInput() { 
+    const times = { h: document.getElementById('timeHongdae').value, m: document.getElementById('timeMyeongdong').value, d: document.getElementById('timeDongdaemun').value }; 
+    localStorage.setItem(lsKey('bus_times'), JSON.stringify(times)); 
+    syncToServer();
+}
+
+function saveGuideName() { 
+    localStorage.setItem(lsKey('bus_guideName'), document.getElementById('guideNameInput').value);
+    localStorage.setItem(lsKey('bus_number'), document.getElementById('busNumberInput').value);
+    if(msgListGroups.length > 0) refreshDisplay(); 
+    syncToServer();
+}
+
+function saveSpecialNotice() { 
+    localStorage.setItem(lsKey('bus_specialNotice'), document.getElementById('specialNotice').value); 
+    if(msgListGroups.length > 0) refreshDisplay(); 
+    syncToServer();
+}
+
 
 
 
 function loadSeatMap() {
 
-    const saved = localStorage.getItem('bus_seatMap');
+    const saved = localStorage.getItem(lsKey('bus_seatMap'));
 
     if (saved) { 
 
@@ -3196,18 +3459,18 @@ function loadSeatMap() {
 
 }
 
-function loadTextInput() { const savedData = localStorage.getItem('bus_rawData'); if(savedData) document.getElementById('rawData').value = savedData; const savedSize = localStorage.getItem('bus_size'); if(savedSize) { const radios = document.getElementsByName('busSize'); for(let r of radios) { if(r.value === savedSize) r.checked = true; } } }
+function loadTextInput() { const savedData = localStorage.getItem(lsKey('bus_rawData')); if(savedData) document.getElementById('rawData').value = savedData; const savedSize = localStorage.getItem(lsKey('bus_size')); if(savedSize) { const radios = document.getElementsByName('busSize'); for(let r of radios) { if(r.value === savedSize) r.checked = true; } } else { document.querySelector('input[name="busSize"][value="44"]').checked = true; } }
 
-function loadGuideName() { const savedGuide = localStorage.getItem('bus_guideName'); if(savedGuide) document.getElementById('guideNameInput').value = savedGuide; const savedBus = localStorage.getItem('bus_number'); if(savedBus) document.getElementById('busNumberInput').value = savedBus; }
+function loadGuideName() { const savedGuide = localStorage.getItem(lsKey('bus_guideName')); if(savedGuide) document.getElementById('guideNameInput').value = savedGuide; const savedBus = localStorage.getItem(lsKey('bus_number')); if(savedBus) document.getElementById('busNumberInput').value = savedBus; }
 
 function clearData() {
     if(confirm('초기화하시겠습니까?')) {
         document.getElementById('rawData').value = '';
         document.querySelector('input[name="busSize"][value="44"]').checked = true;
-        localStorage.removeItem('bus_rawData');
-        localStorage.removeItem('bus_size');
-        localStorage.removeItem('bus_seatMap');
-        localStorage.removeItem('bus_msgStatus');
+        localStorage.removeItem(lsKey('bus_rawData'));
+        localStorage.removeItem(lsKey('bus_size'));
+        localStorage.removeItem(lsKey('bus_seatMap'));
+        localStorage.removeItem(lsKey('bus_msgStatus'));
         currentSeatMap1 = [];
         currentSeatMap2 = [];
         msgListGroups = [];
@@ -3223,6 +3486,7 @@ function clearData() {
         document.querySelectorAll('.criteria').forEach(chk => chk.checked = false);
         document.getElementById('priorityView').innerText = "우선순위: 없음";
         document.getElementById('paxInfo').innerText = "준비됨";
+        syncToServer();
     }
 }
 
@@ -3462,16 +3726,14 @@ function downloadVCard() {
 
 
 function forceSaveAllData() {
-
+    if(currentScreenMode !== 'main') return;
     try {
-
         saveTextInput(); saveGuideName(); saveTimeInput(); checkDateChange();
-
-        localStorage.setItem('bus_specialNotice', document.getElementById('specialNotice').value);
-
+        localStorage.setItem(lsKey('bus_specialNotice'), document.getElementById('specialNotice').value);
+        syncToServer();
     } catch (e) { console.log("Safe Save:", e); }
-
 }
+
 
 
 
@@ -3483,7 +3745,7 @@ function unlock() {
 
         localStorage.setItem('tm_auth_10_8', 'true');
 
-        document.getElementById('lockScreen').style.display = 'none';
+        showRoomSelectScreen();
 
     } else {
 
@@ -3501,20 +3763,6 @@ function unlock() {
 
 window.onload = function() {
 
-    if (localStorage.getItem('tm_auth_10_8') !== 'true') {
-
-        document.getElementById('lockScreen').style.display = 'flex';
-
-    }
-
-
-
-    loadTextInput(); loadGuideName(); 
-
-    document.getElementById('specialNotice').value = localStorage.getItem('bus_specialNotice') || "";
-
-
-
     const today = new Date(); today.setDate(today.getDate() + 1);
 
     const days = ['일','월','화','수','목','금','토'];
@@ -3529,19 +3777,22 @@ window.onload = function() {
 
     document.getElementById('vcardDate').value = yymmdd;
 
-    const savedTimes = JSON.parse(localStorage.getItem('bus_times') || '{}');
 
-    if(savedTimes.h) document.getElementById('timeHongdae').value = savedTimes.h;
-
-    if(savedTimes.m) document.getElementById('timeMyeongdong').value = savedTimes.m;
-
-    if(savedTimes.d) document.getElementById('timeDongdaemun').value = savedTimes.d;
-
+    let savedMode = sessionStorage.getItem('currentScreenMode');
+    let savedRoom = sessionStorage.getItem('currentActiveRoom');
     
-
-    loadSeatMap();
+    if (savedMode === 'main' && savedRoom) {
+        enterRoom(savedRoom);
+    } else if (savedMode === 'roomSelect') {
+        checkSkiAuth();
+    } else if (savedMode === 'lock') {
+        showLockScreen();
+    } else {
+        showEntryScreen();
+    }
 
 };
+
 
 
 
@@ -3598,24 +3849,33 @@ function openLongPopup(el, data, busNum) {
     lpTarget = { 
         repNum: data.repNum, 
         currentStatus: data.isBoarded || false,
+        timeStatus: data.isTimeConfirmed || false,
         busNum: busNum,
         seatIdx: parseInt(el.dataset.idx)
     };
     
     const popup = document.getElementById('longPressPopup');
     const btn = document.getElementById('btnToggleBoarding');
+    const btnTime = document.getElementById('btnToggleTime');
     
-    // 버튼 텍스트/색상 설정 (상태에 따라 변경)
     if (lpTarget.currentStatus) {
-        btn.innerText = "탑승 취소 (Uncheck)";
+        btn.innerText = "탑승 취소";
         btn.classList.add('cancel-mode');
     } else {
-        btn.innerText = "탑승 완료 (Check)";
+        btn.innerText = "탑승 완료";
         btn.classList.remove('cancel-mode');
     }
 
-    // 팝업 위치 (카드 중앙 위쪽)
+    if (lpTarget.timeStatus) {
+        btnTime.innerText = "연락됨 취소";
+        btnTime.classList.add('cancel-mode');
+    } else {
+        btnTime.innerText = "연락됨";
+        btnTime.classList.remove('cancel-mode');
+    }
+
     const rect = el.getBoundingClientRect();
+
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
     popup.style.top = (rect.top + scrollTop - 50) + 'px'; 
     popup.style.left = (rect.left + rect.width/2 - 80) + 'px'; 
@@ -3650,6 +3910,24 @@ function toggleGroupBoarding() {
     saveSeatMap(); // 저장
     refreshDisplay(); // 화면 갱신
     closeLongPopup(); // 팝업 닫기
+}
+function toggleTimeConfirmed() {
+    if (!lpTarget) return;
+    
+    const targetRep = lpTarget.repNum;
+    const newStatus = !lpTarget.timeStatus;
+    
+    [currentSeatMap1, currentSeatMap2].forEach(map => {
+        map.forEach(seat => {
+            if (seat && seat.repNum === targetRep) {
+                seat.isTimeConfirmed = newStatus;
+            }
+        });
+    });
+
+    saveSeatMap();
+    refreshDisplay();
+    closeLongPopup();
 }
 
 function handleNoShow() {

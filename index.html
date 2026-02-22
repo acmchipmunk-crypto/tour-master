@@ -3328,20 +3328,51 @@ function manualBatchAdd() {
     const busSize = isFit ? (currentSeatMap1.length - 1) : parseInt(busSizeVal);
     const seatSequence = generateSeatSequence(999, busSize, isFit);
 
-    newGroups.forEach(grp => {
+        newGroups.forEach(grp => {
         grp.color = getPickColor(grp);
         setGroupMeta(grp);
         msgListGroups.push(grp);
-
         let seatedCount = 0;
-        for (let sNum of seatSequence) {
-            if (seatedCount >= grp.count) break;
-            if (currentSeatMap1[sNum] === null) {
-                currentSeatMap1[sNum] = { ...grp };
-                seatedCount++;
+        if (grp.paxType === 'D2' || grp.paxType === 'D3') {
+            toggleMap2(true);
+            if (!grp.isStay) {
+                for (let sNum of seatSequence) {
+                    if (seatedCount >= grp.count) break;
+                    if (currentSeatMap2[sNum] === null) {
+                        currentSeatMap2[sNum] = { ...grp };
+                        seatedCount++;
+                    }
+                }
+            }
+        } else {
+            for (let sNum of seatSequence) {
+                if (seatedCount >= grp.count) break;
+                if (currentSeatMap1[sNum] === null) {
+                    currentSeatMap1[sNum] = { ...grp };
+                    if (grp.paxType === 'General') {
+                        if (currentSeatMap2[sNum] === null) {
+                            let cloned = { ...grp };
+                            cloned.color = '#e0e0e0';
+                            cloned.isSynced = true;
+                            currentSeatMap2[sNum] = cloned;
+                        } else {
+                            for (let i of seatSequence) {
+                                if (currentSeatMap2[i] === null) {
+                                    let cloned = { ...grp };
+                                    cloned.color = '#e0e0e0';
+                                    cloned.isSynced = true;
+                                    currentSeatMap2[i] = cloned;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    seatedCount++;
+                }
             }
         }
     });
+
 
     document.getElementById('manualBatchData').value = "";
     refreshDisplay();

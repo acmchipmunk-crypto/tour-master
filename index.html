@@ -2933,13 +2933,14 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 }
 
         
-        if (g.isSkiTour && g.paxType !== 'D2' && g.paxType !== 'D3') {
+                if ((g.isSki || g.isBoard) && g.paxType !== 'D2' && g.paxType !== 'D3') {
     if (g.langContext === 'CN') {
         msgText += `\n\n👟 請確認您的鞋子尺寸 (毫米):\nacmchipmunk-crypto.github.io/t/s.html`;
     } else {
         msgText += `\n\n👟 You must check your shoe size (millimeter):\nacmchipmunk-crypto.github.io/t/s.html`;
     }
 }
+
 
 
 

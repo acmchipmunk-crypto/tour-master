@@ -3321,10 +3321,13 @@ function manualDelGroup() {
 }
 
 function manualBatchAdd() {
-    const rawBatch = document.getElementById('manualBatchData').value.trim();
+    let rawBatch = document.getElementById('manualBatchData').value.trim();
     if (!rawBatch) return;
 
+    rawBatch = rawBatch.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
+
     const rawLower = rawBatch.toLowerCase();
+
     const isGlobalSki = rawLower.includes('ski') || rawLower.includes('snowboard') || rawLower.includes('스키') || rawLower.includes('스노우');
     const lines = rawBatch.split('\n');
     

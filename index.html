@@ -2594,10 +2594,13 @@ function renderSeatContent(el, data, num, busNum) {
     else if (len > 3) fSize = "22px";   
 
     // --- [수정된 부분] 영어 손님일 경우 글자색을 진한 파랑으로 설정 ---
-        let textColor = (data.langContext === 'EN') ? '#000099' : '#333';
-    let textDeco = data.isTimeConfirmed ? 'line-through' : 'none';
+            let textColor = (data.langContext === 'EN') ? '#000099' : '#333';
+    let statusDataForDeco = JSON.parse(localStorage.getItem(lsKey('bus_msgStatus')) || '{}');
+    let isConnectedDeco = statusDataForDeco[data.repNum]?.connected || false;
+    let textDeco = isConnectedDeco ? 'line-through #CCA300' : 'none';
 
     let originBadgeHtml = getOriginBadgeHtml(data.originTag);
+
     let cleanNation = data.subInfo ? data.subInfo.replace(/\(.\)/g, '') : "";
     
             let tagsHtml = "";
@@ -3147,7 +3150,17 @@ function updateMsgStatus(gid, type, checked, memo) {
 
     localStorage.setItem(lsKey('bus_msgStatus'), JSON.stringify(statusData));
     syncToServer();
+
+    if(type === 'connected') {
+        const scrollY = window.scrollY;
+        let rawSize = localStorage.getItem(lsKey('bus_size')) || "44";
+        const isFit = (rawSize === 'FIT');
+        let busSize = isFit ? (currentSeatMap1.length - 1) : parseInt(rawSize);
+        redrawAll(busSize, isFit);
+        window.scrollTo(0, scrollY);
+    }
 }
+
 
 
 
@@ -3881,10 +3894,11 @@ function openLongPopup(el, data, busNum) {
     lpTarget = { 
         repNum: data.repNum, 
         currentStatus: data.isBoarded || false,
-        timeStatus: data.isTimeConfirmed || false,
+        timeStatus: JSON.parse(localStorage.getItem(lsKey('bus_msgStatus')) || '{}')[data.repNum]?.connected || false,
         busNum: busNum,
         seatIdx: parseInt(el.dataset.idx)
     };
+
     
     const popup = document.getElementById('longPressPopup');
     const btn = document.getElementById('btnToggleBoarding');
@@ -3949,18 +3963,18 @@ function toggleTimeConfirmed() {
     const targetRep = lpTarget.repNum;
     const newStatus = !lpTarget.timeStatus;
     
-    [currentSeatMap1, currentSeatMap2].forEach(map => {
-        map.forEach(seat => {
-            if (seat && seat.repNum === targetRep) {
-                seat.isTimeConfirmed = newStatus;
-            }
-        });
-    });
+    let statusData = JSON.parse(localStorage.getItem(lsKey('bus_msgStatus')) || '{}');
+    if(!statusData[targetRep]) {
+        statusData[targetRep] = { contacted: false, connected: false, memo: "" };
+    }
+    statusData[targetRep].connected = newStatus;
+    localStorage.setItem(lsKey('bus_msgStatus'), JSON.stringify(statusData));
+    syncToServer();
 
-    saveSeatMap();
     refreshDisplay();
     closeLongPopup();
 }
+
 
 function handleNoShow() {
     // 롱프레스 타겟이 없으면 실행 안 함

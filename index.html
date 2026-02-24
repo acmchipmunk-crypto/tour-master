@@ -1634,9 +1634,12 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
 
 
 
-    let firstCol = parts[0] || "";
+                let firstCol = parts[0] || "";
 
-    if (firstCol === 'No.' || firstCol.includes('예약번호') || firstCol.toLowerCase().startsWith('total') || firstCol.includes('엑셀')) return null;
+    if (firstCol === 'No.' || firstCol.includes('예약번호') || firstCol.toLowerCase().startsWith('total') || firstCol.includes('엑셀') || line.includes('FALSE') || parts.filter(p => p.trim() !== '' && p.trim() !== '0').length < 3) return null;
+
+
+
 
 
 

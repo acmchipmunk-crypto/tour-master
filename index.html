@@ -2597,7 +2597,7 @@ function renderSeatContent(el, data, num, busNum) {
     else if (len > 3) fSize = "22px";   
 
     // --- [수정된 부분] 영어 손님일 경우 글자색을 진한 파랑으로 설정 ---
-            let textColor = (data.langContext === 'EN') ? '#000099' : '#333';
+            let textColor = (data.langContext === 'EN') ? '#0055CC' : '#333';
     let statusDataForDeco = JSON.parse(localStorage.getItem(lsKey('bus_msgStatus')) || '{}');
     let isConnectedDeco = statusDataForDeco[data.repNum]?.connected || false;
     let textDeco = isConnectedDeco ? 'line-through #CCA300' : 'none';
@@ -2806,7 +2806,7 @@ function renderMessages(allGroups, seatMap1, seatMap2, isFit) {
     allGroups.forEach((g, idx) => {
     
             let groupBgColor = getPickColor(g);
-        let groupTextColor = (g.langContext === 'EN') ? '#000099' : '#333';
+        let groupTextColor = (g.langContext === 'EN') ? '#3333FF' : '#333';
 
 
         let seatStr = ""; let targetMap = (g.paxType === 'D2' || g.paxType === 'D3') ? seatMap2 : seatMap1;

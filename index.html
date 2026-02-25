@@ -242,6 +242,8 @@
 .tag-shuttle { background-color: #8e8ebf; border: 1px solid white; font-weight:900; color: black; }
 .tag-sled { background-color: #81d4fa; border: 1px solid white; font-weight:900; color: black; }
 .tag-sight { background-color: #a5d6a7; border: 1px solid white; font-weight:900; color: black; }
+.tag-best { background-color: #ccff00; border: 1px solid white; font-weight:900; color: black; }
+
 
 
 
@@ -1765,7 +1767,7 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
     let isSightseeing = (line.includes('관광'));
     let isSled = (line.includes('스노우힐'));
     let isShuttle = (line.includes('셔틀'));
-  
+  let isBest = (line.includes('[BEST]'));
     let lowerP = productName.toLowerCase();
 
 
@@ -1815,10 +1817,11 @@ function parseRawDataLine(line, originalOrder, isGlobalSki, headerMap) {
       phone: parsedInfo.fullNumber, 
       count: count, location: location, note: note,
       country: parsedInfo.country, langContext: langContext, gender: gender, appType: appType, messenger: messengerCol, isGrouped: false,
-                  paxType: paxType, isStay: isStay, isBoard: isBoard, isSki: isSki, isNoLesson: isNoLesson,
-      isSancheoneo: !isSkiTour, isHot: isHot, isMoving: isMoving, isChair: isChair, isSightseeing: isSightseeing, isSled: isSled, isShuttle: isShuttle, email: emailAddr,
+                        paxType: paxType, isStay: isStay, isBoard: isBoard, isSki: isSki, isNoLesson: isNoLesson,
+      isSancheoneo: !isSkiTour, isHot: isHot, isMoving: isMoving, isChair: isChair, isSightseeing: isSightseeing, isSled: isSled, isShuttle: isShuttle, isBest: isBest, email: emailAddr,
 
       originTag: originTag, 
+
 
       options: { lift: optLift, gear: optGear, clothes: optClothes, lesson: optLesson }
     };
@@ -1917,9 +1920,12 @@ function createGroupsFromEntries(entries) {
             isSancheoneo: rep.isSancheoneo, 
 
 
-            isHot: currentGroupMembers.some(m => m.isHot),
+                        isHot: currentGroupMembers.some(m => m.isHot),
             memberHotList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isHot)),
+            isBest: currentGroupMembers.some(m => m.isBest),
+            memberBestList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isBest)),
             isMoving: currentGroupMembers.some(m => m.isMoving),
+
             memberMovingList: currentGroupMembers.flatMap(m => Array(m.count).fill(m.isMoving)),
             isChair: currentGroupMembers.some(m => m.isChair),
             memberChairCount: currentGroupMembers.reduce((sum, m) => sum + (m.isChair ? m.count : 0), 0),
@@ -2180,23 +2186,27 @@ raw = raw.replace(/"([^"]*)"/g, (match, p1) => p1.replace(/[\r\n\t]+/g, ' '));
                                                 let individualBoard = (grp.memberBoardList && grp.memberBoardList[i]) ? true : false;
                 let individualSki = (grp.memberSkiList && grp.memberSkiList[i]) ? true : false;
                 let individualNoLesson = (grp.memberNoLessonList && grp.memberNoLessonList[i]) ? true : false;
-                let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
+                                let individualHot = (grp.memberHotList && grp.memberHotList[i]) ? true : false;
+                let individualBest = (grp.memberBestList && grp.memberBestList[i]) ? true : false;
 
                 let individualMoving = (grp.memberMovingList && grp.memberMovingList[i]) ? true : false;
+
 
                 let individualShuttle = (grp.memberShuttleList && grp.memberShuttleList[i]) ? true : false;
                 let individualSled = (grp.memberSledList && grp.memberSledList[i]) ? true : false;
                 let individualSight = (grp.memberSightseeingList && grp.memberSightseeingList[i]) ? true : false;
 
                 // 해당 좌석(seatNum)에 개별 속성을 부여하여 셔틀 손님에게 보드 마크가 붙지 않게 합니다.
-                                                currentSeatMap1[seatNum] = { 
+                                                                                                currentSeatMap1[seatNum] = { 
                     ...grp, 
                     isBoard: individualBoard,
                     isSki: individualSki,
                     isNoLesson: individualNoLesson,
                     isHot: individualHot, 
+                    isBest: individualBest,
 
                     isMoving: individualMoving, 
+
 
                     isShuttle: individualShuttle,
                     isSled: individualSled,
@@ -2620,7 +2630,9 @@ function renderSeatContent(el, data, num, busNum) {
     }
 
     if (data.isHot) tagsHtml += `<span class="day-tag tag-hot">H</span>`;
+if (data.isBest) tagsHtml += `<span class="day-tag tag-best">노리</span>`;
 if (data.isMoving) tagsHtml += `<span class="day-tag tag-moving">무</span>`;
+
 if (data.isShuttle) tagsHtml += `<span class="day-tag tag-shuttle">셔</span>`; 
 if (data.isSled) tagsHtml += `<span class="day-tag tag-sled">썰</span>`;
 if (data.isSightseeing) tagsHtml += `<span class="day-tag tag-sight">관</span>`;

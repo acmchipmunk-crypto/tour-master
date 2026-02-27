@@ -622,9 +622,11 @@
 <button id="floatingBackBtn" onclick="goBack()">⬅️<br>뒤로</button>
 
 <div id="entryScreen">
-    <button class="big-btn btn-general" onclick="enterRoom('일반투어')">일반투어</button>
+    <button class="big-btn btn-general" onclick="enterRoom('일반투어 (가)')">일반투어 (가)</button>
+    <button class="big-btn btn-general" style="margin-top: 15px;" onclick="enterRoom('일반투어 (나)')">일반투어 (나)</button>
     <button class="big-btn btn-ski" onclick="checkSkiAuth()">스키투어</button>
 </div>
+
 
 <div id="roomSelectScreen" style="display:none;">
     <div style="font-size: 24px; font-weight: 900; color: #333; margin-bottom: 10px;">스키투어 그룹 선택</div>
@@ -1144,7 +1146,7 @@ function saveScreenState() {
 function goBack() {
     if (currentScreenMode === 'main') {
         forceSaveAllData();
-        if (currentActiveRoom === '일반투어') {
+        if (currentActiveRoom === '일반투어 (가)' || currentActiveRoom === '일반투어 (나)') {
             showEntryScreen();
         } else {
             showRoomSelectScreen();
@@ -1153,6 +1155,7 @@ function goBack() {
         showEntryScreen();
     }
 }
+
 
 function showEntryScreen() {
     currentScreenMode = 'entry';
@@ -1217,7 +1220,7 @@ function enterRoom(roomName) {
     document.getElementById('mainAppScreen').style.display = 'block';
     document.getElementById('floatingBackBtn').style.display = 'flex';
 
-    if (roomName === '일반투어') {
+    if (roomName === '일반투어 (가)' || roomName === '일반투어 (나)') {
         loadAllDataForRoom();
     } else {
         document.getElementById('paxInfo').innerText = "서버 데이터 불러오는 중...";
@@ -1234,6 +1237,7 @@ function enterRoom(roomName) {
         }).loadSkiTourData(roomName);
     }
 }
+
 
 
 function lsKey(key) {
@@ -2932,7 +2936,7 @@ let busLine = isFit ? "" : `\nbus no : ${busNo}`;
 
                 
 
-                msgText = `[${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n​👉 Please tell me the departure time you understood.\nbus no : ${busNo}\nGroup: ${g.repNum}\nSeat: ${seatStr}`;
+                msgText = `[${guideName}]\n${pickupInfo}${finalSpecial}\n\n*We depart early to avoid traffic.\n*There is no refund if you are late.\n*Only water is allowed on the bus.\n*Meals are not included.\n\n​👉 Reply "departure time you understood"\nbus no : ${busNo}\nGroup: ${g.repNum}\nSeat: ${seatStr}`;
 
             }
 
@@ -3414,7 +3418,7 @@ let syncTimer = null;
 let pollTimer = null;
 
 function syncToServer() {
-    if (currentActiveRoom === '일반투어') return;
+    if (currentActiveRoom === '일반투어 (가)' || currentActiveRoom === '일반투어 (나)') return;
     clearTimeout(syncTimer);
     syncTimer = setTimeout(() => {
         let roomData = {
@@ -3428,14 +3432,14 @@ function syncToServer() {
             'bus_specialNotice': localStorage.getItem(currentActiveRoom + '_bus_specialNotice') || '',
             'bus_msgStatus': localStorage.getItem(currentActiveRoom + '_bus_msgStatus') || '{}'
         };
-        // 구글 스크립트의 saveSkiTourData 함수를 직접 호출합니다.
         google.script.run.saveSkiTourData(currentActiveRoom, JSON.stringify(roomData));
-    }, 1500); // 1.5초 후 저장
+    }, 1500);
 }
 
 
+
 function startPolling() {
-    if (currentActiveRoom === '일반투어') return;
+    if (currentActiveRoom === '일반투어 (가)' || currentActiveRoom === '일반투어 (나)') return;
     clearInterval(pollTimer);
     pollTimer = setInterval(() => {
         google.script.run.withSuccessHandler(function(serverData) {
@@ -3454,6 +3458,7 @@ function startPolling() {
         }).loadSkiTourData(currentActiveRoom);
     }, 1000);
 }
+
 
 
 function saveSeatMap() { 
